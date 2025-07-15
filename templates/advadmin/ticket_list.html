@@ -1,0 +1,191 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage /</span> Tickets
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Ticket List</h5>
+        <a href="{% url 'ticket_create' %}" class="btn btn-primary">
+          <i class="bx bx-plus me-1"></i> Add Ticket
+        </a>
+      </div>
+      <div class="card-body">
+        <!-- Tickets Table -->
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Customer</th>
+                <th>Support Executive</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              {% for ticket in tickets %}
+              <tr>
+                <td><strong>{{ ticket.ticket_id }}</strong></td>
+                <td>{{ ticket.title }}</td>
+                <td>{{ ticket.status }}</td>
+                <td>{{ ticket.customer.first_name }} &nbsp; {{ ticket.customer.last_name }} &nbsp; - {{ ticket.customer.username }} </td>
+                <td>
+                  {% if ticket.support_executive %}
+                    {{ ticket.support_executive.user.first_name }}  &nbsp; {{ ticket.support_executive.user.last_name }} &nbsp; - {{ ticket.support_executive }}
+                  {% else %}
+                    Unassigned
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <!-- View Button -->
+                    <a href="{% url 'ticket_detail' ticket.id %}" 
+                       class="btn btn-icon btn-secondary">
+                      <i class="bx bx-show"></i>
+                    </a>
+                    
+                    <!-- Edit Button -->
+                    <a href="{% url 'ticket_edit' ticket.id %}" 
+                       class="btn btn-icon btn-secondary">
+                      <i class="bx bx-edit"></i>
+                    </a>
+                    
+                    <!-- Delete Button -->
+                    <button class="btn btn-icon btn-danger" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#deleteModal"
+                            data-ticket-id="{{ ticket.id }}" 
+                            data-ticket-title="{{ ticket.title }}">
+                      <i class="bx bx-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center py-4">
+                  <div class="text-muted">No tickets found</div>
+                  <a href="{% url 'ticket_create' %}" class="btn btn-primary mt-2">
+                    <i class="bx bx-plus me-1"></i> Add New Ticket
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="mt-4">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+              <li class="page-item prev">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                  <i class="tf-icon bx bx-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+              
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <a class="page-link" href="#">{{ num }}</a>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+              {% endfor %}
+              
+              {% if page_obj.has_next %}
+              <li class="page-item next">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                  <i class="tf-icon bx bx-chevron-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col mb-3">
+            <p>Are you sure you want to delete <strong id="ticketTitle"></strong>?</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Delete modal handler
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var ticketId = button.getAttribute('data-ticket-id');
+      var ticketTitle = button.getAttribute('data-ticket-title');
+      document.getElementById('ticketTitle').textContent = ticketTitle;
+      var deleteUrl = "{% url 'ticket_delete' 0 %}".replace('0', ticketId);
+      document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+    });
+
+    // Auto-dismiss toast messages after 5 seconds
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

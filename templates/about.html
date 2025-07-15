@@ -1,0 +1,119 @@
+{% extends 'index.html' %}
+{% block content %}
+{% load static %}
+<section id="breadcrumb-hero" class="hero-wrap hero-wrap-2" style="background-image: url('');" data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-end">
+      <div class="col-md-9 ftco-animate pb-5">
+        <p class="breadcrumbs mb-2">
+          <span class="mr-2"><a href="{% url 'home' %}">Home <i class="fa fa-chevron-right"></i></a></span>
+          <span>About <i class="fa fa-chevron-right"></i></span>
+        </p>
+        <h1 class="mb-0 bread" style="color:grey!important;">About</h1>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="ftco-section ftco-no-pt ftco-no-pb  mt-5 pt-5">
+	<div class="container">
+		<div class="row d-flex no-gutters">
+			<div class="col-md-6 d-flex">
+				<div  id="about-page-image" class="img img-video d-flex align-self-stretch align-items-center justify-content-center mb-4 mb-sm-0" style="background-image:url({% static 'images/about.jpg' %});">
+					<a href="https://vimeo.com/45830194" class="icon-video popup-vimeo d-flex justify-content-center align-items-center">
+						<span class="fa fa-play"></span>
+					</a>
+				</div>
+			</div>
+			<div class="col-md-6 pl-md-5">
+				<div class="row justify-content-start">
+			  <div class="col-md-12 heading-section ftco-animate">
+				<span class="subheading">Welcome to CODESPIKE STUDIO</span>
+				<h2 class="mb-4">CODESPIKE STUDIO: Your Trusted Partner for Web Design & Development Solutions</h2>
+				<p>At CODESPIKE STUDIO, we take pride in being a leading startup in the web design and development industry. As a passionate team of developers and designers, we specialize in delivering high-quality, trend-oriented websites for our clients. We offer a wide range of pre-built, visually appealing templates that clients can choose from, ensuring each project reflects their unique brand. 
+	
+				With 16+ satisfied clients, we’re committed to meeting strict timelines while offering personalized attention to each project. Our three-phase UAT process ensures that we deliver exactly what our clients need, all while providing cost-effective solutions to fit any budget.
+				</p>
+				<div class="tabulation-2 mt-4">
+					<ul class="nav nav-pills nav-fill d-md-flex d-block">
+						<li class="nav-item mb-md-0 mb-2">
+							<a class="nav-link active py-2" data-toggle="tab" href="#home1">Why Partner With Us?</a>
+						</li>
+						{% comment %} <li class="nav-item mb-md-0 mb-2">
+							<a class="nav-link py-2" data-toggle="tab" href="#home2">CODESPIKE STUDIO – World Class Products</a>
+						</li> {% endcomment %}
+					</ul>
+					<div class="tab-content rounded mt-2">
+						<div class="tab-pane container p-0 active" id="home1">
+							<div class="tab-content-inner">
+								<p>
+									<strong>Why Choose CODESPIKE STUDIO?</strong>
+									<ul>
+										<li>✨ <strong>Creative & Trend-Oriented Designs:</strong> We craft modern, visually stunning websites tailored to current industry trends.</li>
+										<li>✨ <strong>Budget-Friendly Solutions:</strong> High-quality results without breaking the bank – ideal for startups and growing businesses.</li>
+										<li>✨ <strong>Strict Timelines & Reliable Delivery:</strong> We stick to deadlines with a proven three-phase UAT process to ensure everything is spot-on.</li>
+										<li>✨ <strong>Wide Template Selection:</strong> Choose from a vast collection of pre-built, good-looking templates to kickstart your vision.</li>
+										<li>✨ <strong>Client-Focused Automation Ideas:</strong> We suggest smart automation features based on your specific business needs.</li>
+									</ul>
+								</p>
+								<p>
+									Join our growing family of satisfied clients who trust CODESPIKE STUDIO to turn their digital ideas into reality. <strong>Let’s build smarter, more powerful web solutions together!</strong>
+								</p>
+							</div>
+						</div>
+						{% comment %} <div class="tab-pane container p-0 fade" id="home2">
+							<div class="tab-content-inner">
+								<p>CODESPIKE STUDIO leads the industry with cutting-edge product innovation, delivering global-quality garage equipment tailored to local conditions. By partnering with global market leaders and leveraging deep domestic expertise, we customize solutions to withstand tough geographic challenges. Our advanced technology ensures zero-failure performance, making us the trusted choice for reliable, durable, and locally-optimized garage tools.</p>
+								<p>
+									<em>"From essential garage tools to cutting-edge equipment, we deliver end-to-end solutions that help garage owners thrive in a competitive market."</em>
+								</p>
+							</div>
+						</div> {% endcomment %}
+					</div>
+				</div>
+				
+				<style>
+					.tab-content-inner {
+						height: 620px; /* Set a fixed height for the content */
+						overflow-y: auto; /* Enable vertical scrolling if content exceeds height */
+						padding: 10px; /* Add some padding for better readability */
+					}
+				</style>
+			</div>
+		</div>
+	</div>
+	</div>
+</section>
+
+<section class="ftco-map ftco-no-pb">
+	<div class="container"  style="margin-block: 50px !important;">
+		<div class="row justify-content-center">
+			<div class="col-md-7 heading-section text-center ftco-animate">
+				<span class="subheading">Location</span>
+				<h2>Find Us on the Map</h2>
+			</div>
+		</div>
+	</div>
+	<div class="container-fluid px-md-0">
+		<div class="row no-gutters">
+			<div class="col-md-12 ftco-animate">
+				<!-- Google Map Embed using iframe with marker -->
+				<iframe 
+					src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.287865356603!2d77.04236809999999!3d11.0170152!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba857b9b8dac099%3A0x3262d6ec75101180!2sSAP%20EQUIPMENTS%20%26%20TOOLS!5e0!3m2!1sen!2sin!4v1741336541976!5m2!1sen!2sin&markers=color:red%7Clabel:SAP%7C11.0170152,77.0423681" 
+					width="100%" 
+					height="800" 
+					style="border:0;" 
+					allowfullscreen="" 
+					loading="lazy" 
+					referrerpolicy="no-referrer-when-downgrade">
+				</iframe>
+			</div>
+		</div>
+	</div>
+</section>
+  {% endblock %}
+
+
+

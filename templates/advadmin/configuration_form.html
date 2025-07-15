@@ -1,0 +1,129 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage / Configurations /</span> 
+      {% if object %}Edit{% else %}Add{% endif %} Configuration
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <h5 class="card-header">Configuration Details</h5>
+      <div class="card-body">
+        
+        <!-- Show Form Errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        
+        <form method="post" class="mb-3">
+          {% csrf_token %}
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="configKey" class="form-label">Config Key</label>
+              <input type="text" class="form-control {% if form.config.errors %}is-invalid{% endif %}" 
+                     id="configKey" name="config" value="{{ form.config.value|default:'' }}" required>
+              <div class="invalid-feedback">
+                {{ form.config.errors.0 }}
+              </div>
+              <small class="text-muted">Unique identifier for this configuration</small>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="configValue" class="form-label">Config Value</label>
+              <input type="text" class="form-control {% if form.value.errors %}is-invalid{% endif %}" 
+                     id="configValue" name="value" value="{{ form.value.value|default:'' }}" required>
+              <div class="invalid-feedback">
+                {{ form.value.errors.0 }}
+              </div>
+              <small class="text-muted">The value associated with this configuration</small>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bx bx-save me-1"></i> {% if object %}Update{% else %}Save{% endif %} Configuration
+            </button>
+            <a href="{% url 'configuration_list' %}" class="btn btn-outline-secondary">
+              <i class="bx bx-arrow-back me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Additional styles if needed */
+  .form-control.is-invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+  }
+  
+  .invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+  }
+</style>
+
+<script>
+  // Auto-dismiss toast messages after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+
+  // Make config key field slug-like (optional)
+  document.getElementById('configKey').addEventListener('input', function(e) {
+    this.value = this.value
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')  // Remove special chars
+      .replace(/[\s]+/g, '_')     // Replace spaces with underscores
+      .replace(/_+/g, '_')        // Remove duplicate underscores
+      .replace(/^_+|_+$/g, '');   // Trim underscores from start/end
+  });
+</script>
+
+{% endblock %}

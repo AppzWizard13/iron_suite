@@ -1,0 +1,206 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage /</span> Social Media Links
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Social Media Links</h5>
+        <a href="{% url 'socialmedia_add' %}" class="btn btn-primary">
+          <i class="bx bx-plus me-1"></i> Add Link
+        </a>
+      </div>
+      <div class="card-body">
+        <!-- Social Media Links Table -->
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Platform</th>
+                <th>URL</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              {% for link in social_links %}
+              <tr>
+                <td><strong>#{{ link.id }}</strong></td>
+                <td>
+                    <a href="{{ link.user }}" target="_blank" class="text-truncate" style="max-width: 200px; display: inline-block;">
+                      {{ link.user }}
+                    </a>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <i class="fab fa-{{ link.platform|lower }} me-2" style="font-size: 1.25rem;"></i>
+                    {{ link.get_platform_display }}
+                  </div>
+                </td>
+                <td>
+                  <a href="{{ link.url }}" target="_blank" class="text-truncate" style="max-width: 200px; display: inline-block;">
+                    {{ link.url }}
+                  </a>
+                </td>
+                <td>
+                  <span class="badge bg-{% if link.is_active %}success{% else %}secondary{% endif %}">
+                    {% if link.is_active %}Active{% else %}Inactive{% endif %}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <!-- Edit Button -->
+                    <a href="{% url 'socialmedia_edit' link.id %}" 
+                       class="btn btn-icon btn-secondary"
+                       data-bs-toggle="tooltip"
+                       data-bs-offset="0,4"
+                       data-bs-placement="top"
+                       data-bs-html="true"
+                       title="<span>Edit</span>">
+                      <i class="bx bx-edit"></i>
+                    </a>
+                
+                    <!-- Delete Button -->
+                    <button class="btn btn-icon btn-danger"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#deleteModal"
+                            data-link-id="{{ link.id }}"
+                            data-link-platform="{{ link.get_platform_display }}"
+                            data-bs-toggle="tooltip"
+                            data-bs-offset="0,4"
+                            data-bs-placement="top"
+                            data-bs-html="true"
+                            title="<span>Delete</span>">
+                      <i class="bx bx-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center py-4">
+                  <div class="text-muted">No social media links found</div>
+                  <a href="{% url 'socialmedia_add' %}" class="btn btn-primary mt-2">
+                    <i class="bx bx-plus me-1"></i> Add New Link
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="mt-4">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+              <li class="page-item prev">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                  <i class="tf-icon bx bx-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+              
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <a class="page-link" href="#">{{ num }}</a>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+              {% endfor %}
+              
+              {% if page_obj.has_next %}
+              <li class="page-item next">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                  <i class="tf-icon bx bx-chevron-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col mb-3">
+            <p>Are you sure you want to delete <strong id="linkPlatform"></strong> link?</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Delete modal handler
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var linkId = button.getAttribute('data-link-id');
+      var linkPlatform = button.getAttribute('data-link-platform');
+      document.getElementById('linkPlatform').textContent = linkPlatform;
+      var deleteUrl = "{% url 'socialmedia_delete' 0 %}".replace('0', linkId);
+      document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+    });
+
+    // Auto-dismiss toast messages after 5 seconds
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

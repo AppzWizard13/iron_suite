@@ -1,0 +1,87 @@
+{% extends 'admin_panel/index.html' %}
+{% block content %}
+
+<!-- Toast Messages -->
+{% if messages %}
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    {% for message in messages %}
+    <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ message }}
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+<div class="container-fluid" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">{% if review %}Edit{% else %}Add{% endif %} Review</h5>
+
+      <!-- Show Form Errors -->
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% if review %}{% url 'review_edit' review.pk %}{% else %}{% url 'review_create' %}{% endif %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label for="customerName" class="form-label">Customer Name</label>
+          <input type="text" class="form-control {% if form.customer_name.errors %}is-invalid{% endif %}" 
+                 id="customerName" name="customer_name" value="{{ form.customer_name.value|default:'' }}" required>
+          <div class="invalid-feedback">
+            {{ form.customer_name.errors.0 }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="reviewRating" class="form-label">Review Rating</label>
+          <select class="form-control {% if form.review_rating.errors %}is-invalid{% endif %}" 
+                  id="reviewRating" name="review_rating" required>
+            <option value="">Select Rating</option>
+            {% for value, label in form.fields.review_rating.choices %}
+              <option value="{{ value }}" {% if form.review_rating.value == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <div class="invalid-feedback">
+            {{ form.review_rating.errors.0 }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="reviewContent" class="form-label">Review Content</label>
+          <textarea class="form-control {% if form.review_content.errors %}is-invalid{% endif %}" 
+                    id="reviewContent" name="review_content" rows="3">{{ form.review_content.value|default:'' }}</textarea>
+          <div class="invalid-feedback">
+            {{ form.review_content.errors.0 }}
+          </div>
+        </div>
+        <div class="mb-3">
+            <label for="reviewDate" class="form-label">Review Date</label>
+            <input type="date" class="form-control {% if form.review_date.errors %}is-invalid{% endif %}" 
+            id="reviewDate" name="review_date" 
+            value="{{ form.review_date.value|date:'Y-m-d' }}" required>
+     
+            <div class="invalid-feedback">
+              {{ form.review_date.errors.0 }}
+            </div>
+          </div>
+
+        <button type="submit" class="btn btn-primary">{% if review %}Update{% else %}Submit{% endif %} Review</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

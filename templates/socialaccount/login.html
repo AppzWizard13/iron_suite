@@ -1,0 +1,160 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #4285F4;
+            --dark-gray: #6c757d;
+            --light-gray: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+        }
+
+        .sso-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .sso-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            max-width: 360px;
+            width: 100%;
+        }
+
+        .sso-header {
+            padding: 1rem 1rem 0.5rem;
+            text-align: center;
+        }
+
+        .sso-logo {
+            height: 40px;
+            margin-bottom: 0.75rem;
+        }
+
+        .sso-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            color: #212529;
+        }
+
+        .sso-provider-card {
+            padding: 1rem;
+        }
+
+        .sso-provider-header {
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .sso-provider-logo {
+            height: 24px;
+        }
+
+        .sso-description {
+            text-align: center;
+            color: var(--dark-gray);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .sso-continue-btn {
+            width: 100%;
+            padding: 8px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sso-continue-btn:hover {
+            background-color: #3367d6;
+        }
+
+        .sso-continue-btn svg {
+            margin-left: 6px;
+        }
+
+        .sso-footer {
+            padding: 0.75rem 1rem;
+            background-color: var(--light-gray);
+            text-align: center;
+        }
+
+        .sso-footer-text {
+            font-size: 0.75rem;
+            color: var(--dark-gray);
+            margin: 0;
+        }
+
+        .sso-footer-text a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .sso-footer-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="sso-container">
+        <div class="sso-card">
+            <div class="sso-header">
+                <img src="{% static 'images/main_logo151.png' %}" alt="Logo" class="sso-logo">
+                <h1 class="sso-title">Sign In</h1>
+            </div>
+
+            <div class="sso-provider-card">
+                {% comment %} <div class="sso-provider-header">
+                    static/images/main_logo.png
+                    <img src="{% static 'logo/google-logo.png' %}" alt="Google" class="sso-provider-logo">
+                </div> {% endcomment %}
+                <p class="sso-description">Sign in with your Google account.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="sso-continue-btn">
+                        Continue with Google
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <div class="sso-footer">
+                <p class="sso-footer-text">
+                    By continuing, you agree to our 
+                    <a href="/terms">Terms</a> & 
+                    <a href="/privacy">Privacy</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

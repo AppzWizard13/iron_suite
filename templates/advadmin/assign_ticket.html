@@ -1,0 +1,60 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage / Tickets /</span> Assign Ticket
+    </h4>
+
+    <div class="card mb-4">
+      <h5 class="card-header">Assign Ticket</h5>
+      <div class="card-body">
+        
+        <!-- Show Form Errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        
+        <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bx bx-save me-1"></i> Assign Ticket
+            </button>
+            <a href="{% url 'ticket_list' %}" class="btn btn-outline-secondary">
+              <i class="bx bx-arrow-back me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-dismiss toast messages after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

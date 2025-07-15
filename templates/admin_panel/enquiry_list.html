@@ -1,0 +1,67 @@
+{% extends 'admin_panel/index.html' %}
+{% block content %}
+<div class="container-fluid px-3 px-md-4" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Client Enquiries</h5>
+      
+      <!-- Date Filter Form -->
+      <form method="GET" action="{% url 'enquiry_list' %}" class="mb-4">
+        <div class="row g-2">
+          <div class="col-12 col-md-4">
+            <label for="date_filter" class="form-label">Select Date</label>
+            <input type="date" class="form-control" id="date_filter" name="date_filter" value="{{ date_filter }}">
+          </div>
+          <div class="col-12 col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer Name</th>
+              <th>Phone</th>
+              <th>Service</th>
+              <th>Message</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for enquiry in enquiries %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ enquiry.customer_name }}</td>
+              <td>{{ enquiry.customer_number }}</td>
+              <td>{{ enquiry.service }}</td>
+              <td>{{ enquiry.message }}</td>
+              <td>{{ enquiry.date_created|date:"Y-m-d H:i" }}</td>
+              <td>
+                <span class="badge {% if enquiry.status == 'unread' %}bg-danger{% else %}bg-success{% endif %}">
+                  {{ enquiry.status|title }}
+                </span>
+              </td>
+              <td>
+                <a href="{% url 'toggle_enquiry_status' enquiry.id %}" class="btn btn-sm btn-primary">
+                  Toggle Status
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="text-center">No enquiries found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

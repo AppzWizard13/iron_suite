@@ -1,0 +1,58 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-bold py-3 mb-4">Member / QR Scan</h4>
+
+  <div class="card">
+    <div class="card-body text-center">
+      <!-- QR Scanner Area -->
+      <div id="reader" style="width: 100%; max-width: 350px; margin: 0 auto;"></div>
+
+      <!-- Result -->
+      <div class="mt-3">
+        <strong>Scanned Result:</strong>
+        <pre id="result" class="border p-2 bg-light"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Load QR Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.9/html5-qrcode.min.js"></script>
+
+<script>
+  function onScanSuccess(decodedText, decodedResult) {
+    document.getElementById('result').textContent = decodedText;
+
+    // Send token to backend
+    fetch("{% url 'scan_checkin' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({ token: decodedText })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || "Check-in successful");
+    })
+    .catch(err => {
+      alert("Scan failed");
+    });
+
+    html5QrcodeScanner.clear(); // Stop scanning
+  }
+
+  // Start QR scanner
+  const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: 250
+  });
+  html5QrcodeScanner.render(onScanSuccess);
+</script>
+{% endblock %}

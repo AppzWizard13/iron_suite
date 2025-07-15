@@ -1,0 +1,368 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  /* Custom styles for chat interface */
+  .chat-container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .chat-sidebar {
+    width: 350px;
+    border-right: 1px solid #e1e1e1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+  }
+  
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+  }
+  
+  .sidebar-header {
+    padding: 1rem;
+    background-color: #fff;
+    border-bottom: 1px solid #e1e1e1;
+  }
+  
+  .sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .chat-contact-list {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .chat-contact-list-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .chat-contact-list-item:hover {
+    background-color: #f0f4f8;
+  }
+  
+  .chat-contact-list-item.active {
+    background-color: #e8f0fe;
+  }
+  
+  .chat-history-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .chat-history-header {
+    padding: 1rem;
+    background-color: #fff;
+  }
+  
+  .chat-history-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background-color: #f5f7fb;
+  }
+  
+  .chat-history-footer {
+    padding: 1rem;
+    background-color: #fff;
+    border-top: 1px solid #e1e1e1;
+  }
+  
+  .chat-message {
+    margin-bottom: 1.5rem;
+    max-width: 80%;
+  }
+  
+  .chat-message-right {
+    margin-left: auto;
+    align-items: flex-end;
+  }
+  
+  .chat-message-text {
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    position: relative;
+  }
+  
+  .chat-message-right .chat-message-text {
+    background-color: #e8f0fe;
+    border-top-right-radius: 0;
+  }
+  
+  .chat-message:not(.chat-message-right) .chat-message-text {
+    border-top-left-radius: 0;
+  }
+  
+  .message-meta {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 992px) {
+    .chat-container {
+      flex-direction: column;
+      height: 80vh;
+    }
+    
+    .chat-sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid #e1e1e1;
+      height: 40%;
+    }
+    
+    .chat-main {
+      height: 60%;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .chat-sidebar {
+      height: 35%;
+    }
+    
+    .chat-main {
+      height: 65%;
+    }
+    
+    .chat-message {
+      max-width: 90%;
+    }
+  }
+</style>
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage /</span> Chat
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Chat</h5>
+        <a href="{% url 'ticket_create' %}" class="btn btn-primary">
+          <i class="bx bx-plus me-1"></i> Add Ticket
+        </a>
+      </div>
+      <div class="card-body p-0">
+        <div class="chat-container">
+    <!-- Left Sidebar - My Tickets -->
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 avatar avatar-online me-3">
+            <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}" 
+                class="rounded-circle border border-2" 
+                style="width: 40px; height: 40px; object-fit: cover;" 
+                alt="Profile Image" />
+            </div>
+            <div class="flex-grow-1 input-group input-group-merge rounded-pill">
+            <span class="input-group-text" id="basic-addon-search31"><i class="bx bx-search"></i></span>
+            <input type="text" class="form-control chat-search-input" placeholder="Search..." aria-label="Search...">
+            </div>
+        </div>
+        </div>
+        <div class="sidebar-body">
+        <ul class="list-unstyled chat-contact-list">
+            <li class="chat-contact-list-item chat-contact-list-item-title">
+            <h5 class="text-primary mb-0 py-3">My Tickets</h5>
+            </li>
+            {% for ticket in assigned_tickets %}
+            <li class="chat-contact-list-item {% if ticket.pk == object.pk %}active{% endif %}">
+            <a href="{% url 'ticket_detail' pk=ticket.pk %}" class="d-flex align-items-center">
+                <div class="flex-shrink-0 avatar avatar-{% if ticket.status == 'open' %}online{% elif ticket.status == 'closed' %}offline{% else %}away{% endif %}">
+                <img src="{% if ticket.customer.profile_image %}{{ ticket.customer.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}" 
+                    class="rounded-circle border border-2" 
+                    style="width: 40px; height: 40px; object-fit: cover;" 
+                    alt="Profile Image" />
+                </div>
+                <div class="chat-contact-info flex-grow-1 ms-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="chat-contact-name text-truncate m-0">{{ ticket.title }}</h6>
+                    <small class="text-muted">{{ ticket.created_at|timesince }} ago</small>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-truncate text-muted mb-0" style="max-width: 150px;">
+                    {% if ticket.chat_messages.last %}
+                        {{ ticket.chat_messages.last.message|truncatechars:30 }}
+                    {% else %}
+                        No messages yet
+                    {% endif %}
+                    </small>
+                    <span class="badge bg-{% if ticket.status == 'open' %}danger{% elif ticket.status == 'in_progress' %}warning{% else %}success{% endif %}">
+                    {{ ticket.status }}
+                    </span>
+                </div>
+                </div>
+            </a>
+            </li>
+            {% empty %}
+            <li class="chat-contact-list-item">
+            <div class="text-center py-3 text-muted">
+                No tickets assigned to you
+            </div>
+            </li>
+            {% endfor %}
+        </ul>
+        </div>
+  </div>
+
+          <!-- Right Side - Chat Area -->
+          <div class="chat-main">
+            <div class="chat-history-wrapper">
+              <div class="chat-history-header">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 avatar avatar-online">
+                      <img src="{% if ticket.customer.profile_image %}{{ ticket.customer.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}" 
+                        class="rounded-circle border border-2" 
+                        style="width: 40px; height: 40px; object-fit: cover;" 
+                        alt="Profile Image" />
+                    </div>
+                    <div class="ms-3">
+                      <h6 class="mb-0">{{ ticket.title }}</h6>
+                      <small class="text-muted">Status: 
+                        <span class="badge bg-{% if ticket.status == 'open' %}danger{% elif ticket.status == 'in_progress' %}warning{% else %}success{% endif %}">
+                          {{ ticket.status }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bx bx-dots-vertical-rounded"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="#">View Details</a>
+                        <a class="dropdown-item" href="{% url 'resolve_ticket' ticket.id %}">Resolve Ticket</a>
+                        <a class="dropdown-item" href="#">Mark as Urgent</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="chat-history-body">
+                <ul class="list-unstyled">
+                  {% for message in ticket.chat_messages.all %}
+                  <li class="chat-message {% if message.sender == request.user %}chat-message-right{% endif %}">
+                    <div class="d-flex {% if message.sender == request.user %}justify-content-end{% endif %}">
+                      {% if message.sender != request.user %}
+                      <div class="flex-shrink-0 me-3">
+                        <img src="{% if message.sender.profile_image %}{{ message.sender.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}" 
+                          class="rounded-circle border border-2" 
+                          style="width: 32px; height: 32px; object-fit: cover;" 
+                          alt="Profile Image" />
+                      </div>
+                      {% endif %}
+                      
+                      <div class="{% if message.sender == request.user %}text-end{% endif %}">
+                        <div class="chat-message-text d-inline-block">
+                          {{ message.message }}
+                        </div>
+                        <div class="message-meta">
+                          {% if message.sender != request.user %}
+                          <span>{{ message.sender.username }} • </span>
+                          {% endif %}
+                          <span>{{ message.created_at|date:"g:i A" }}</span>
+                        </div>
+                      </div>
+                      
+                      {% if message.sender == request.user %}
+                      <div class="flex-shrink-0 ms-3">
+                        <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}" 
+                          class="rounded-circle border border-2" 
+                          style="width: 32px; height: 32px; object-fit: cover;" 
+                          alt="Profile Image" />
+                      </div>
+                      {% endif %}
+                    </div>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+              
+              <div class="chat-history-footer">
+                <form class="form-send-message d-flex align-items-center" method="post">
+                  {% csrf_token %}
+                  <div class="flex-grow-1 me-2">
+                    <input class="form-control" placeholder="Type your message here..." name="message" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bx bx-send"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-scroll to bottom of chat
+  document.addEventListener('DOMContentLoaded', function() {
+    const chatBody = document.querySelector('.chat-history-body');
+    if (chatBody) {
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    
+    // Make ticket items clickable
+    document.querySelectorAll('.chat-contact-list-item:not(.chat-contact-list-item-title)').forEach(item => {
+      item.addEventListener('click', function() {
+        // Remove active class from all items
+        document.querySelectorAll('.chat-contact-list-item').forEach(i => {
+          i.classList.remove('active');
+        });
+        // Add active class to clicked item
+        this.classList.add('active');
+        // Here you would typically load the chat for this ticket
+        // For now we'll just scroll to bottom
+        const chatBody = document.querySelector('.chat-history-body');
+        if (chatBody) {
+          chatBody.scrollTop = chatBody.scrollHeight;
+        }
+      });
+    });
+  });
+</script>
+
+{% endblock %}

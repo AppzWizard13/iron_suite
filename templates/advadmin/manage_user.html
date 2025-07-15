@@ -1,0 +1,338 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage /</span> Members
+    </h4>
+
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">{{ message }}</div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Members</h5>
+        <div class="d-flex gap-3">
+          <form method="GET" action="{% url 'user_list' %}" class="d-flex">
+            <div class="input-group input-group-merge">
+              <span class="input-group-text"><i class="bx bx-search"></i></span>
+              <input 
+                type="text" 
+                name="q" 
+                class="form-control" 
+                placeholder="Search memebers..." 
+                value="{{ request.GET.q }}"
+              >
+              {% if request.GET.q %}
+              <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">
+                <i class="bx bx-x"></i>
+              </a>
+              {% endif %}
+            </div>
+            {% if request.GET.sort %}
+              <input type="hidden" name="sort" value="{{ request.GET.sort }}">
+            {% endif %}
+            <button type="submit" class="btn btn-primary ms-2">Search</button>
+          </form>
+          <a href="{% url 'user_registration' %}" class="btn btn-primary">
+            <i class="bx bx-plus me-1"></i> Add Member
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>
+                  <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}sort={% if request.GET.sort == 'employee_id' %}-employee_id{% else %}employee_id{% endif %}">
+                    ID
+                    {% if request.GET.sort == 'employee_id' %}
+                      <i class="bx bx-up-arrow-alt"></i>
+                    {% elif request.GET.sort == '-employee_id' %}
+                      <i class="bx bx-down-arrow-alt"></i>
+                    {% endif %}
+                  </a>
+                </th>
+                <th>Username</th>
+                <th>
+                  <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}sort={% if request.GET.sort == 'name' %}-name{% else %}name{% endif %}">
+                    Name
+                    {% if request.GET.sort == 'name' %}
+                      <i class="bx bx-up-arrow-alt"></i>
+                    {% elif request.GET.sort == '-name' %}
+                      <i class="bx bx-down-arrow-alt"></i>
+                    {% endif %}
+                  </a>
+                </th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              {% for user in users %}
+              <tr>
+                <td><strong>{{ user.employee_id }}</strong></td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>{{ user.phone_number }}</td>
+                <td>{{ user.staff_role }}</td>
+                <td>
+                  <span class="badge bg-label-{% if user.is_active %}success{% else %}secondary{% endif %}">
+                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                  </span>
+                </td>
+                <td>{{ user.city }}, {{ user.state }} ({{ user.pincode }})</td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <a href="{% url 'user_edit' user.username %}" class="btn btn-icon btn-secondary">
+                      <i class="bx bx-edit"></i>
+                    </a>
+                    <button class="btn btn-icon btn-{% if user.is_active %}warning{% else %}success{% endif %}" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#toggleActiveModal"
+                            data-user-id="{{ user.username }}"
+                            data-action="{% if user.is_active %}block{% else %}unblock{% endif %}">
+                      <i class="bx bx-{% if user.is_active %}lock{% else %}lock-open-alt{% endif %}"></i>
+                    </button>
+                    <button class="btn btn-icon btn-danger" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#deleteModal"
+                            data-user-id="{{ user.username }}" 
+                            data-user-name="{{ user.get_full_name }}">
+                      <i class="bx bx-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center py-4">
+                  <div class="text-muted">No users found</div>
+                  <a href="{% url 'user_registration' %}" class="btn btn-primary mt-2">
+                    <i class="bx bx-plus me-1"></i> Add New Member
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="mt-4">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+              <li class="page-item prev">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                  <i class="tf-icon bx bx-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <a class="page-link" href="#">{{ num }}</a>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+              {% endfor %}
+
+              {% if page_obj.has_next %}
+              <li class="page-item next">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                  <i class="tf-icon bx bx-chevron-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toggle Active Confirmation Modal -->
+<div class="modal fade" id="toggleActiveModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col mb-3">
+            <p>Are you sure you want to <span id="actionText"></span> this user?</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmToggleActive">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col mb-3">
+            <p>Delete user <strong id="userName"></strong>?</p>
+            <p class="text-muted">This action cannot be undone.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Toast auto-dismiss
+  const toastElements = document.querySelectorAll('.toast');
+  toastElements.forEach(toastEl => {
+    setTimeout(() => {
+      const toast = bootstrap.Toast.getInstance(toastEl);
+      toast?.hide();
+    }, 5000);
+  });
+
+  // Delete modal handler
+  const deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const userId = button.getAttribute('data-user-id');
+      const userName = button.getAttribute('data-user-name');
+      document.getElementById('userName').textContent = userName;
+      document.getElementById('confirmDeleteBtn').setAttribute('href', 
+        "{% url 'user_delete' 0 %}".replace('0', userId));
+    });
+  }
+
+  // Toggle Active Modal Handler
+  const toggleActiveModal = document.getElementById('toggleActiveModal');
+  if (toggleActiveModal) {
+    toggleActiveModal.addEventListener('show.bs.modal', function(event) {
+      const button = event.relatedTarget;
+      const userId = button.getAttribute('data-user-id');
+      const action = button.getAttribute('data-action');
+      const actionText = action === 'block' ? 'block' : 'unblock';
+      
+      document.getElementById('actionText').textContent = actionText;
+      document.getElementById('confirmToggleActive').dataset.userId = userId;
+      document.getElementById('confirmToggleActive').dataset.action = action;
+    });
+
+    document.getElementById('confirmToggleActive').addEventListener('click', async function() {
+      const { userId, action } = this.dataset;
+      const csrfToken = getCSRFToken();
+      
+      if (!csrfToken) {
+        showToast('CSRF token missing', 'danger');
+        return;
+      }
+    
+      try {
+        const response = await fetch("{% url 'toggle_user_active' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            action: action,
+            csrfmiddlewaretoken: csrfToken
+          })
+        });
+    
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Action failed');
+        }
+    
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast(`Member ${action === 'block' ? 'blocked' : 'unblocked'} successfully`, 'success');
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          throw new Error(data.message || 'Action failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast(`Error: ${error.message}`, 'danger');
+      } finally {
+        bootstrap.Modal.getInstance(toggleActiveModal)?.hide();
+      }
+    });
+  }
+
+  // Helper functions
+  function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.cookie.match(/csrftoken=([^;]+)/)?.[1];
+  }
+
+  function showToast(message, type) {
+    const toastContainer = document.querySelector('.position-fixed.top-0.end-0') || 
+                          document.body;
+    const toastId = `toast-${Date.now()}`;
+    
+    toastContainer.insertAdjacentHTML('beforeend', `
+      <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">${message}</div>
+          <button class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    `);
+    
+    const toastEl = document.getElementById(toastId);
+    new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 }).show();
+    
+    toastEl.addEventListener('hidden.bs.toast', () => {
+      toastEl.remove();
+    });
+  }
+});
+</script>
+
+{% endblock %}

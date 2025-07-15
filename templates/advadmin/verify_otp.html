@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html
+  lang="en"
+  class="light-style customizer-hide"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="../assets/"
+  data-template="vertical-menu-template-free"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+
+    <title>Forgot Password</title>
+
+    <meta name="description" content="" />
+
+    <!-- Favicon -->
+    
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+    <!-- Icons. Uncomment required icon fonts -->
+    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/fonts/boxicons.css' %}" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/core.css' %}" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/theme-default.css' %}" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="{% static 'advadmin/assets/css/demo.css' %}" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}" />
+
+    <!-- Page CSS -->
+    <!-- Page -->
+    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/pages/page-auth.css' %}" />
+    <!-- Helpers -->
+    <script src="{% static 'advadmin/assets/vendor/js/helpers.js' %}"></script>
+
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="{% static 'advadmin/assets/js/config.js' %}"></script>
+  </head>
+  <style>
+		
+		/* Define Theme Variables */
+		body {
+      font-family: 'Poppins', Poppins !important;
+      width: 100%; /* Adjust width to compensate for the scale */
+      height: 90%;
+      transform-origin: top left; /* Ensure the scaling starts from the top-left corner */
+      zoom: 0.8; 
+      margin: 0; /* Remove default margin */
+      overflow: auto; /* Prevent scrollbars from appearing */
+      margin-bottom: -1437px;
+		}
+    .authentication-wrapper.authentication-basic .authentication-inner .card .app-brand {
+        margin-bottom: 0.5rem !important;
+    }
+
+  </style>
+  <body>
+    <!-- Content -->
+
+    <div class="container-xxl">
+      <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner py-4">
+          <!-- Forgot Password -->
+          <div class="card">
+            <div class="card-body">
+              <!-- Logo -->
+              <div class="app-brand justify-content-center">
+                <a href="index.html" class="app-brand-link gap-2">
+                  <div class="app-brand demo">
+
+                    <a href="{% url 'dashboard' %}" class="app-brand-link">
+                      <span class="app-brand-logo demo m-3">
+                        <!-- Dot Loader -->
+                        <div id="logo-loader" class="dot-loader">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
+                    
+                        <!-- Hidden Image (Will be shown after loading) -->
+                        <img id="company-logo-svg" 
+                             alt="Company Logo" 
+                             style="width: 185px; height: 65px; object-fit: contain; display: none;" />
+                      </span>
+                    </a>
+                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+                      <i class="bx bx-chevron-left bx-sm align-middle"></i>
+                    </a>
+                  </div>
+                
+                </a>
+              </div>
+              <!-- /Logo -->
+            <!-- /Logo -->
+            <h4 class="mb-2">Log in with OTP</h4>
+                <p class="mb-4">We've sent an OTP to {{ request.session.phone_number }}</p>
+                        {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                  
+                        
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="otp" class="form-label">Enter OTP</label>
+                                <input type="text" class="form-control" id="otp" name="otp" 
+                                       placeholder="6-digit code" required>
+                            </div>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary w-100">Verify</button>
+                            </div>
+                        </form>
+                        
+                        <div class="text-center">
+                            <a href="{% url 'login_with_otp' %}" class="text-muted">Resend OTP</a>
+                        </div>
+          
+              
+              <div class="text-center mt-3">
+                <a href="{% url 'login' %}" class="d-flex align-items-center justify-content-center text-decoration-none">
+                  <i class="bx bx-chevron-left scaleX-n1-rtl bx-sm me-1"></i>
+                  Back to login
+                </a>
+              </div>
+            </div>
+          </div>
+          <!-- /Forgot Password -->
+        </div>
+      </div>
+    </div>
+
+    <!-- / Content -->
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const logoImg = document.getElementById('company-logo-svg');
+        const loader = document.getElementById('logo-loader');
+        const faviconLink = document.querySelector("link[rel='icon']"); // Select favicon link
+    
+        fetch('/api/company-data/')
+          .then(response => response.json())
+          .then(data => {
+            console.log("Company Data:", data); // Debugging
+    
+            // ✅ Load the company logo
+            if (data.company_logo_svg_url) {
+              logoImg.src = data.company_logo_svg_url;
+              logoImg.alt = data.company_name + " Logo";
+              logoImg.style.display = "block"; // Show image
+              loader.style.display = "none"; // Hide loader
+            } else {
+              loader.innerHTML = "No Logo Available"; // Show text if no logo
+            }
+    
+            // ✅ Load the favicon dynamically
+            if (data.company_favicon_url) {
+              faviconLink.href = data.company_favicon_url;
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching company data:', error);
+            loader.innerHTML = "Failed to load logo"; // Show error message
+          });
+      });
+    </script>
+    <!-- Core JS -->
+    <!-- build:js assets/vendor/js/core.js -->
+    <script src="{% static 'advadmin/assets/vendor/libs/jquery/jquery.js' %}"></script>
+    <script src="{% static 'advadmin/assets/vendor/libs/popper/popper.js' %}"></script>
+    <script src="{% static 'advadmin/assets/vendor/js/bootstrap.js' %}"></script>
+    <script src="{% static 'advadmin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
+
+    <script src="{% static 'advadmin/assets/vendor/js/menu.js' %}"></script>
+    <!-- end
+
+
+

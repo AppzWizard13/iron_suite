@@ -1,0 +1,134 @@
+{% extends 'admin_panel/index.html' %}
+{% load static %}  <!-- Load static for default image -->
+
+{% block content %}
+
+<!-- Toast Messages -->
+{% if messages %}
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    {% for message in messages %}
+    <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ message }}
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+<div class="container-fluid px-3 px-md-4" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Manage Categories</h5>
+      
+      <!-- Add Category Button (Green) -->
+      <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'add_category' %}" class="btn btn-success btn-sm">+ Add Category</a>
+      </div>
+
+      <!-- Search Form -->
+      <form method="GET" action="{% url 'category_list' %}" class="mb-3">
+        <div class="input-group">
+          <input type="text" name="search" class="form-control" placeholder="Search category..." value="{{ query }}">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
+
+      <!-- Add subcategory Button -->
+      <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'add_subcategory' %}" class="btn btn-success btn-sm">+ Add subcategory</a>
+      </div>
+
+      <!-- Search Form -->
+      <form method="GET" action="{% url 'subcategory_list' %}" class="mb-3">
+        <div class="input-group">
+          <input type="text" name="search" class="form-control" placeholder="Search subcategory..." value="{{ query }}">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
+
+      <!-- Categories Table (Responsive) -->
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Image</th>  <!-- New Image Column -->
+              <th>Name</th>
+              <th>Description</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for category in categories %}
+            <tr>
+              <td>{{ category.id }}</td>
+              <td class="text-center">
+                {% if category.image %}
+                  <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                {% else %}
+                  <img src="{% static 'icons/default-category.png' %}" alt="No Image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                {% endif %}
+              </td>
+              <td>{{ category.name }}</td>
+              <td>{{ category.description }}</td>
+              <td class="text-center">
+                <a href="{% url 'edit_category' category.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-category-id="{{ category.id }}" data-category-name="{{ category.name }}">
+                  Delete
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">No categories found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <strong id="categoryName"></strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;  // Button that triggered the modal
+      var categoryId = button.getAttribute('data-category-id');
+      var categoryName = button.getAttribute('data-category-name');
+      
+      // Set the category name in the modal
+      document.getElementById('categoryName').textContent = categoryName;
+
+      // Update the delete button URL
+      var deleteUrl = "{% url 'delete_category' 0 %}".replace('0', categoryId);
+      document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+    });
+  });
+</script>
+
+{% endblock %}

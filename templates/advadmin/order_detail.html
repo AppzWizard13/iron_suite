@@ -1,0 +1,213 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  /* Responsive table styles */
+  @media (max-width: 767.98px) {
+    .responsive-table {
+      width: 100%;
+      margin-bottom: 1rem;
+      overflow-y: hidden;
+      border: 1px solid #dee2e6;
+    }
+    
+    .responsive-table table {
+      margin-bottom: 0;
+    }
+    
+    .responsive-table thead {
+      display: none;
+    }
+    
+    .responsive-table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+    }
+    
+    .responsive-table tbody td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid #dee2e6;
+      text-align: right;
+    }
+    
+    .responsive-table tbody td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      margin-right: 1rem;
+      text-align: left;
+    }
+    
+    .responsive-table tbody td:last-child {
+      border-bottom: 0;
+    }
+    
+    .responsive-table tbody tr:last-child {
+      margin-bottom: 0;
+    }
+    
+    .responsive-table .img-thumbnail {
+      max-width: 50px;
+      height: auto;
+    }
+  }
+</style>
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage / Orders /</span> Order Details
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <h5 class="card-header">Order Details</h5>
+      <div class="card-body">
+        
+        <div class="mb-3">
+          <label for="orderNumber" class="form-label">Order Number</label>
+          <input type="text" class="form-control" id="orderNumber" name="order_number" value="{{ order.order_number }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="customer" class="form-label">Customer</label>
+          <input type="text" class="form-control" id="customer" name="customer" value="{{ order.customer.username }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="status" class="form-label">Status</label>
+          <input type="text" class="form-control" id="status" name="status" value="{{ order.get_status_display }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="paymentStatus" class="form-label">Payment Status</label>
+          <input type="text" class="form-control" id="paymentStatus" name="payment_status" value="{{ order.get_payment_status_display }}" readonly>
+        </div>
+        <div class="mb-3">
+          <label for="shippingAddress" class="form-label">Shipping Address</label>
+          <textarea class="form-control" id="shippingAddress" name="shipping_address" rows="3" readonly>{{ order.shipping_address }}</textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="billingAddress" class="form-label">Billing Address</label>
+          <textarea class="form-control" id="billingAddress" name="billing_address" rows="3" readonly>{{ order.billing_address }}</textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="subtotal" class="form-label">Subtotal</label>
+          <input type="text" class="form-control" id="subtotal" name="subtotal" value="{{ order.subtotal }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="tax" class="form-label">Tax</label>
+          <input type="text" class="form-control" id="tax" name="tax" value="{{ order.tax }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="shippingCost" class="form-label">Shipping Cost</label>
+          <input type="text" class="form-control" id="shippingCost" name="shipping_cost" value="{{ order.shipping_cost }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="discount" class="form-label">Discount</label>
+          <input type="text" class="form-control" id="discount" name="discount" value="{{ order.discount }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="total" class="form-label">Total</label>
+          <input type="text" class="form-control" id="total" name="total" value="{{ order.total }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="notes" class="form-label">Notes</label>
+          <textarea class="form-control" id="notes" name="notes" rows="3" readonly>{{ order.notes }}</textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="orderItems" class="form-label">Order Items</label>
+          <div class="responsive-table">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Product Image</th>
+                  <th>Product Name</th>
+                  <th>Product SKU</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order_items %}
+                <tr>
+                  <td data-label="Product Image">
+                    <img src="{{ item.product.images.url }}" alt="{{ item.product_name }}" class="img-thumbnail" style="width: 50px; height: 50px;">
+                  </td>
+                  <td data-label="Product Name">{{ item.product_name }}</td>
+                  <td data-label="Product SKU">{{ item.product_sku }}</td>
+                  <td data-label="Quantity">{{ item.quantity }}</td>
+                  <td data-label="Price">{{ item.price }}</td>
+                  <td data-label="Subtotal">{{ item.subtotal }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="paymentDetails" class="form-label">Payment Details</label>
+          <div class="responsive-table">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Payment Method</th>
+                  <th>Status</th>
+                  <th>Amount</th>
+                  <th>Transaction ID</th>
+                  <th>Created At</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Payment Method">{{ payment.payment_method }}</td>
+                  <td data-label="Status">{{ payment.get_status_display }}</td>
+                  <td data-label="Amount">{{ payment.amount }}</td>
+                  <td data-label="Transaction ID">{{ payment.transaction_id }}</td>
+                  <td data-label="Created At">{{ payment.created_at }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Back to Orders
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

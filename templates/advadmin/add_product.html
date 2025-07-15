@@ -1,0 +1,433 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage / Products /</span> 
+      {% if form.instance.id %}Edit{% else %}Add{% endif %} Product
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <h5 class="card-header">
+        {% if form.instance.id %}Edit Product{% else %}Add New Product{% endif %}
+      </h5>
+      <div class="card-body">
+        
+        <!-- Show Form Errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data" class="mb-3">
+          {% csrf_token %}
+
+          <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="id_name" class="form-label">Product Name</label>
+                <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}" 
+                       id="id_name" name="name" value="{{ form.name.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.name.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="id_category" class="form-label">Category</label>
+                <select class="form-select {% if form.category.errors %}is-invalid{% endif %}" 
+                        id="id_category" name="category" required>
+                  {% for category in form.category.field.queryset %}
+                    <option value="{{ category.id }}" 
+                      {% if category.id == form.category.value %}selected{% endif %}>
+                      {{ category.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                  {{ form.category.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="id_subcategory" class="form-label">Subcategory</label>
+                <select class="form-select {% if form.subcategory.errors %}is-invalid{% endif %}" 
+                        id="id_subcategory" name="subcategory" required>
+                  {% for subcategory in form.subcategory.field.queryset %}
+                    <option value="{{ subcategory.id }}" 
+                      {% if subcategory.id == form.subcategory.value %}selected{% endif %}>
+                      {{ subcategory.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                  {{ form.subcategory.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="id_country_of_origin" class="form-label">Country of Orgin</label>
+                <input type="number" step="0.01" class="form-control {% if form.country_of_origin.errors %}is-invalid{% endif %}" 
+                       id="id_country_of_origin" name="country_of_origin" value="{{ form.country_of_origin.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.country_of_origin.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="id_sku" class="form-label">SKU</label>
+                <input type="number" step="0.01" class="form-control {% if form.sku.errors %}is-invalid{% endif %}" 
+                       id="id_sku" name="sku" value="{{ form.sku.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.sku.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="id_price" class="form-label">Price (₹)</label>
+                <input type="number" step="0.01" class="form-control {% if form.price.errors %}is-invalid{% endif %}" 
+                       id="id_price" name="price" value="{{ form.price.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.price.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3 form-check form-switch">
+                <input class="form-check-input {% if form.is_active.errors %}is-invalid{% endif %}" 
+                       type="checkbox" id="id_is_active" name="is_active" 
+                       {% if form.is_active.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_is_active">Is Active</label>
+                <div class="invalid-feedback">
+                  {{ form.is_active.errors.0 }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column - Images -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                <label for="id_images" class="form-label">Main Product Image</label>
+                <input type="file" class="form-control {% if form.images.errors %}is-invalid{% endif %}" 
+                        id="id_images" name="images" accept="image/*" onchange="previewImage(this, 'previewMain')">
+                <div class="invalid-feedback">
+                    {{ form.images.errors.0 }}
+                </div>
+                <div class="image-preview-container mt-2">
+                    {% if form.instance.images %}
+                    <div class="image-wrapper">
+                        <img src="{{ form.instance.images.url }}" class="uniform-image" id="previewMain">
+                        <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_images" data-preview="previewMain">
+                        <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="image-wrapper">
+                        <img src="" class="uniform-image" id="previewMain" style="display: none;">
+                    </div>
+                    {% endif %}
+                </div>
+                </div>
+            
+                <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_image_1" class="form-label">Image 2</label>
+                    <input type="file" class="form-control {% if form.image_1.errors %}is-invalid{% endif %}" 
+                        id="id_image_1" name="image_1" accept="image/*" onchange="previewImage(this, 'previewImage1')">
+                    <div class="invalid-feedback">
+                    {{ form.image_1.errors.0 }}
+                    </div>
+                    <div class="image-preview-container mt-2">
+                    {% if form.instance.image_1 %}
+                        <div class="image-wrapper">
+                        <img src="{{ form.instance.image_1.url }}" class="uniform-image" id="previewImage1">
+                        <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_image_1" data-preview="previewImage1">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        </div>
+                    {% else %}
+                        <div class="image-wrapper">
+                        <img src="" class="uniform-image" id="previewImage1" style="display: none;">
+                        </div>
+                    {% endif %}
+                    </div>
+                </div>
+            
+                <div class="col-md-4 mb-3">
+                    <label for="id_image_2" class="form-label">Image 3</label>
+                    <input type="file" class="form-control {% if form.image_2.errors %}is-invalid{% endif %}" 
+                        id="id_image_2" name="image_2" accept="image/*" onchange="previewImage(this, 'previewImage2')">
+                    <div class="invalid-feedback">
+                    {{ form.image_2.errors.0 }}
+                    </div>
+                    <div class="image-preview-container mt-2">
+                    {% if form.instance.image_2 %}
+                        <div class="image-wrapper">
+                        <img src="{{ form.instance.image_2.url }}" class="uniform-image" id="previewImage2">
+                        <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_image_2" data-preview="previewImage2">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        </div>
+                    {% else %}
+                        <div class="image-wrapper">
+                        <img src="" class="uniform-image" id="previewImage2" style="display: none;">
+                        </div>
+                    {% endif %}
+                    </div>
+                </div>
+            
+                <div class="col-md-4 mb-3">
+                    <label for="id_image_3" class="form-label">Image 4</label>
+                    <input type="file" class="form-control {% if form.image_3.errors %}is-invalid{% endif %}" 
+                        id="id_image_3" name="image_3" accept="image/*" onchange="previewImage(this, 'previewImage3')">
+                    <div class="invalid-feedback">
+                    {{ form.image_3.errors.0 }}
+                    </div>
+                    <div class="image-preview-container mt-2">
+                    {% if form.instance.image_3 %}
+                        <div class="image-wrapper">
+                        <img src="{{ form.instance.image_3.url }}" class="uniform-image" id="previewImage3">
+                        <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_image_3" data-preview="previewImage3">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        </div>
+                    {% else %}
+                        <div class="image-wrapper">
+                        <img src="" class="uniform-image" id="previewImage3" style="display: none;">
+                        </div>
+                    {% endif %}
+                    </div>
+                </div>
+
+
+                  <div class="col-md-4 mb-3">
+                    <label for="id_image_4" class="form-label">Image 4</label>
+                    <input type="file" class="form-control {% if form.image_4.errors %}is-invalid{% endif %}" 
+                        id="id_image_4" name="image_4" accept="image/*" onchange="previewImage(this, 'previewImage4')">
+                    <div class="invalid-feedback">
+                    {{ form.image_4.errors.0 }}
+                    </div>
+                    <div class="image-preview-container mt-2">
+                    {% if form.instance.image_4 %}
+                        <div class="image-wrapper">
+                        <img src="{{ form.instance.image_4.url }}" class="uniform-image" id="previewImage4">
+                        <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_image_4" data-preview="previewImage4">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        </div>
+                    {% else %}
+                        <div class="image-wrapper">
+                        <img src="" class="uniform-image" id="previewImage4" style="display: none;">
+                        </div>
+                    {% endif %}
+                    </div>
+                </div>
+                </div>
+            </div>
+            
+            <style>
+                /* Uniform Image Styling */
+                .image-preview-container {
+                display: flex;
+                justify-content: center;
+                }
+                
+                .image-wrapper {
+                position: relative;
+                width: 150px;
+                height: 150px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #f8f9fa;
+                overflow: hidden;
+                }
+                
+                .uniform-image {
+                max-width: 100%;
+                max-height: 100%;
+                width: auto;
+                height: auto;
+                object-fit: contain;
+                }
+                
+                /* Main image slightly larger */
+                #previewMain {
+                max-width: 200px;
+                max-height: 200px;
+                }
+                
+                /* Remove button styling */
+                .remove-image {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                width: 25px;
+                height: 25px;
+                padding: 0;
+                border-radius: 50%;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                }
+                
+                .image-wrapper:hover .remove-image {
+                display: flex;
+                }
+                
+                .remove-image i {
+                font-size: 12px;
+                }
+            </style>
+            
+            <script>
+                // Image preview functionality
+                function previewImage(input, previewId) {
+                const file = input.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                    const preview = document.getElementById(previewId);
+                    const wrapper = preview.parentElement;
+                    
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                    wrapper.style.border = "1px solid #ddd";
+                    
+                    // Show remove button
+                    const removeBtn = wrapper.querySelector('.remove-image');
+                    if (removeBtn) removeBtn.style.display = "flex";
+                    }
+                    reader.readAsDataURL(file);
+                }
+                }
+            
+                // Remove image functionality
+                document.querySelectorAll('.remove-image').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const inputId = this.getAttribute('data-target');
+                    const previewId = this.getAttribute('data-preview');
+                    const wrapper = this.parentElement;
+                    const preview = document.getElementById(previewId);
+                    
+                    // Clear file input
+                    document.getElementById(inputId).value = '';
+                    
+                    // Reset preview
+                    preview.src = '';
+                    preview.style.display = 'none';
+                    wrapper.style.border = '1px dashed #ccc';
+                    
+                    // Hide remove button
+                    this.style.display = 'none';
+                    
+                    // For existing images, add a hidden field to mark for deletion
+                    if (preview.src.includes('/media/')) {
+                    const deleteInput = document.createElement('input');
+                    deleteInput.type = 'hidden';
+                    deleteInput.name = inputId.replace('id_', '') + '-clear';
+                    deleteInput.value = 'on';
+                    wrapper.appendChild(deleteInput);
+                    }
+                });
+                });
+            </script>
+
+          <!-- Text Areas -->
+          <div class="mb-3">
+            <label for="id_description" class="form-label">Description (Markdown Supported)</label>
+            <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                      id="id_description" name="description" rows="5">{{ form.description.value|default:'' }}</textarea>
+            <div class="invalid-feedback">
+              {{ form.description.errors.0 }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="id_specifications" class="form-label">Specifications (Markdown Supported)</label>
+            <textarea class="form-control {% if form.specifications.errors %}is-invalid{% endif %}" 
+                      id="id_specifications" name="specifications" rows="5">{{ form.specifications.value|default:'' }}</textarea>
+            <div class="invalid-feedback">
+              {{ form.specifications.errors.0 }}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="id_additional_information" class="form-label">Additional Information (Markdown Supported)</label>
+            <textarea class="form-control {% if form.additional_information.errors %}is-invalid{% endif %}" 
+                      id="id_additional_information" name="additional_information" rows="5">{{ form.additional_information.value|default:'' }}</textarea>
+            <div class="invalid-feedback">
+              {{ form.additional_information.errors.0 }}
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bx bx-save me-1"></i> {% if form.instance.id %}Update{% else %}Add{% endif %} Product
+            </button>
+            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
+              <i class="bx bx-arrow-back me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-dismiss toast messages after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+
+    // Category-subcategory dependency
+    const categorySelect = document.getElementById('id_category');
+    const subcategorySelect = document.getElementById('id_subcategory');
+    
+    if (categorySelect && subcategorySelect) {
+      categorySelect.addEventListener('change', function() {
+        const categoryId = this.value;
+        // You would typically fetch subcategories via AJAX here
+        // For now, we'll just enable/disable based on selection
+        subcategorySelect.disabled = !categoryId;
+      });
+    }
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage / Banners /</span> 
+      {% if banner %}Edit{% else %}Add{% endif %} Banner
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <h5 class="card-header">Banner Details</h5>
+      <div class="card-body">
+        
+        <!-- Show Form Errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data" class="mb-3">
+          {% csrf_token %}
+          <!-- Banner Name -->
+          <div class="mb-3">
+            <label for="bannerName" class="form-label">Banner Name</label>
+            <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}"
+                  id="bannerName" name="name" value="{{ form.name.value|default:'' }}" required>
+            <div class="invalid-feedback">{{ form.name.errors.0 }}</div>
+          </div>
+
+          <!-- Banner Series -->
+          <div class="mb-3">
+            <label for="bannerSeries" class="form-label">Banner Series</label>
+            <input type="number" class="form-control {% if form.series.errors %}is-invalid{% endif %}"
+                  id="bannerSeries" name="series" value="{{ form.series.value|default:'' }}" required>
+            <div class="invalid-feedback">{{ form.series.errors.0 }}</div>
+          </div>
+
+          <!-- Banner Image -->
+          <div class="mb-3">
+            <label for="bannerImage" class="form-label">Banner Image</label>
+            <input type="file" class="form-control {% if form.image.errors %}is-invalid{% endif %}"
+                  id="bannerImage" name="image" accept="image/*" onchange="previewImage(this, 'previewBannerImage')">
+            <div class="invalid-feedback">{{ form.image.errors.0 }}</div>
+
+            <div class="image-preview-container mt-2">
+              {% if banner and banner.image %}
+                <div class="image-wrapper">
+                  <img src="{{ banner.image.url }}" class="img-thumbnail" id="previewBannerImage">
+                  <button type="button" class="btn btn-sm btn-danger remove-image" data-target="bannerImage" data-preview="previewBannerImage">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </div>
+              {% else %}
+                <div class="image-wrapper">
+                  <img src="" class="img-thumbnail" id="previewBannerImage" style="display: none;">
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- NEW FIELDS START HERE -->
+
+          <div class="mb-3">
+            <label for="tagline" class="form-label">Tagline</label>
+            <input type="text" class="form-control {% if form.tagline.errors %}is-invalid{% endif %}"
+                  id="tagline" name="tagline" value="{{ form.tagline.value|default:'' }}">
+            <div class="invalid-feedback">{{ form.tagline.errors.0 }}</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="titleMain" class="form-label">Title (Main)</label>
+            <input type="text" class="form-control {% if form.title_main.errors %}is-invalid{% endif %}"
+                  id="titleMain" name="title_main" value="{{ form.title_main.value|default:'' }}">
+            <div class="invalid-feedback">{{ form.title_main.errors.0 }}</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="titleHighlight" class="form-label">Title (Highlight)</label>
+            <input type="text" class="form-control {% if form.title_highlight.errors %}is-invalid{% endif %}"
+                  id="titleHighlight" name="title_highlight" value="{{ form.title_highlight.value|default:'' }}">
+            <div class="invalid-feedback">{{ form.title_highlight.errors.0 }}</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="subtitle" class="form-label">Subtitle</label>
+            <input type="text" class="form-control {% if form.subtitle.errors %}is-invalid{% endif %}"
+                  id="subtitle" name="subtitle" value="{{ form.subtitle.value|default:'' }}">
+            <div class="invalid-feedback">{{ form.subtitle.errors.0 }}</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="buttonText" class="form-label">Button Text</label>
+            <input type="text" class="form-control {% if form.button_text.errors %}is-invalid{% endif %}"
+                  id="buttonText" name="button_text" value="{{ form.button_text.value|default:'Get Info' }}">
+            <div class="invalid-feedback">{{ form.button_text.errors.0 }}</div>
+          </div>
+
+          <!-- Form Buttons -->
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bx bx-save me-1"></i> {% if banner %}Update{% else %}Save{% endif %} Banner
+            </button>
+            <a href="{% url 'banner_list' %}" class="btn btn-outline-secondary">
+              <i class="bx bx-arrow-back me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .image-preview-container {
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .image-wrapper {
+    position: relative;
+    width: 300px;
+    height: 150px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    overflow: hidden;
+  }
+  
+  .image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .image-wrapper:hover .remove-image {
+    display: flex;
+  }
+</style>
+
+<script>
+  // Image preview functionality
+  function previewImage(input, previewId) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById(previewId);
+        preview.src = e.target.result;
+        preview.style.display = "block";
+        
+        // Show remove button
+        const removeBtn = preview.parentElement.querySelector('.remove-image');
+        if (removeBtn) removeBtn.style.display = "flex";
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Remove image functionality
+  document.querySelectorAll('.remove-image').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const inputId = this.getAttribute('data-target');
+      const previewId = this.getAttribute('data-preview');
+      
+      // Clear file input
+      document.getElementById(inputId).value = '';
+      
+      // Hide preview
+      document.getElementById(previewId).style.display = 'none';
+      this.style.display = 'none';
+      
+      // For existing images, add a hidden field to mark for deletion
+      if (document.getElementById(previewId).src.includes('/media/')) {
+        const deleteInput = document.createElement('input');
+        deleteInput.type = 'hidden';
+        deleteInput.name = 'image-clear';
+        deleteInput.value = 'on';
+        this.parentNode.appendChild(deleteInput);
+      }
+    });
+  });
+
+  // Auto-dismiss toast messages after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

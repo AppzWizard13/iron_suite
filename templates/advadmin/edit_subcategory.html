@@ -1,0 +1,112 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Manage / Subcategories /</span> Edit Subcategory</h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <h5 class="card-header">Edit Subcategory</h5>
+      <div class="card-body">
+        
+        <!-- Show Form Errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{% url 'edit_subcategory' subcategory.id %}" class="mb-3">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="name" class="form-label">Subcategory Name</label>
+            <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}" 
+                   id="name" name="name" value="{{ subcategory.name }}" required>
+            <div class="invalid-feedback">
+              {% if form.name.errors %}{{ form.name.errors.0 }}{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                      id="description" name="description" rows="3">{{ subcategory.description }}</textarea>
+            <div class="invalid-feedback">
+              {% if form.description.errors %}{{ form.description.errors.0 }}{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select {% if form.category.errors %}is-invalid{% endif %}" 
+                    id="category" name="category" required>
+              {% if categories %}
+                {% for category in categories %}
+                  <option value="{{ category.id }}" 
+                    {% if category.id == subcategory.category.id %}selected{% endif %}>
+                    {{ category.name }}
+                  </option>
+                {% endfor %}
+              {% else %}
+                <option disabled selected>No Categories Found</option>
+              {% endif %}
+            </select>
+            <div class="invalid-feedback">
+              {% if form.category.errors %}{{ form.category.errors.0 }}{% endif %}
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bx bx-save me-1"></i> Update Subcategory
+            </button>
+            <a href="{% url 'subcategory_list' %}" class="btn btn-outline-secondary">
+              <i class="bx bx-arrow-back me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-dismiss toast messages after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

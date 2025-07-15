@@ -1,0 +1,98 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sap Equipments Admin Login</title>
+  <link rel="shortcut icon" type="image/png" href="{% static 'admin_panel/images/logos/favicon.png' %}" />
+  <link rel="stylesheet" href="{% static 'admin_panel/css/styles.min.css' %}" />
+</head>
+
+<style>
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .logo-img {
+    max-width: 150px;
+    height: auto;
+  }
+</style>
+
+<body>
+  <!-- Toast Messages -->
+  {% if messages %}
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    {% for message in messages %}
+    <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ message }}
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <div class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
+      <div class="d-flex align-items-center justify-content-center w-100">
+        <div class="row justify-content-center w-100">
+          <div class="col-md-8 col-lg-6 col-xxl-3">
+            <div class="card mb-0">
+              <div class="card-body">
+                <div class="logo-container">
+                  <a class="navbar-brand" href="{% url 'home' %}">
+                    <img src="{% static 'admin_panel/images/main_logo.png' %}" alt="CODESPIKE STUDIO" class="logo-img">
+                  </a>
+                </div>
+                <p class="text-center"><b class="text-center">SAP EQUIPMENTS ADMIN PORTAL</b></p>
+                <p class="text-center">Administration Panel Login</p>
+
+                <form method="post">
+                  {% csrf_token %}
+                  <div class="mb-3">
+                    <label for="id_username" class="form-label">Phone Number</label>
+                    <input type="text" name="username" class="form-control" id="id_username" placeholder="Enter phone number" required>
+                  </div>
+                  <div class="mb-4">
+                    <label for="id_password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" id="id_password" placeholder="Enter password" required>
+                  </div>
+                  <div class="text-center">
+                    <button type="submit" class="btn btn-primary px-4 py-2 fs-5 mb-4 rounded-2">Sign In</button>
+                  </div>
+                  <a class="text-primary fw-bold ms-2" href="{% url 'home' %}">Back to Home</a>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'admin_panel/libs/jquery/dist/jquery.min.js' %}"></script>
+  <script src="{% static 'admin_panel/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+
+  <script>
+    // Auto-dismiss Bootstrap toast messages after 3 seconds
+    document.addEventListener("DOMContentLoaded", function () {
+      var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+      var toastList = toastElList.map(function (toastEl) {
+        return new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
+      });
+      toastList.forEach(toast => toast.show());
+    });
+  </script>
+</body>
+</html>

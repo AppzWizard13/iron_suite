@@ -1,0 +1,184 @@
+
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+<section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_1.jpg' %});" data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-end">
+      <div class="col-md-9 ftco-animate pb-5">
+        <p class="breadcrumbs mb-2"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="fa fa-chevron-right"></i></a></span> <span>Services <i class="fa fa-chevron-right"></i></span></p>
+        <h1 class="mb-0 bread" style="color:grey!important;">Services</h1>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="ftco-section mb-5" style="padding:3rem;">
+    <div class="container">
+      <div class="row justify-content-center pb-2 mb-2">
+        <div class="col-md-7 heading-section text-center ftco-animate">
+          <span class="subheading">Premium Automotive Solutions</span>
+          <h2>Our Products</h2>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 services ftco-animate">
+          <div class="d-block d-flex">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/car-wash-equipments.png' %}" alt="Washing Equipment Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Washing Equipment</h3>
+              <p>High-performance washing equipment designed for efficient, water-saving, and eco-friendly vehicle cleaning.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+          <div class="d-block d-flex">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/promotion.png' %}" alt="Car Care Products Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Car Care Products</h3>
+              <p>Premium car care solutions, including waxes, polishes, and cleaners, to protect and enhance your vehicle's finish.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+          <div class="d-block d-flex">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/car-lift.png' %}" alt="Washing Lift Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Washing Lift</h3>
+              <p>Heavy-duty washing lifts for safe and efficient vehicle maintenance, designed for garages and workshops.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-md-4 services ftco-animate">
+          <div class="d-block d-flex">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/wheels.png' %}" style="color:white;" alt="Wheel Balancer Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Wheel Balancer</h3>
+              <p>Precision wheel balancers for accurate tire balancing, ensuring smoother rides and extended tire lifespan.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+          <div class="d-block d-flex">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/car-wash.png' %}" alt="Automatic Car Washer Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Automatic Car Washer</h3>
+              <p>Fully automatic car washers with advanced technology for fast, efficient, and scratch-free vehicle cleaning.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+          <div class="d-block d-flex">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/tyre-change.png' %}" alt="Tyre Changer Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Tyre Changer</h3>
+              <p>Robust tyre changers for quick and safe tire replacements, suitable for all vehicle types.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-md-4 services ftco-animate">
+          <div class="d-block d-flex mb-5">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/car-washer-1.png' %}" alt="Washing Equipments Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Car Washer</h3>
+              <p>Advanced car washing systems for thorough cleaning, designed for both small and large-scale operations.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+          <div class="d-block d-flex">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/scanner.png' %}" alt="Carman Car Scanner Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Carman Car Scanner</h3>
+              <p>Advanced diagnostic scanners for accurate vehicle health checks, engine diagnostics, and fault detection.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+          <div class="d-block d-flex">
+            <div class="icon d-flex justify-content-center align-items-center">
+              <img src="{% static 'icons/air-compressor.png' %}" alt="Air Compressor Icon" class="icon-img white-icon">
+            </div>
+            <div class="media-body pl-3">
+              <h3 class="heading">Air Compressor</h3>
+              <p>High-efficiency air compressors for tire inflation, painting, and other automotive applications.</p>
+              <p><a href="#" class="btn-custom">View Catelogue</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* Round design for the icon container */
+    /* Make the icon white using CSS filter */
+    .white-icon {
+      filter: brightness(0) invert(1); /* Converts icon to white */
+    }
+    
+    /* Round design for the icon container */
+    .icon {
+      width: 60px; /* Adjust size of the round container */
+      height: 60px; /* Adjust size of the round container */
+      border-radius: 50%; /* Makes it round */
+      {% comment %} background-color: #007bff; /* Blue background for contrast */ {% endcomment %}
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 15px; /* Space between icon and text */
+    }
+    
+    /* Smaller icon size */
+    .icon-img {
+      width: 30px; /* Adjust icon size */
+      height: 30px; /* Adjust icon size */
+      transition: transform 0.3s ease; /* Smooth hover effect */
+    }
+    
+    /* Hover effect for the icon */
+    .icon:hover .icon-img {
+      transform: scale(1.1); /* Slightly enlarge on hover */
+    }
+
+    
+    .services .icon img {
+      max-width: 100%; /* Ensure the icon fits within the container */
+      max-height: 100%;
+    }
+    
+    .services .media-body {
+      flex: 1; /* Allow the text to take up remaining space */
+    }
+    
+    /* Optional: Add hover effects for better interactivity */
+    .services .d-block.d-flex:hover {
+      transform: translateY(-5px);
+      transition: transform 0.3s ease;
+    }
+
+    .block-23 ul li, .block-23 ul li > a{
+    display: table;
+    line-height: 1.5;
+    margin-bottom: 0px !important;
+  }
+  </style>
+
+  {% endblock %}

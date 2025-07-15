@@ -1,0 +1,411 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Products /</span> 
+      {% if form.instance.id %}Edit{% else %}Add New{% endif %} Product
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Product Details</h5>
+        <a href="{% url 'product_list' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bx bx-arrow-back me-1"></i> Back to List
+        </a>
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Product Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}" 
+                       name="name" value="{{ form.name.value|default:'' }}" required>
+                {% if form.name.errors %}
+                <div class="invalid-feedback">
+                  {{ form.name.errors.0 }}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Category <span class="text-danger">*</span></label>
+                  <select class="form-select {% if form.category.errors %}is-invalid{% endif %}" 
+                          name="category" required>
+                    {% for category in form.category.field.queryset %}
+                      <option value="{{ category.id }}" {% if category.id == form.category.value %}selected{% endif %}>
+                        {{ category.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  {% if form.category.errors %}
+                  <div class="invalid-feedback">
+                    {{ form.category.errors.0 }}
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Subcategory <span class="text-danger">*</span></label>
+                  <select class="form-select {% if form.subcategory.errors %}is-invalid{% endif %}" 
+                          name="subcategory" required>
+                    {% for subcategory in form.subcategory.field.queryset %}
+                      <option value="{{ subcategory.id }}" {% if subcategory.id == form.subcategory.value %}selected{% endif %}>
+                        {{ subcategory.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  {% if form.subcategory.errors %}
+                  <div class="invalid-feedback">
+                    {{ form.subcategory.errors.0 }}
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="id_sku" class="form-label">SKU</label>
+                <input type="number" step="0.01" class="form-control {% if form.sku.errors %}is-invalid{% endif %}" 
+                       id="id_sku" name="sku" value="{{ form.sku.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.sku.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Price (₹) <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" class="form-control {% if form.price.errors %}is-invalid{% endif %}" 
+                       name="price" value="{{ form.price.value|default:'' }}" required>
+                {% if form.price.errors %}
+                <div class="invalid-feedback">
+                  {{ form.price.errors.0 }}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="form-check form-switch mb-4">
+                <input class="form-check-input" type="checkbox" name="is_active" 
+                       id="is_active" {% if form.is_active.value %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Active Product</label>
+              </div>
+            </div>
+
+            <!-- Right Column - Images -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Main Image <span class="text-danger">*</span></label>
+                <input type="file" class="form-control {% if form.images.errors %}is-invalid{% endif %}" 
+                       name="images" accept="image/*" {% if not form.instance.id %}required{% endif %}>
+                {% if form.images.errors %}
+                <div class="invalid-feedback">
+                  {{ form.images.errors.0 }}
+                </div>
+                {% endif %}
+                <div class="mt-2">
+                  {% if form.instance.images %}
+                    <img src="{{ form.instance.images.url }}" class="img-thumbnail" id="previewMain" style="max-width: 200px;">
+                  {% else %}
+                    <img src="" class="img-thumbnail" id="previewMain" style="max-width: 200px; display: none;">
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <div class="image-upload-card">
+                    <label class="form-label">Image 2</label>
+                    <div class="image-upload-wrapper">
+                      <input type="file" class="form-control" name="image_1" accept="image/*" onchange="previewImage(this, 'previewImage1')">
+                      <div class="image-preview mt-2">
+                        {% if form.instance.image_1 %}
+                          <img src="{{ form.instance.image_1.url }}" class="img-thumbnail" id="previewImage1">
+                          <button type="button" class="btn btn-sm btn-danger remove-image" data-target="image_1" data-preview="previewImage1">
+                            <i class="bx bx-trash"></i>
+                          </button>
+                        {% else %}
+                          <img src="" class="img-thumbnail" id="previewImage1" style="display: none;">
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              
+                <div class="col-md-4 mb-3">
+                  <div class="image-upload-card">
+                    <label class="form-label">Image 3</label>
+                    <div class="image-upload-wrapper">
+                      <input type="file" class="form-control" name="image_2" accept="image/*" onchange="previewImage(this, 'previewImage2')">
+                      <div class="image-preview mt-2">
+                        {% if form.instance.image_2 %}
+                          <img src="{{ form.instance.image_2.url }}" class="img-thumbnail" id="previewImage2">
+                          <button type="button" class="btn btn-sm btn-danger remove-image" data-target="image_2" data-preview="previewImage2">
+                            <i class="bx bx-trash"></i>
+                          </button>
+                        {% else %}
+                          <img src="" class="img-thumbnail" id="previewImage2" style="display: none;">
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              
+                <div class="col-md-4 mb-3">
+                  <div class="image-upload-card">
+                    <label class="form-label">Image 4</label>
+                    <div class="image-upload-wrapper">
+                      <input type="file" class="form-control" name="image_3" accept="image/*" onchange="previewImage(this, 'previewImage3')">
+                      <div class="image-preview mt-2">
+                        {% if form.instance.image_3 %}
+                          <img src="{{ form.instance.image_3.url }}" class="img-thumbnail" id="previewImage3">
+                          <button type="button" class="btn btn-sm btn-danger remove-image" data-target="image_3" data-preview="previewImage3">
+                            <i class="bx bx-trash"></i>
+                          </button>
+                        {% else %}
+                          <img src="" class="img-thumbnail" id="previewImage3" style="display: none;">
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+                <div class="col-md-4 mb-3">
+                  <div class="image-upload-card">
+                    <label class="form-label">Image 5</label>
+                    <div class="image-upload-wrapper">
+                      <input type="file" class="form-control" name="image_4" accept="image/*" onchange="previewImage(this, 'previewImage4')">
+                      <div class="image-preview mt-2">
+                        {% if form.instance.image_4 %}
+                          <img src="{{ form.instance.image_4.url }}" class="img-thumbnail" id="previewImage4">
+                          <button type="button" class="btn btn-sm btn-danger remove-image" data-target="image_4" data-preview="previewImage4">
+                            <i class="bx bx-trash"></i>
+                          </button>
+                        {% else %}
+                          <img src="" class="img-thumbnail" id="previewImage4" style="display: none;">
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+          </div>
+          <style>
+            .image-upload-card {
+              border: 1px dashed #ddd;
+              border-radius: 8px;
+              padding: 15px;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+            }
+            
+            .image-upload-wrapper {
+              flex-grow: 1;
+              display: flex;
+              flex-direction: column;
+            }
+            
+            .image-preview {
+              position: relative;
+              flex-grow: 1;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 120px;
+              background-color: #f8f9fa;
+              border-radius: 4px;
+            }
+            
+            .image-preview img {
+              max-width: 100%;
+              max-height: 120px;
+              object-fit: contain;
+            }
+            
+            .remove-image {
+              position: absolute;
+              top: 5px;
+              right: 5px;
+              width: 25px;
+              height: 25px;
+              padding: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 50%;
+            }
+          </style>
+
+          <!-- Text Areas -->
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                      name="description" rows="4">{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}
+            <div class="invalid-feedback">
+              {{ form.description.errors.0 }}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Specifications</label>
+            <textarea class="form-control {% if form.specifications.errors %}is-invalid{% endif %}" 
+                      name="specifications" rows="4">{{ form.specifications.value|default:'' }}</textarea>
+            {% if form.specifications.errors %}
+            <div class="invalid-feedback">
+              {{ form.specifications.errors.0 }}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Additional Information</label>
+            <textarea class="form-control {% if form.additional_information.errors %}is-invalid{% endif %}" 
+                      name="additional_information" rows="4">{{ form.additional_information.value|default:'' }}</textarea>
+            {% if form.additional_information.errors %}
+            <div class="invalid-feedback">
+              {{ form.additional_information.errors.0 }}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">
+              <i class="bx bx-save me-1"></i> {% if form.instance.id %}Update{% else %}Save{% endif %} Product
+            </button>
+            {% if form.instance.id %}
+            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
+              <i class="bx bx-x me-1"></i> Cancel
+            </a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-dismiss toast messages
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toast messages
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+
+    // Image preview functionality
+    function setupImagePreview(inputSelector, previewId) {
+      const input = document.querySelector(inputSelector);
+      if (input) {
+        input.addEventListener('change', function() {
+          const file = this.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const preview = document.getElementById(previewId);
+              preview.src = e.target.result;
+              preview.style.display = "block";
+            }
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+    }
+
+    // Set up previews for all image inputs
+    setupImagePreview('[name="images"]', 'previewMain');
+    setupImagePreview('[name="image_1"]', 'previewImage1');
+    setupImagePreview('[name="image_2"]', 'previewImage2');
+    setupImagePreview('[name="image_3"]', 'previewImage3');
+
+    // Category-subcategory dependency
+    const categorySelect = document.querySelector('[name="category"]');
+    const subcategorySelect = document.querySelector('[name="subcategory"]');
+    
+    if (categorySelect && subcategorySelect) {
+      categorySelect.addEventListener('change', function() {
+        const categoryId = this.value;
+        // You would typically fetch subcategories via AJAX here
+        // For now, we'll just enable/disable based on selection
+        subcategorySelect.disabled = !categoryId;
+      });
+    }
+  });
+</script>
+<script>
+    function previewImage(input, previewId) {
+      const file = input.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById(previewId);
+          preview.src = e.target.result;
+          preview.style.display = "block";
+          
+          // Show remove button if it exists
+          const removeBtn = preview.nextElementSibling;
+          if (removeBtn && removeBtn.classList.contains('remove-image')) {
+            removeBtn.style.display = 'flex';
+          }
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+  
+    // Handle image removal
+    document.querySelectorAll('.remove-image').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const inputName = this.getAttribute('data-target');
+        const previewId = this.getAttribute('data-preview');
+        
+        // Clear file input
+        document.querySelector(`input[name="${inputName}"]`).value = '';
+        
+        // Hide preview
+        document.getElementById(previewId).style.display = 'none';
+        this.style.display = 'none';
+        
+        // For existing images, add a hidden field to mark for deletion
+        if (document.getElementById(previewId).src.includes('/media/')) {
+          const deleteInput = document.createElement('input');
+          deleteInput.type = 'hidden';
+          deleteInput.name = `${inputName}-clear`;
+          deleteInput.value = 'on';
+          this.parentNode.appendChild(deleteInput);
+        }
+      });
+    });
+  </script>
+
+{% endblock %}

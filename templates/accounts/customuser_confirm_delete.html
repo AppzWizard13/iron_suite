@@ -1,0 +1,14 @@
+{% extends 'admin_panel/index.html' %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2>Confirm Delete</h2>
+    <p>Are you sure you want to delete user "<strong>{{ object.username }}</strong>"?</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Delete</button>
+      <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

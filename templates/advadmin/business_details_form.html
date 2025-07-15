@@ -1,0 +1,492 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage /</span> Business Details
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <ul class="nav nav-pills flex-column flex-md-row mb-3">
+        <li class="nav-item">
+          <a class="nav-link " href="{% url 'account_settings' %}"><i class="bx bx-user me-1"></i> Account</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'business_details' %}"
+            ><i class="bx bx-bell me-1"></i> Business Details</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="javascript:void(0);"
+            ><i class="bx bx-link-alt me-1"></i> Connections</a
+          >
+        </li>
+        <!-- Other tabs -->
+      </ul>
+
+    <div class="card mb-4">
+      <h5 class="card-header">Business Information</h5>
+      <div class="card-body">
+        
+        <!-- Show Form Errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data" class="mb-3">
+          {% csrf_token %}
+
+          <div class="row">
+            <!-- Company Info Section -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                <label class="form-label">Company Name*</label>
+                <input type="text" class="form-control {% if form.company_name.errors %}is-invalid{% endif %}" 
+                        name="company_name" value="{{ form.company_name.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                    {{ form.company_name.errors.0 }}
+                </div>
+                </div>
+
+                <div class="mb-3">
+                <label class="form-label">Company Tagline</label>
+                <input type="text" class="form-control {% if form.company_tagline.errors %}is-invalid{% endif %}" 
+                        name="company_tagline" value="{{ form.company_tagline.value|default:'' }}">
+                <div class="invalid-feedback">
+                    {{ form.company_tagline.errors.0 }}
+                </div>
+                </div>
+
+                <!-- Company Instagram -->
+                <div class="mb-3">
+                  <label class="form-label">Company Instagram</label>
+                  <input type="url" class="form-control {% if form.company_instagram.errors %}is-invalid{% endif %}" 
+                        name="company_instagram" value="{{ form.company_instagram.value|default:'' }}">
+                  <div class="invalid-feedback">
+                      {{ form.company_instagram.errors.0 }}
+                  </div>
+                </div>
+
+                <!-- Company Facebook -->
+                <div class="mb-3">
+                  <label class="form-label">Company Facebook</label>
+                  <input type="url" class="form-control {% if form.company_facebook.errors %}is-invalid{% endif %}" 
+                        name="company_facebook" value="{{ form.company_facebook.value|default:'' }}">
+                  <div class="invalid-feedback">
+                      {{ form.company_facebook.errors.0 }}
+                  </div>
+                </div>
+
+                <!-- Company CEO Email -->
+                <div class="mb-3">
+                  <label class="form-label">Company CEO Email</label>
+                  <input type="email" class="form-control {% if form.company_email_ceo.errors %}is-invalid{% endif %}" 
+                        name="company_email_ceo" value="{{ form.company_email_ceo.value|default:'' }}">
+                  <div class="invalid-feedback">
+                      {{ form.company_email_ceo.errors.0 }}
+                  </div>
+                </div>
+
+
+                <div class="mb-3">
+                <label class="form-label">Company Logo</label>
+                <input type="file" class="form-control {% if form.company_logo.errors %}is-invalid{% endif %}" 
+                        name="company_logo" accept="image/*" onchange="previewImage(this, 'previewLogo')">
+                <div class="invalid-feedback">
+                    {{ form.company_logo.errors.0 }}
+                </div>
+                <div class="image-preview-container mt-2">
+                    {% if form.instance.company_logo %}
+                    <div class="image-wrapper">
+                        <img src="{{ form.instance.company_logo.url }}" class="img-thumbnail" id="previewLogo">
+                        <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_company_logo" data-preview="previewLogo">
+                        <i class="bx bx-trash"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="image-wrapper">
+                        <img src="" class="img-thumbnail" id="previewLogo" style="display: none;">
+                    </div>
+                    {% endif %}
+                </div>
+                </div>
+
+                <!-- Breadcrumb Image -->
+                <div class="mb-3">
+                  <label class="form-label">Breadcrumb Image*</label>
+                  <input type="file" class="form-control {% if form.breadcrumb_image.errors %}is-invalid{% endif %}" 
+                        name="breadcrumb_image" accept="image/*" onchange="previewImage(this, 'previewBreadcrumbImage')">
+                  <div class="invalid-feedback">
+                    {{ form.breadcrumb_image.errors.0 }}
+                  </div>
+                  <div class="image-preview-container mt-2">
+                    {% if form.instance.breadcrumb_image %}
+                    <div class="image-wrapper">
+                      <img src="{{ form.instance.breadcrumb_image.url }}" class="img-thumbnail" id="previewBreadcrumbImage">
+                      <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_breadcrumb_image" data-preview="previewBreadcrumbImage">
+                        <i class="bx bx-trash"></i>
+                      </button>
+                    </div>
+                    {% else %}
+                    <div class="image-wrapper">
+                      <img src="" class="img-thumbnail" id="previewBreadcrumbImage" style="display: none;">
+                    </div>
+                    {% endif %}
+                  </div>
+                  <small class="text-muted">Recommended size: 1920x500px for best appearance</small>
+                </div>
+
+
+              <!-- About Page Image -->
+              <div class="mb-3">
+                <label class="form-label">About Page Image*</label>
+                <input type="file" class="form-control {% if form.about_page_image.errors %}is-invalid{% endif %}" 
+                      name="about_page_image" accept="image/*" onchange="previewImage(this, 'previewAboutPageImage')">
+                <div class="invalid-feedback">
+                  {{ form.about_page_image.errors.0 }}
+                </div>
+                <div class="image-preview-container mt-2">
+                  {% if form.instance.about_page_image %}
+                  <div class="image-wrapper">
+                    <img src="{{ form.instance.about_page_image.url }}" class="img-thumbnail" id="previewAboutPageImage">
+                    <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_about_page_image" data-preview="previewAboutPageImage">
+                      <i class="bx bx-trash"></i>
+                    </button>
+                  </div>
+                  {% else %}
+                  <div class="image-wrapper">
+                    <img src="" class="img-thumbnail" id="previewAboutPageImage" style="display: none;">
+                  </div>
+                  {% endif %}
+                </div>
+                <small class="text-muted">Recommended size: 1920x500px for best appearance</small>
+              </div>
+
+
+                <!-- Company Logo SVG -->
+                <div class="mb-3">
+                <label class="form-label">Company Logo (SVG)*</label>
+                <input type="file" class="form-control {% if form.company_logo_svg.errors %}is-invalid{% endif %}" 
+                        name="company_logo_svg" accept="image/svg+xml" onchange="previewImage(this, 'previewLogoSvg')">
+                <div class="invalid-feedback">
+                    {{ form.company_logo_svg.errors.0 }}
+                </div>
+                <div class="image-preview-container mt-2">
+                    {% if form.instance.company_logo_svg %}
+                    <div class="image-wrapper">
+                        <img src="{{ form.instance.company_logo_svg.url }}" class="img-thumbnail" id="previewLogoSvg">
+                        <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_company_logo_svg" data-preview="previewLogoSvg">
+                        <i class="bx bx-trash"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="image-wrapper">
+                        <img src="" class="img-thumbnail" id="previewLogoSvg" style="display: none;">
+                    </div>
+                    {% endif %}
+                </div>
+                <small class="text-muted">SVG format recommended for better quality</small>
+                </div>
+
+                <!-- Company Favicon Field -->
+                <div class="mb-3">
+                <label class="form-label">Company Favicon</label>
+                <input type="file" class="form-control {% if form.company_favicon.errors %}is-invalid{% endif %}" 
+                        name="company_favicon" accept="image/*" onchange="previewImage(this, 'previewFavicon')">
+                <div class="invalid-feedback">
+                    {{ form.company_favicon.errors.0 }}
+                </div>
+                <div class="image-preview-container mt-2">
+                    {% if form.instance.company_favicon %}
+                    <div class="image-wrapper" style="width: 100px; height: 100px;">
+                        <img src="{{ form.instance.company_favicon.url }}" class="img-thumbnail" id="previewFavicon">
+                        <button type="button" class="btn btn-sm btn-danger remove-image" data-target="id_company_favicon" data-preview="previewFavicon">
+                        <i class="bx bx-trash"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="image-wrapper" style="width: 100px; height: 100px;">
+                        <img src="" class="img-thumbnail" id="previewFavicon" style="display: none;">
+                    </div>
+                    {% endif %}
+                </div>
+                <small class="text-muted">Recommended size: 32x32 or 16x16 pixels (ICO/PNG format)</small>
+                </div>
+            </div>
+
+
+            <!-- Contact Info Section -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Primary Mobile*</label>
+                <input type="text" class="form-control {% if form.info_mobile.errors %}is-invalid{% endif %}" 
+                       name="info_mobile" value="{{ form.info_mobile.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.info_mobile.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Primary Email*</label>
+                <input type="email" class="form-control {% if form.info_email.errors %}is-invalid{% endif %}" 
+                       name="info_email" value="{{ form.info_email.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.info_email.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Complaint Mobile*</label>
+                <input type="text" class="form-control {% if form.complaint_mobile.errors %}is-invalid{% endif %}" 
+                       name="complaint_mobile" value="{{ form.complaint_mobile.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.complaint_mobile.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Complaint Email*</label>
+                <input type="email" class="form-control {% if form.complaint_email.errors %}is-invalid{% endif %}" 
+                       name="complaint_email" value="{{ form.complaint_email.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.complaint_email.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Sales Mobile*</label>
+                <input type="text" class="form-control {% if form.sales_mobile.errors %}is-invalid{% endif %}" 
+                       name="sales_mobile" value="{{ form.sales_mobile.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.sales_mobile.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Sales Email*</label>
+                <input type="email" class="form-control {% if form.sales_email.errors %}is-invalid{% endif %}" 
+                       name="sales_email" value="{{ form.sales_email.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.sales_email.errors.0 }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Map Location URL</label>
+                <input type="url" class="form-control {% if form.map_location.errors %}is-invalid{% endif %}" 
+                       name="map_location" value="{{ form.map_location.value|default:'' }}">
+                <div class="invalid-feedback">
+                  {{ form.map_location.errors.0 }}
+                </div>
+              </div>
+
+
+              <div class="mb-3">
+                <label class="form-label">Map Location URL</label>
+                <input type="url" class="form-control {% if form.map_location.errors %}is-invalid{% endif %}" 
+                       name="map_location" value="{{ form.map_location.value|default:'' }}">
+                <div class="invalid-feedback">
+                  {{ form.map_location.errors.0 }}
+                </div>
+              </div>
+
+
+              <div class="mb-3">
+                <label class="form-label">GSTN</label>
+                <input type="text" class="form-control {% if form.gstn.errors %}is-invalid{% endif %}" 
+                       name="gstn" value="{{ form.gstn.value|default:'' }}">
+                <div class="invalid-feedback">
+                  {{ form.gstn.errors.0 }}
+                </div>
+              </div>
+              
+
+
+            </div>
+          </div>
+
+          <!-- Address Section -->
+          <div class="mb-3">
+            <label class="form-label">Physical Address</label>
+            <textarea class="form-control {% if form.offline_address.errors %}is-invalid{% endif %}" 
+                      name="offline_address" rows="3">{{ form.offline_address.value|default:'' }}</textarea>
+            <div class="invalid-feedback">
+              {{ form.offline_address.errors.0 }}
+            </div>
+          </div>
+
+          <!-- Business Hours Section -->
+          <div class="mb-3">
+            <label class="form-label">Business Hours</label>
+            <div class="row">
+              <div class="col-md-3">
+                <label>Opening Time*</label>
+                <input type="time" class="form-control {% if form.opening_time.errors %}is-invalid{% endif %}" 
+                  name="opening_time" 
+                  value="{{ form.opening_time.value|default:''|time:'H:i' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.opening_time.errors.0 }}
+                </div>
+              </div>
+              <div class="col-md-3">
+                <label>Closing Time*</label>
+                <input type="time" class="form-control {% if form.closing_time.errors %}is-invalid{% endif %}" 
+                   name="closing_time" 
+                   value="{{ form.closing_time.value|default:''|time:'H:i' }}" required>
+                <div class="invalid-feedback">
+                  {{ form.closing_time.errors.0 }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label>Closed Days (Max 20 characters)</label>
+                <input type="text" class="form-control {% if form.closed_days.errors %}is-invalid{% endif %}" 
+                       name="closed_days" value="{{ form.closed_days.value|default:'' }}" maxlength="20">
+                <div class="invalid-feedback">
+                  {{ form.closed_days.errors.0 }}
+                </div>
+                <small class="text-muted">Example: Sunday, Monday or Sun, Mon (max 20 chars)</small>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bx bx-save me-1"></i> Save Changes
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+              <i class="bx bx-arrow-back me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .image-preview-container {
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .image-wrapper {
+    position: relative;
+    width: 200px;
+    height: 100px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    overflow: hidden;
+  }
+  
+  .image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .image-wrapper:hover .remove-image {
+    display: flex;
+  }
+</style>
+
+<script>
+  // Image preview functionality
+  function previewImage(input, previewId) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById(previewId);
+        preview.src = e.target.result;
+        preview.style.display = "block";
+        
+        // Show remove button
+        const removeBtn = preview.parentElement.querySelector('.remove-image');
+        if (removeBtn) removeBtn.style.display = "flex";
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Remove image functionality
+  document.querySelectorAll('.remove-image').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const inputId = this.getAttribute('data-target');
+      const previewId = this.getAttribute('data-preview');
+      
+      // Clear file input
+      document.querySelector(`input[name="${inputId}"]`).value = '';
+      
+      // Hide preview
+      document.getElementById(previewId).style.display = 'none';
+      this.style.display = 'none';
+      
+      // For existing images, add a hidden field to mark for deletion
+      if (document.getElementById(previewId).src.includes('/media/')) {
+        const deleteInput = document.createElement('input');
+        deleteInput.type = 'hidden';
+        deleteInput.name = inputId + '-clear';
+        deleteInput.value = 'on';
+        this.parentNode.appendChild(deleteInput);
+      }
+    });
+  });
+
+  // Auto-dismiss toast messages after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

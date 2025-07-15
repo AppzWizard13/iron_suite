@@ -1,0 +1,153 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage / Social Media /</span> 
+      {% if social_link %}Edit{% else %}Add{% endif %} Social Media Link
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <h5 class="card-header">Social Media Link Details</h5>
+      <div class="card-body">
+        
+        <!-- Show Form Errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        
+        <form method="post" class="mb-3">
+          {% csrf_token %}
+
+
+            <div class="mb-3">
+              <label for="user" class="form-label">User</label>
+              <select class="form-select {% if form.user.errors %}is-invalid{% endif %}" 
+                     id="user" name="user" required>
+                <option value="">Select User</option>
+                {% for user in form.fields.user.queryset %}
+                  <option value="{{ user.id }}" 
+                    {% if form.user.value|default:request.user.id == user.id %}selected{% endif %}>
+                    {{ user.get_full_name|default:user.username }} ({{ user.email }})
+                  </option>
+                {% endfor %}
+              </select>
+              <div class="invalid-feedback">
+                {{ form.user.errors.0 }}
+              </div>
+            </div>
+
+
+          <div class="mb-3">
+            <label for="platform" class="form-label">Platform</label>
+            <select class="form-select {% if form.platform.errors %}is-invalid{% endif %}" 
+                   id="platform" name="platform" required>
+              <option value="">Select Platform</option>
+              {% for value, label in form.fields.platform.choices %}
+                <option value="{{ value }}" {% if form.platform.value == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+            <div class="invalid-feedback">
+              {{ form.platform.errors.0 }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="url" class="form-label" id="urlLabel">
+              {% if form.platform.value == 'PHONE' %}Phone Number{% else %}Profile URL{% endif %}
+            </label>
+            <input type="text" 
+                   class="form-control" 
+                   id="url" 
+                   name="url" 
+                   value="{{ form.url.value|default:'' }}" 
+                   placeholder="{% if form.platform.value == 'PHONE' %}Enter phone or text{% else %}Enter URL or text{% endif %}">
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                     {% if form.is_active.value %}checked{% endif %}>
+              <label class="form-check-label" for="is_active">Active</label>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bx bx-save me-1"></i> {% if social_link %}Update{% else %}Save{% endif %} Link
+            </button>
+            <a href="{% url 'socialmedia_list' %}" class="btn btn-outline-secondary">
+              <i class="bx bx-arrow-back me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+  }
+</style>
+
+<script>
+  // Auto-dismiss toast messages
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+
+  // Update field label when platform changes
+  document.getElementById('platform').addEventListener('change', function() {
+    const platform = this.value;
+    const urlLabel = document.getElementById('urlLabel');
+    
+    if (platform === 'PHONE') {
+      urlLabel.textContent = "Phone Number";
+      document.getElementById('url').placeholder = 'Enter phone or text';
+    } else {
+      urlLabel.textContent = "Profile URL";
+      document.getElementById('url').placeholder = 'Enter URL or text';
+    }
+  });
+</script>
+
+{% endblock %}

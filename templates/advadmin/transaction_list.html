@@ -1,0 +1,190 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage /</span> 
+      {% if transaction_type == 'income' %}
+        Income Transactions
+      {% elif transaction_type == 'expense' %}
+        Expense Transactions
+      {% else %}
+        Transactions
+      {% endif %}
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+<!-- Filter Form -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Filter Transactions</h5>
+    </div>
+    <div class="card-body">
+      <form method="GET" action="{% url 'transaction_list' transaction_type %}">
+        <div class="row">
+          <div class="col-md-4">
+            <label for="date_from" class="form-label">Date From</label>
+            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+          </div>
+          <div class="col-md-4">
+            <label for="date_to" class="form-label">Date To</label>
+            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+          </div>
+          <div class="col-md-4">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+              <option value="">All</option>
+              {% for value, name in status_choices %}
+              <option value="{{ value }}" {% if value == request.GET.status %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" name="category">
+              <option value="">All</option>
+              {% for value, name in category_choices %}
+              <option value="{{ value }}" {% if value == request.GET.category %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary mt-3">Filter</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+    <!-- Transaction List -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Transactions</h5>
+        <div class="d-flex gap-3">
+          <form method="GET" action="{% url 'transaction_list' transaction_type %}" class="d-flex">
+            <div class="input-group input-group-merge">
+              <span class="input-group-text"><i class="bx bx-search"></i></span>
+              <input 
+                type="text" 
+                name="q" 
+                class="form-control" 
+                placeholder="Search transactions..." 
+                value="{{ request.GET.q }}"
+              >
+              {% if request.GET.q %}
+              <a href="{% url 'transaction_list' transaction_type %}" class="btn btn-outline-secondary">
+                <i class="bx bx-x"></i>
+              </a>
+              {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary ms-2">Search</button>
+          </form>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Reference</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              {% for transaction in transactions %}
+              <tr>
+                <td><strong>{{ transaction.id }}</strong></td>
+                <td>{{ transaction.reference }}</td>
+                <td>{{ transaction.get_transaction_type_display }}</td>
+                <td>{{ transaction.get_category_display }}</td>
+                <td>
+                  <span class="badge bg-label-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'refunded' %}danger{% else %}primary{% endif %}">
+                    {{ transaction.get_status_display }}
+                  </span>
+                </td>
+                <td>${{ transaction.amount }}</td>
+                <td>{{ transaction.date}}</td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <!-- View Button -->
+                    <a href="{% url 'transaction_detail' transaction.id %}" class="btn btn-icon btn-secondary">
+                      <i class="bx bx-show"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center py-4">
+                  <div class="text-muted">No transactions found</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="mt-4">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+              <li class="page-item prev">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                  <i class="tf-icon bx bx-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+              
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <a class="page-link" href="#">{{ num }}</a>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+              {% endfor %}
+              
+              {% if page_obj.has_next %}
+              <li class="page-item next">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                  <i class="tf-icon bx bx-chevron-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

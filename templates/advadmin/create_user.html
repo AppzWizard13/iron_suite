@@ -1,0 +1,159 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage / Member /</span> 
+      {% if object %}Edit{% else %}Add{% endif %} Member
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <h5 class="card-header">Member Registration</h5>
+      
+        
+        <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+              <div class="row">
+                {% for field in form %}
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">{{ field.label }}:</label>
+                  {{ field }}
+                  {% if field.errors %}
+                  <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                  {% endif %}
+                </div>
+                {% endfor %}
+              </div>
+              <div class="text-center my-1">
+                <button type="submit" class="btn btn-primary">{% if object %}Update Member{% else %}Create Member{% endif %}</button>
+                <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+              </div>
+            </form>
+          </div>
+     
+    </div>
+  </div>
+</div>
+
+<style>
+  .image-preview-container {
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .image-wrapper {
+    position: relative;
+    width: 300px;
+    height: 150px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    overflow: hidden;
+  }
+  
+  .image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .image-wrapper:hover .remove-image {
+    display: flex;
+  }
+</style>
+
+<script>
+  // Image preview functionality
+  function previewImage(input, previewId) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById(previewId);
+        preview.src = e.target.result;
+        preview.style.display = "block";
+        
+        // Show remove button
+        const removeBtn = preview.parentElement.querySelector('.remove-image');
+        if (removeBtn) removeBtn.style.display = "flex";
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Remove image functionality
+  document.querySelectorAll('.remove-image').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const inputId = this.getAttribute('data-target');
+      const previewId = this.getAttribute('data-preview');
+      
+      // Clear file input
+      document.getElementById(inputId).value = '';
+      
+      // Hide preview
+      document.getElementById(previewId).style.display = 'none';
+      this.style.display = 'none';
+      
+      // For existing images, add a hidden field to mark for deletion
+      if (document.getElementById(previewId).src.includes('/media/')) {
+        const deleteInput = document.createElement('input');
+        deleteInput.type = 'hidden';
+        deleteInput.name = 'image-clear';
+        deleteInput.value = 'on';
+        this.parentNode.appendChild(deleteInput);
+      }
+    });
+  });
+
+  // Auto-dismiss toast messages after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  .payment-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    justify-content: center;
+  }
+  .payment-card {
+    flex: 0 0 calc(25% - 1.5rem);
+    width: 220px;
+    height: 180px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .payment-wrap-card {
+    min-width: 200px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid transparent;
+  }
+  .payment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.12);
+  }
+  .payment-card.selected {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+  }
+  .payment-icon {
+    font-size: 3rem;
+    margin-bottom: 1.25rem;
+    color: #555;
+  }
+  .payment-card h5 {
+    margin: 0;
+    font-weight: 500;
+    font-size: 16px;
+    color: #333;
+  }
+  @media (max-width: 992px) {
+    .payment-card {
+      flex: 0 0 calc(50% - 1rem);
+    }
+  }
+  @media (max-width: 576px) {
+    .payment-card {
+      flex: 0 0 100%;
+    }
+  }
+  
+  /* Specific icon colors */
+  .fa-google-pay { color: #4285F4; }
+  .fa-cc-stripe { color: #635bff; }
+  .fa-credit-card { color: #1a237e; }
+  .fa-phonepe { color: #5f259f; }
+</style>
+
+<div class="container-fluid mt-5">
+    <div class="container"  style="margin-block: 40px !important;">
+        <div class="row justify-content-center">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Your Order Awaits</span>
+            <h2>Select Payment Method</h2>
+          </div>
+        </div>
+      </div>
+
+  <div class="payment-wrap-card card rounded-4 my-5" style="min-height: 800px; border:none; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;">
+    <div class="card-body p-4">
+        <form method="post" action="{% url 'process_payment' order_id=order.id order_number=order.order_number %}">
+            {% csrf_token %}
+          
+            <div class="payment-methods">
+              {% for method in payment_modules %}
+                <div class="payment-card" data-method="{{ method|lower }}" onclick="selectPaymentMethod(this)">
+                  {% if method == 'gpay' %}
+                    <i class="fa-brands fa-google-pay payment-icon"></i>
+                  {% elif method == 'Phonepe' %}
+                    <i class="fa-solid fa-indian-rupee-sign payment-icon"></i>
+                  {% elif method == 'Stripe' %}
+                    <i class="fa-brands fa-cc-stripe payment-icon"></i>
+                  {% elif method == 'Cards' %}
+                    <i class="fa-solid fa-credit-card payment-icon"></i>
+                  {% else %}
+                    <i class="fa-solid fa-money-bill-wave payment-icon"></i>
+                  {% endif %}
+                  <h5>
+                    {% if method == 'gpay' %}
+                      Google Pay
+                    {% elif method == 'Phonepe' %}
+                      PhonePe
+                    {% elif method == 'Cards' %}
+                      Credit/Debit Card
+                    {% else %}
+                      {{ method }}
+                    {% endif %}
+                  </h5>
+                </div>
+              {% endfor %}
+            </div>
+          
+            <input type="hidden" name="payment_method" id="selectedPaymentMethod" required>
+          
+            <div class="text-center mt-5 pt-5">
+              <button type="submit" class="btn btn-primary px-5 py-2" style="font-size: 1.1rem;">Continue to Pay</button>
+            </div>
+          </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function selectPaymentMethod(card) {
+    document.querySelectorAll('.payment-card').forEach(el => {
+      el.classList.remove('selected');
+      el.style.transform = '';
+      el.style.boxShadow = '0px 4px 10px rgba(0, 0, 0, 0.08)';
+    });
+    card.classList.add('selected');
+    card.style.transform = 'translateY(-5px)';
+    card.style.boxShadow = '0px 8px 20px rgba(0, 0, 0, 0.12)';
+    document.getElementById('selectedPaymentMethod').value = card.getAttribute('data-method');
+  }
+</script>
+
+{% endblock %}

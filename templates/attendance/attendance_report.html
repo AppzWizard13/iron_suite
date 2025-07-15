@@ -1,0 +1,59 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Attendance Report</h4>
+    <div class="card">
+    <div class="card-body">
+        <form method="get" class="mb-3 d-flex gap-2">
+        <input type="text" name="q" class="form-control" placeholder="Search by name or phone" value="{{ request.GET.q }}">
+        <input type="date" name="date" class="form-control" value="{{ request.GET.date }}">
+        <select name="status" class="form-select">
+            <option value="">All Status</option>
+            <option value="checked_in" {% if request.GET.status == 'checked_in' %}selected{% endif %}>Checked In</option>
+            <option value="checked_out" {% if request.GET.status == 'checked_out' %}selected{% endif %}>Checked Out</option>
+            <option value="auto_checked_out" {% if request.GET.status == 'auto_checked_out' %}selected{% endif %}>Auto Checked Out</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+
+        <table class="table table-hover">
+        <thead>
+            <tr>
+            <th>User</th>
+            <th>Schedule</th>
+            <th>Check-in</th>
+            <th>Check-out</th>
+            <th>Status</th>
+            <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody class="table-border-bottom-0">
+            {% for record in attendance_list %}
+            <tr>
+            <td>{{ record.user.get_full_name }}<br><small>{{ record.user.username }}</small></td>
+            <td>{{ record.schedule.name }}</td>
+            <td>{{ record.check_in_time|date:"d M Y, H:i" }}</td>
+            <td>{% if record.check_out_time %}{{ record.check_out_time|date:"d M Y, H:i" }}{% else %}-{% endif %}</td>
+            <td>
+                <span class="badge bg-label-{% if record.status == 'checked_in' %}info{% elif record.status == 'checked_out' %}success{% else %}warning{% endif %}">
+                {{ record.get_status_display }}
+                </span>
+            </td>
+            <td>{% if record.duration %}{{ record.duration }}{% else %}-{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr>
+            <td colspan="6" class="text-center py-4">
+                <div class="text-muted">No Attendance records found</div>
+            </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+</div>
+{% endblock %}

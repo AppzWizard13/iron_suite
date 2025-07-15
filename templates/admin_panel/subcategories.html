@@ -1,0 +1,108 @@
+{% extends 'admin_panel/index.html' %}
+{% block content %}
+
+<!-- Toast Messages -->
+{% if messages %}
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    {% for message in messages %}
+    <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ message }}
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+<div class="container-fluid px-3 px-md-4" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Manage SubCategories</h5>
+
+      <!-- Add subcategory Button -->
+      <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'add_subcategory' %}" class="btn btn-success btn-sm">+ Add subcategory</a>
+      </div>
+
+      <!-- Search Form -->
+      <form method="GET" action="{% url 'subcategory_list' %}" class="mb-3">
+        <div class="input-group">
+          <input type="text" name="search" class="form-control" placeholder="Search subcategory..." value="{{ query }}">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
+
+      <!-- subcategory Table (Responsive) -->
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for subcategory in subcategories %}
+            <tr>
+              <td>{{ subcategory.id }}</td>
+              <td>{{ subcategory.name }}</td>
+              <td>{{ subcategory.category.name }}</td>
+              <td class="text-center">
+                <a href="{% url 'edit_subcategory' subcategory.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                  data-subcategory-id="{{ subcategory.id }}" data-subcategory-name="{{ subcategory.name }}">
+                  Delete
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center">No subcategories found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete "<strong id="subcategoryName"></strong>"?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a href="" id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Modal Update -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget; // Button that triggered the modal
+      var subcategoryId = button.getAttribute('data-subcategory-id');
+      var subcategoryName = button.getAttribute('data-subcategory-name');
+
+      // Update modal content
+      document.getElementById('subcategoryName').textContent = subcategoryName;
+      document.getElementById('confirmDeleteBtn').href = "/delete-subcategory/" + subcategoryId + "/";
+    });
+  });
+</script>
+{% endblock %}

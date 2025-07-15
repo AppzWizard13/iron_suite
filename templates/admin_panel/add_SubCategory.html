@@ -1,0 +1,38 @@
+{% extends 'admin_panel/index.html' %}
+{% block content %}
+<div class="container-fluid" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Add subcategory</h5>
+      <form method="POST" action="{% url 'add_subcategory' %}">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          <label for="name" class="form-label">subcategory Name</label>
+          <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        
+        <div class="mb-3">
+          <label for="category" class="form-label">Select Category</label>
+          <select class="form-control" id="category" name="category" required>
+            {% if categories %}
+              {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+              {% endfor %}
+            {% else %}
+              <option disabled>No Category Found</option>
+            {% endif %}
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add subcategory</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

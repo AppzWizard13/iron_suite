@@ -1,0 +1,114 @@
+{% extends 'admin_panel/index.html' %}
+{% block content %}
+<div class="container-fluid" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">
+        {% if form.instance.id %} Edit Product {% else %} Add Product {% endif %}
+      </h5>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label for="name" class="form-label">Product Name</label>
+          {{ form.name }}
+        </div>
+
+        <div class="mb-3">
+          <label for="category" class="form-label">Category</label>
+          {{ form.category }}
+        </div>
+
+        <div class="mb-3">
+          <label for="subcategory" class="form-label">subcategory</label>
+          {{ form.subcategory }}
+        </div>
+
+        <!-- Main Product Image -->
+        <div class="mb-3">
+          <label for="images" class="form-label">Main Product Image</label>
+          {{ form.images }}
+          <img id="previewMain" class="img-fluid mt-2 rounded" style="max-width: 200px; display: none;">
+        </div>
+
+        <!-- Additional Images -->
+        <div class="mb-3">
+          <label for="image_1" class="form-label">Additional Image 1</label>
+          {{ form.image_1 }}
+          <img id="previewImage1" class="img-fluid mt-2 rounded" style="max-width: 100px; display: none;">
+        </div>
+
+        <div class="mb-3">
+          <label for="image_2" class="form-label">Additional Image 2</label>
+          {{ form.image_2 }}
+          <img id="previewImage2" class="img-fluid mt-2 rounded" style="max-width: 100px; display: none;">
+        </div>
+
+        <div class="mb-3">
+          <label for="image_3" class="form-label">Additional Image 3</label>
+          {{ form.image_3 }}
+          <img id="previewImage3" class="img-fluid mt-2 rounded" style="max-width: 100px; display: none;">
+        </div>
+
+        <div class="mb-3">
+          <label for="is_active" class="form-label">Is Active</label>
+          {{ form.is_active }}
+        </div>
+
+        <div class="mb-3">
+          <label for="price" class="form-label">Price (₹)</label>
+          {{ form.price }}
+        </div>
+
+        <div class="mb-3">
+          <label for="specifications" class="form-label">Specifications</label>
+          {{ form.specifications }}
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+          <label for="additional_information" class="form-label">Additional Information</label>
+          {{ form.additional_information }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          {% if form.instance.id %} Update Product {% else %} Add Product {% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Image Preview JavaScript -->
+<script>
+    function previewImage(input, previewId) {
+        var file = input.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = document.getElementById(previewId);
+                img.src = e.target.result;
+                img.style.display = "block";
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.querySelector("[name='images']").addEventListener("change", function() {
+        previewImage(this, "previewMain");
+    });
+    document.querySelector("[name='image_1']").addEventListener("change", function() {
+        previewImage(this, "previewImage1");
+    });
+    document.querySelector("[name='image_2']").addEventListener("change", function() {
+        previewImage(this, "previewImage2");
+    });
+    document.querySelector("[name='image_3']").addEventListener("change", function() {
+        previewImage(this, "previewImage3");
+    });
+</script>
+{% endblock %}

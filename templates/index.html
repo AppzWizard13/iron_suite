@@ -1,0 +1,2480 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title id="page-title"></title>
+    <meta charset="utf-8">
+	<link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+	<meta name="csrf-token" content="{{ csrf_token }}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+ 
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
+
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+	<style>
+		
+		/* Define Theme Variables */
+		body {
+		font-family: 'Poppins', Poppins !important;
+		}
+		body {
+			background-image: url("{% static 'images/coolbackgrounds-particles-stellar.png' %}");
+			background-size: cover;
+			background-position: center;
+			background-attachment: fixed;
+			width: 100%; /* Adjust width to compensate for the scale */
+			height: 90%;
+			transform-origin: top left; /* Ensure the scaling starts from the top-left corner */
+			zoom: 0.9; 
+			margin: 0; /* Remove default margin */
+			overflow: auto; /* Prevent scrollbars from appearing */
+			margin-bottom: -1437px;
+		}
+		.form-control{
+			height: 35px !important;
+		}
+
+		h1, h2, h3, h4, h5, h6 {
+		font-family: 'Poppins', sans-serif;
+		font-weight: 600;
+		}
+		
+		p, span, a, button {
+		font-family: 'Poppins', sans-serif;
+		font-weight: 400;
+		}
+		/* Apply Poppins globally */ 
+
+		:root {
+			--primary-red: #00b32e; /* Power green */
+			--primary-green: #00b32e; /* Power green */
+			--light-gray: #a3a3a3; /* Light metallic gray */
+			--text-light: #f2f2f2; /* Near white text */
+			--charcoal-dark: #3d3d3d; /* Dark accent */
+			--button-hover-red: #b80c0c; /* Button hover effect */
+		}
+		
+		/* Global Background */
+		body {
+			{% comment %} background: linear-gradient(to right, var(--light-gray), var(--charcoal-dark)); {% endcomment %}
+			color: var(--charcoal-dark);
+			font-family: 'Poppins', Poppins;
+		}
+		
+		/* Headings */
+		h1, h2, h3 {
+			color: #020101 !important;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+		}
+		
+		/* Subheadings */
+		.subheading {
+			color: var(--primary-green); !important;
+			font-size: 18px;
+		}
+		.heading{
+			color: #00b32e!important;
+		}
+
+		
+		/* Navbar */
+		.navbar {
+			background: var(--charcoal-dark) !important;
+			border-bottom: 3px solid var(--primary-green);
+		}
+		
+		/* Ensures all text inside the navbar is white */
+		.navbar, 
+		.navbar a, 
+		.navbar .nav-link, 
+		.navbar .navbar-brand, 
+		.navbar .navbar-toggler-icon, 
+		.navbar .dropdown-menu, 
+		.navbar .dropdown-item {
+			color: white !important;
+		}
+		
+		/* Ensures navbar brand/logo text is white */
+		.navbar-brand {
+			font-size: 20px;
+			font-weight: bold;
+			color: white !important;
+		}
+		
+		/* Navbar links hover effect */
+		.navbar .nav-link:hover,
+		.navbar .dropdown-item:hover {
+			{% comment %} color: var(--primary-green) !important; {% endcomment %}
+		}
+		
+		/* Active link styling */
+		.navbar .nav-item.active .nav-link {
+			font-weight: bold;
+			{% comment %} color: var(--primary-green) !important; {% endcomment %}
+		}
+		
+		/* Ensures dropdown menu has a dark background */
+		.navbar .dropdown-menu {
+			background: var(--charcoal-dark) !important;
+			border: none;
+			z-index: 20 !important; /* Ensures it appears above other elements */
+			position: absolute !important; /* Helps ensure proper stacking */
+		}
+		
+		/* Ensures dropdown items are white */
+		.navbar .dropdown-item {
+			color: white !important;
+		}
+		
+		/* Navbar toggler (mobile menu button) */
+		.navbar-toggler {
+			border: none !important;
+			z-index: 30 !important; /* Keeps it on top */
+		}
+		
+		/* Navbar toggler icon (hamburger menu) */
+		.navbar-toggler-icon {
+			filter: invert(1); /* Makes it white */
+		}
+		
+		/* Ensures navbar is above the slider */
+		.navbar {
+			position: relative;
+			z-index: 50 !important;
+		}
+		
+		
+		/* Buttons */
+		.btn-primary {
+			background: var(--primary-green) !important;
+			border: none;
+			color: white !important;
+			font-weight: bold;
+			padding: 12px 24px;
+			border-radius: 10px;
+			text-transform: uppercase;
+			transition: all 0.3s ease-in-out;
+			box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+		}
+		.services .icon {
+			background: #f9f9f9 !important;
+		}
+		.bg-intro{
+			background: var(--charcoal-dark) !important;
+		}
+		.bg-intro:after{
+			background: #202020 !important;
+		}
+
+		.bg-catelogue {
+			background: var(--primary-green) !important;
+			border: none;
+			color: white !important;
+		}
+		.bg-catelogue:hover {
+			background: var(--primary-green) !important;
+			border: none;
+			color: white !important;
+		}
+		
+		
+		.btn-primary:hover {
+			background: var(--primary-green) !important;
+			color: white !important;
+		}
+		
+		/* Secondary Buttons */
+		.btn-secondary {
+			background: var(--light-gray) !important;
+			color: black !important;
+			border: none;
+		}
+		
+		.btn-secondary:hover {
+			background: var(--primary-green) !important;
+			color: white !important;
+		}
+		
+		/* Cards */
+		.card {
+			background: var(--text-light);
+			border: 2px solid var(--charcoal-dark);
+			border-radius: 8px;
+			box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+			color: black;
+			padding: 20px;
+		}
+		
+		/* Footer */
+		.footer {
+			background: var(--charcoal-dark);
+			color: var(--text-light);
+			padding: 20px;
+			text-align: center;
+		}
+		/* Product Section Background */
+		.custom-product-section {
+			padding: 50px 0 !important;
+		}
+
+		/* Product Grid */
+		.product-grid {
+			display: grid !important;
+		
+			gap: 20px !important;
+			justify-content: center !important;
+		}
+
+		/* Product Card */
+		.blog-entry {
+			color: var(--charcoal-dark);
+			border-radius: 10px !important;
+			overflow: hidden !important;
+			transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
+			box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2) !important;
+		}
+
+		/* Product Image */
+		.blog-entry .block-20 {
+			display: block !important;
+			width: 100% !important;
+			height: 220px !important; /* Fixed height for uniformity */
+			overflow: hidden !important;
+			border-bottom: 3px solid var(--primary-green) !important;
+		}
+
+		.blog-entry .block-20 img {
+			width: 100% !important;
+			height: 100% !important;
+			object-fit: cover !important; /* Ensure images maintain aspect ratio */
+			transition: transform 0.3s ease-in-out !important;
+		}
+
+		/* Image Hover Effect */
+		.blog-entry:hover .block-20 img {
+			transform: scale(1.1) !important; /* Zoom effect */
+		}
+
+		/* Product Text */
+		.blog-entry .text {
+			padding: 15px !important;
+			text-align: left !important;
+			color: black !important;
+		}
+
+		/* Product Title */
+		.blog-entry .heading a {
+			font-size: 15px !important;
+			font-weight: bold !important;
+			text-transform: uppercase !important;
+			transition: color 0.3s ease-in-out !important;
+		}
+
+		.blog-entry .heading a:hover {
+			color: var(--primary-green) !important;
+		}
+
+		/* Product Description */
+		.blog-entry p {
+			font-size: 14px !important;
+			{% comment %} color: #d1d1d1 !important; {% endcomment %}
+			margin-bottom: 10px !important;
+		}
+
+		/* Price */
+		.blog-entry p strong {
+			color: var(--primary-green) !important;
+			font-weight: bold !important;
+		}
+
+		/* Hover Effect */
+		.blog-entry:hover {
+			transform: translateY(-5px) !important;
+			box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3) !important;
+		}
+
+
+
+		/* Section Heading */
+		.heading-section-white h2 {
+			font-size: 28px !important;
+			font-weight: bold !important;
+			color: #020101 !important;
+		}
+
+		/* Testimonial Card */
+		.testimony-wrap {
+			background: white !important;
+			border-radius: 10px !important;
+			padding: 20px !important;
+			box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1) !important;
+			transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
+		}
+
+		/* Quote Icon */
+		.testimony-wrap .icon {
+			font-size: 24px !important;
+			color: var(--primary-green) !important;
+		}
+
+		/* Testimonial Text */
+		.testimony-wrap .text {
+			font-size: 16px !important;
+			color: #555 !important;
+		}
+
+		/* User Image */
+		.testimony-wrap .user-img {
+			width: 50px !important;
+			height: 50px !important;
+			border-radius: 50% !important;
+			background-size: cover !important;
+			background-position: center !important;
+			border: 2px solid var(--primary-green) !important;
+		}
+
+		/* User Name */
+		.testimony-wrap .name {
+			font-size: 18px !important;
+			font-weight: bold !important;
+			color: #222 !important;
+		}
+
+		/* User Position */
+		.testimony-wrap .position {
+			font-size: 14px !important;
+			color: #777 !important;
+		}
+
+		/* Hover Effect */
+		.testimony-wrap:hover {
+			transform: translateY(-3px) !important;
+			box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15) !important;
+		}
+		.ftco-heading-2{
+			color:grey !important;
+			font-size:16px !important;
+		}
+		/* Tab navigation styles */
+		.nav-pills .nav-link {
+			border-radius: 8px;
+			transition: all 0.3s ease;
+		}
+		.nav-pills .nav-link.active {
+			background-color: #d8232a !important;
+			color: #fff !important;
+			box-shadow: 0px 4px 10px rgba(216, 35, 42, 0.3);
+		}
+		.nav-pills .nav-link:hover {
+			background-color: #d8232a !important;
+			color: #fff !important;
+		}
+	
+		/* Tab Navigation */
+		.nav-pills .nav-link {
+			font-size: 16px !important;
+			font-weight: bold !important;
+			{% comment %} color: white !important; {% endcomment %}
+			text-transform: uppercase !important;
+			background-color: var(--primary-dark) !important;
+			transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out !important;
+			border-radius: 8px !important;
+			padding: 10px 15px !important;
+		}
+		
+		.nav-pills .nav-link.active,
+		.nav-pills .nav-link:hover {
+			background-color: var(--primary-green) !important;
+			color: #fff !important;
+			box-shadow: 0px 4px 10px rgba(216, 35, 42, 0.3) !important;
+		}
+		
+		/* Tab Content */
+		.tab-content {
+			border-radius: 10px !important;
+			background: white !important;
+			color: black !important;
+			padding: 20px !important;
+			box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3) !important;
+		}
+		
+		.tab-content-inner p {
+			font-size: 14px !important;
+			color: black !important;
+		}
+		
+		.tab-content-inner ul li {
+			font-size: 14px !important;
+			color: black !important;
+			margin-bottom: 8px !important;
+		}
+		
+		/* Hover Effects */
+		.tab-content-inner p strong,
+		.tab-content-inner ul li strong {
+			color: var(--primary-green) !important;
+		}
+		
+		.tab-content-inner p.text-secondary {
+			font-style: italic !important;
+			color: #999 !important;
+		}
+		.blog-entry {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			background: #fff;
+			border-radius: 10px;
+			overflow: hidden;
+			box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+			transition: transform 0.3s ease-in-out;
+		}
+		
+		.blog-entry:hover {
+			transform: translateY(-5px);
+			box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+		}
+		
+		.blog-entry .text {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			padding: 15px;
+		}
+		
+		.blog-entry .heading a {
+			font-size: 18px;
+			font-weight: bold;
+			color: black;
+			text-transform: uppercase;
+			text-align: center;
+			transition: color 0.3s ease-in-out;
+		}
+		
+		.blog-entry .heading a:hover {
+			color: var(--primary-green);
+		}
+		
+		.blog-entry p {
+			font-size: 14px;
+			color: #555;
+			margin-bottom: 10px;
+			text-align: center;
+		}
+		
+		.blog-entry p strong {
+			color: var(--primary-green);
+			font-weight: bold;
+		}
+		.ftco-counter{
+			background: #202020 !important;
+		}
+		.wrap .top-wrap .text{
+			color: lightgrey;
+			font-weight:bolder !important;
+		}
+		
+		.logo-img {
+			max-height: 60px; /* Adjust as needed */
+			width: auto;
+		}
+		.footer .ftco-footer-widget h2{
+			margin-bottom: 10px !important;
+		}
+		.dropdown-submenu {
+			position: relative;
+		}
+		
+		.dropdown-submenu .dropdown-menu {
+			top: 0;
+			left: 100%;
+			margin-top: -1px;
+			display: none;
+		}
+		
+		.dropdown-submenu .dropdown-menu.show {
+			display: block;
+		}
+
+		.bg-intro .intro-box {
+
+			padding: 12px 0 !important;
+		}
+		@media (max-width: 767.98px) {
+			.col-md-3.d-flex.justify-content-end.justify-content-md-evenly.align-items-center {
+				margin-right: 90px !important;
+			}
+		}
+		.searchform .form-control:focus, .searchform .form-control:active{
+			border-radius: 10px !important;
+		}
+		.searchform .form-control:focus, .searchform .form-control{
+			border-radius: 10px !important;
+		}
+		.searchform .form-control {
+			border-radius: 10px !important;
+		}
+
+	</style> 
+	
+  </head>
+  <body>
+
+		<!-- Toast Messages -->
+		{% if messages %}
+		<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+		{% for message in messages %}
+		<div id="toast-{{ forloop.counter }}" class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="d-flex">
+			<div class="toast-body">
+				{{ message }}
+			</div>
+			</div>
+		</div>
+		{% endfor %}
+		</div>
+		{% endif %}
+
+		<!-- Script to handle auto-timeout for toasts -->
+		<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			{% for message in messages %}
+			var toastElement = document.getElementById('toast-{{ forloop.counter }}');
+			if (toastElement) {
+				var toast = new bootstrap.Toast(toastElement);
+				toast.show();
+
+				// Automatically hide the toast after 5 seconds (5000 milliseconds)
+				setTimeout(function() {
+				toast.hide();
+				}, 5000);
+			}
+			{% endfor %}
+		});
+		</script>
+
+		<div class="wrap">
+	    <div class="container">
+				<div class="row justify-content-between">
+					<div class="col-md-3 d-flex align-items-center">
+						<a href="{% url 'home' %}" class="app-brand-link">
+							<span class="app-brand-logo demo m-3">
+							  <!-- Dot Loader -->
+							  <div id="logo-loader" class="dot-loader">
+								<span></span>
+								<span></span>
+								<span></span>
+							  </div>
+						  
+							  <!-- Hidden Image (Will be shown after loading) -->
+							  <img id="company-logo-svg" 
+								   alt="Company Logo" 
+								   style="width: 200px; height: 75px; object-fit: contain; display: none;  margin-left: -20px;" />
+							</span>
+						  </a>
+						  <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+							<i class="bx bx-chevron-left bx-sm align-middle"></i>
+						  </a>
+					</div>
+					
+					<div class="col-md-7">
+						<div class="row">
+							<div class="col">
+								<div class="top-wrap d-flex">
+									<div class="icon d-flex align-items-center justify-content-center"><span class="fa fa-location-arrow"></span></div>
+									<div class="text"><span >Address</span><span id="contact-address"></span></div>
+								</div>
+							</div>
+							<div class="col">
+								<div class="top-wrap d-flex">
+									<div class="text"><span>Call us</span><span id="info-mobile"></span></div>
+								</div>
+								<div class="top-wrap d-flex">
+									<div class="text"><span>GSTIN</span><span id="gstn"></span></div>
+								</div>
+							</div>
+							<div class="col-md-3 d-flex justify-content-end justify-content-md-evenly align-items-center">
+								<div class="social-media">
+									<p class="mb-0 d-flex">
+										<a id="facebook-link" href="#" class="d-flex align-items-center justify-content-center">
+											<span style="background-color: transparent !important;" class="fab fa-facebook">
+												<i class="sr-only">Facebook</i>
+											</span>
+										</a>
+										<a id="instagram-link" href="#" class="d-flex align-items-center justify-content-center">
+											<span style="background-color: transparent !important;" class="fab fa-instagram">
+												<i class="sr-only">Instagram</i>
+											</span>
+										</a>
+										<a id="google-link" href="#" class="d-flex align-items-center justify-content-center">
+											<span style="background-color: transparent !important;" class="fab fa-google">
+												<i class="sr-only">Google</i>
+											</span>
+										</a>
+									</p>
+								</div>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+	    	<div class="container">
+			
+			<button class="navbar-toggler" type="button" >
+				<span class="fa fa-bars"></span> Menu
+			</button>
+			<div class="collapse navbar-collapse" id="ftco-nav">
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+						<a href="{% url 'home' %}" class="nav-link">Home</a>
+					</li>
+					<li class="nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+						<a href="{% url 'about' %}" class="nav-link">About</a>
+					</li>
+					<li class="nav-item active d-block d-lg-none">
+						<a href="#" class="nav-link" role="button" data-toggle="modal" data-target="#appointmentModal" aria-expanded="false">
+							Enquire Now
+						</a>
+					</li>
+					{% if total_categories %}
+					<!-- Updated Category Dropdown Markup -->
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link dropdown-toggle" id="categoriesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Products
+						</a>
+						<div class="dropdown-menu" style="border-bottom: 3px solid green !important;" aria-labelledby="categoriesDropdown">
+							{% for category in total_categories %}
+							<div>
+								<!-- Mobile + Tablet version -->
+								<a class="dropdown-item d-block d-lg-none" href="{% url 'products_by_category' category.id %}">
+									{{ category.name }} <span class="arrow"></span>
+								</a>
+
+								<!-- Desktop version -->
+								<a class="dropdown-item category-item my-2 d-none d-lg-block" href="#" data-category-id="{{ category.id }}">
+									{{ category.name }} <span class="arrow">→</span>
+								</a>
+								<div class="dropdown-menu product-menu shadow-sm my-2" style="display: none;"></div>
+							</div>
+							{% endfor %}
+						</div>
+					</li>
+					{% endif %}
+					{% if request.user.is_authenticated %}
+					<li class="nav-item d-none d-lg-block {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+						<a href="{% url 'dashboard' %}" class="nav-link">Admin Panel</a>
+					</li>
+					{% endif %}
+					<li class="nav-item active d-none d-lg-block">
+						<a href="#" class="nav-link" style="margin-left:150px;" role="button" data-toggle="modal" data-target="#appointmentModal" aria-expanded="false">
+							Enquire Now
+						</a>
+					</li>
+				</ul>
+			</div>
+		</nav>
+		
+		<style>
+			/* Add right and down arrows to the category dropdown */
+			.dropdown-toggle::after {
+				content: '';
+				display: inline-block;
+				margin-left: 0.5em;
+				vertical-align: middle;
+				border-top: 0.3em solid;
+				border-right: 0.3em solid transparent;
+				border-bottom: 0;
+				border-left: 0.3em solid transparent;
+				transition: transform 0.2s ease-in-out;
+			}
+
+			/* Rotate the arrow when the dropdown is open */
+			.show .dropdown-toggle::after {
+				transform: rotate(180deg);
+			}
+			.dropdown-toggle {
+				border-bottom: 2px solid green !important; /* Adds green bottom border */
+				padding-bottom: 5px; /* Ensures spacing looks natural */
+			}
+			
+			.dropdown-menu {
+				min-width: 200px;
+				display: none;
+				transition: opacity 0.2s ease-in-out;
+				border-bottom: 2px solid green; /* Adds green bottom border to the dropdown */
+			}
+			
+			.dropdown-item {
+				cursor: pointer;
+			}
+			.dropdown-menu {
+				min-width: 200px;
+				display: none;
+				transition: opacity 0.2s ease-in-out;
+			}
+			.dropdown-item {
+				cursor: pointer;
+			}
+			.loading-indicator {
+				width: 1rem;
+				height: 1rem;
+				border: 2px solid #ccc;
+				border-radius: 50%;
+				border-top-color: transparent;
+				animation: spin 0.6s linear infinite;
+			}
+			@keyframes spin {
+				to { transform: rotate(360deg); }
+			}
+			.navbar-collapse {
+				transition: height 0.3s ease-in-out;
+			}
+			
+			.navbar-collapse.show {
+				display: block !important;
+			}
+			
+			.navbar-toggler:focus {
+				outline: none;
+				box-shadow: none;
+			}
+			.category-item {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.category-item .arrow {
+				transition: transform 0.3s ease-in-out;
+			}
+			.category-item.expanded .arrow {
+				transform: rotate(90deg);
+			}
+			.product-menu {
+				display: none;
+				padding-left: 20px;
+				left: 201px !important;
+			}
+			
+		</style>
+		
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+	<!-- Floating Action Buttons -->
+	<div class="fab-container">
+		<a href="https://wa.me/+917736500760" class="fab whatsapp" target="_blank" id="wtinfo-mobile">
+			<i class="fab fa-whatsapp"></i> 
+		  </a>
+		  
+		  <a href="tel:+917736500760" class="fab phone" id="contact-phone">
+			<i class="fas fa-phone"></i> 
+		  </a>
+		<input type="hidden" id="username" value="{{ request.user.username }}">
+		<a href="/cart/view" class="fab cart" id="cart-button">
+			<i class="fas fa-shopping-cart"></i>  <!-- Cart Icon -->
+			<span class="badge" id="cart-badge">0</span>  <!-- Badge for item count -->
+		</a>
+	</div>
+
+
+
+	<!-- Include FontAwesome for Icons -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+	<!-- Floating Button Styles -->
+	<style>
+		.fab-container {
+			position: fixed;
+			bottom: 80px;
+			right: 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+			z-index: 1000;
+		}
+
+		.fab {
+			width: 45px;
+			height: 45px;
+			background-color: #25D366; /* WhatsApp Green */
+			color: white;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-decoration: none;
+			font-size: 24px;
+			transition: all 0.3s ease-in-out;
+		}
+
+		/* Increase only the WhatsApp icon size */
+		.fab.whatsapp i {
+			font-size: 32px; /* Bigger WhatsApp Icon */
+		}
+
+		.fab.phone {
+			background-color: #007bff; /* Blue for Phone */
+		}
+
+		.fab:hover {
+			transform: scale(1.1);
+			opacity: 0.9;
+			color: white;
+		}
+		
+		/* Specific styles for the cart button */
+		.cart {
+			position: fixed;
+			top: 45%; /* Center vertically */
+			right: 20px; /* Position at the right end with some padding */
+			width: 65px;
+			height: 65px;
+			font-size: 32px;
+		}
+		@media (max-width: 576px) {
+		.cart {
+			position: fixed;
+			top: 20%; /* Center vertically */
+			right: 20px; /* Position at the right end with some padding */
+			width: 65px;
+			height: 65px;
+			font-size: 32px;
+		}
+
+		}
+
+		.badge {
+			position: absolute;
+			top: -10px;
+			right: -10px;
+			width: 30px;
+			height: 30px;
+			background-color: red;
+			color: white;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+			font-weight: bold;
+		}
+		.modal-backdrop {
+			background-color: transparent !important;
+		  }
+
+
+
+	</style>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			// Navbar toggle functionality
+			$('.navbar-toggler').on('click', function () {
+				let $navCollapse = $('.navbar-collapse');
+				let isExpanded = $navCollapse.hasClass('show');
+		
+				$navCollapse.toggleClass('show', !isExpanded);
+				$(this).attr('aria-expanded', !isExpanded);
+			});
+		
+			// Close navbar when clicking outside
+			$(document).on('click', function (e) {
+				let $nav = $('.navbar-collapse');
+				if ($nav.hasClass('show') && !$(e.target).closest('.navbar-collapse, .navbar-toggler').length) {
+					$nav.removeClass('show');
+					$('.navbar-toggler').attr('aria-expanded', 'false');
+				}
+			});
+		
+			// Prevent navbar from closing when clicking inside the category dropdown
+			$('.category-item').on('click', function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+		
+				let categoryId = $(this).data('category-id');
+				let $menu = $(this).next('.product-menu');
+		
+				// Hide other dropdowns
+				$('.product-menu').not($menu).hide().removeData('loaded');
+		
+				if ($menu.is(':visible')) {
+					$menu.hide();
+					
+					return;
+				}
+		
+				if (!$menu.data('loaded')) {
+					loadProducts(categoryId, $menu);
+				}
+		
+				// Position the product dropdown
+				let position = $(this).position();
+				$menu.css({
+					top: position.top,
+					left: $(this).outerWidth() + 5,
+					display: 'block'
+				});
+			});
+		
+			$(document).on('click', function (e) {
+				if (!$(e.target).closest('.dropdown-menu, .category-item').length) {
+					$('.product-menu').hide();
+				}
+			});
+		
+			function loadProducts(categoryId, $container) {
+				$container.html('<div class="dropdown-item py-2"><div class="loading-indicator"></div></div>');
+		
+				$.ajax({
+					url: `/fetch-products/${categoryId}/`,
+					method: 'GET',
+					success: function (response) {
+						if (!response || response.length === 0) {
+							$container.html('<div class="dropdown-item py-2 text-muted">Coming Soon</div>');
+							return;
+						}
+						let items = response.map(product => `
+							<a class="dropdown-item py-2" href="/products/${product.sku}/">
+								${product.name}
+					  
+							</a>
+						`);
+						$container.html(items.join('')).data('loaded', true);
+					},
+					error: function () {
+						$container.html('<div class="dropdown-item py-2 text-danger">Failed to load products</div>');
+					}
+				});
+			}
+		});
+	</script>
+	<!-- END nav -->
+
+	{% block content %}
+	<div class="hero-wrap">
+		<div class="custom-slider">
+		  {% for banner in banners %}
+		  <div class="slider-item" style="background-image: url({{ banner.image.url }});">
+			<div class="overlay"></div>
+			<div class="container">
+			  <div class="row no-gutters slider-text align-items-center justify-content-start">
+				<div class="col-md-6 ftco-animate">
+				 {% comment %} <div class="text w-100">
+					<h2>We care about your car</h2>
+					<h1 class="mb-4">It's time to come to repair your car</h1>
+					<p>
+					  <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#appointmentModal">
+						Book an appointment
+					  </a>
+					</p>
+				  </div>  {% endcomment %}
+				</div>
+			  </div>
+			</div>
+		  </div>
+		  {% empty %}
+		  <!-- Default banner -->
+		  <div class="slider-item" style="background-image: url({% static 'images/default-banner.jpg' %});">
+			<div class="overlay"></div>
+			<div class="container">
+			  <div class="row no-gutters slider-text align-items-center justify-content-start">
+				<div class="col-md-6 ftco-animate">
+				  <div class="text w-100">
+					{% comment %} <h2>Welcome to Our Service</h2>
+					<h1 class="mb-4">Your car deserves the best</h1>
+					<p>
+					  <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#appointmentModal">
+						Book an appointment
+					  </a>
+					</p>
+				  </div> {% endcomment %}
+				</div>
+			  </div>
+			</div>
+		  </div>
+		  {% endfor %}
+		  
+		  <!-- Navigation -->
+		  <button class="slider-nav prev">‹</button>
+		  <button class="slider-nav next">›</button>
+		  <div class="slider-dots"></div>
+		</div>
+	  </div>
+	  
+	  <style>
+		/* 16:9 Aspect Ratio Container */
+		.custom-slider {
+		  position: relative;
+		  width: 100%;
+		  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+		  overflow: hidden;
+		}
+	  
+		/* Slider Items with Z-Index Control */
+		.slider-item {
+		  position: absolute;
+		  top: 0;
+		  left: 0;
+		  width: 100%;
+		  height: 100%;
+		  background-size: cover;
+		  background-position: center;
+		  transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+		  transform: translateX(100%);
+		  opacity: 0;
+		  z-index: 1; /* Default z-index for inactive slides */
+		}
+	  
+		.slider-item.active {
+		  transform: translateX(0);
+		  opacity: 1;
+		  z-index: 3; /* Highest for current active slide */
+		}
+	  
+		.slider-item.prev-slide {
+		  transform: translateX(-100%);
+		  opacity: 0;
+		  z-index: 2; /* Middle layer for smoother transitions */
+		}
+	  
+		/* Overlay stays on top */
+		.overlay {
+		  position: absolute;
+		  top: 0;
+		  left: 0;
+		  width: 100%;
+		  height: 100%;
+		  background: rgba(0, 0, 0, 0.3);
+		  z-index: 4; /* Above slides but below content */
+		}
+	  
+		/* Content stays on top */
+		.container {
+		  position: relative;
+		  z-index: 5;
+		  height: 100%;
+		}
+	  
+		/* Navigation */
+		.slider-nav {
+		  position: absolute;
+		  top: 50%;
+		  transform: translateY(-50%);
+		  z-index: 10;
+		  background: rgba(0,0,0,0.5);
+		  color: white;
+		  border: none;
+		  width: 50px;
+		  height: 80px;
+		  font-size: 30px;
+		  cursor: pointer;
+		  transition: all 0.3s;
+		}
+	  
+		.slider-nav:hover {
+		  background: rgba(0,0,0,0.8);
+		}
+	  
+		.slider-nav.prev {
+		  left: 20px;
+		}
+	  
+		.slider-nav.next {
+		  right: 20px;
+		}
+	  
+		/* Dots */
+		.slider-dots {
+		  position: absolute;
+		  bottom: 60px;
+		  left: 0;
+		  right: 0;
+		  display: flex;
+		  justify-content: center;
+		  z-index: 10;
+		  gap: 20px;
+		}
+	  
+		.slider-dots .dot {
+		  width: 12px;
+		  height: 12px;
+		  border-radius: 50%;
+		  background: rgba(255,255,255,0.5);
+		  cursor: pointer;
+		  transition: all 0.3s;
+		}
+	  
+		.slider-dots .dot.active {
+		  background: white;
+		  transform: scale(1.2);
+		}
+	  </style>
+	  <script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Load the cart count from session storage
+			let cartCount = sessionStorage.getItem('cartCount');
+			if (cartCount === null) {
+				cartCount = 1;
+			} else {
+				cartCount = parseInt(cartCount, 10);
+			}
+			document.getElementById('cart-badge').textContent = cartCount;
+	
+			// Function to get CSRF token from cookie
+			function getCSRFToken() {
+				let cookieValue = null;
+				if (document.cookie && document.cookie !== '') {
+					const cookies = document.cookie.split(';');
+					for (let i = 0; i < cookies.length; i++) {
+						const cookie = cookies[i].trim();
+						if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken' + '=')) {
+							cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+							break;
+						}
+					}
+				}
+				return cookieValue;
+			}
+	
+			// Function to validate the count input
+			function validateCount(input) {
+				let value = input.value;
+				if (value <= 0) {
+					input.value = 1; // Reset to 1 if invalid
+				}
+			}
+		});
+	</script>
+
+
+
+	  
+	  <script>
+	  document.addEventListener('DOMContentLoaded', function() {
+		const slider = document.querySelector('.custom-slider');
+		const slides = document.querySelectorAll('.slider-item');
+		const prevBtn = document.querySelector('.slider-nav.prev');
+		const nextBtn = document.querySelector('.slider-nav.next');
+		const dotsContainer = document.querySelector('.slider-dots');
+		
+		let currentIndex = 0;
+		let slideInterval;
+		const slideDuration = 15000; // 15 seconds
+	  
+		function initSlider() {
+		  // Create dots
+		  slides.forEach((_, index) => {
+			const dot = document.createElement('div');
+			dot.classList.add('dot');
+			if (index === 0) dot.classList.add('active');
+			dot.addEventListener('click', () => goToSlide(index));
+			dotsContainer.appendChild(dot);
+		  });
+	  
+		  // Activate first slide
+		  if (slides.length > 0) {
+			slides[0].classList.add('active');
+		  }
+	  
+		  startAutoSlide();
+		  prevBtn.addEventListener('click', prevSlide);
+		  nextBtn.addEventListener('click', nextSlide);
+		}
+	  
+		function goToSlide(index) {
+		  if (index === currentIndex) return;
+		  
+		  clearInterval(slideInterval);
+		  
+		  const currentSlide = slides[currentIndex];
+		  const nextSlide = slides[index];
+		  
+		  // Prepare animation classes
+		  currentSlide.classList.remove('active');
+		  currentSlide.classList.add('prev-slide');
+		  
+		  nextSlide.classList.add('active');
+		  
+		  // Update current index
+		  currentIndex = index;
+		  updateDots();
+		  
+		  // Cleanup classes after animation
+		  setTimeout(() => {
+			currentSlide.classList.remove('prev-slide');
+		  }, 800); // Match CSS transition duration
+		  
+		  startAutoSlide();
+		}
+	  
+		function nextSlide() {
+		  const nextIndex = (currentIndex + 1) % slides.length;
+		  goToSlide(nextIndex);
+		}
+	  
+		function prevSlide() {
+		  const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+		  goToSlide(prevIndex);
+		}
+	  
+		function updateDots() {
+		  const dots = document.querySelectorAll('.slider-dots .dot');
+		  dots.forEach((dot, index) => {
+			dot.classList.toggle('active', index === currentIndex);
+		  });
+		}
+	  
+		function startAutoSlide() {
+		  slideInterval = setInterval(nextSlide, slideDuration);
+		}
+	  
+		// Initialize
+		initSlider();
+	  
+		// Pause on hover
+		slider.addEventListener('mouseenter', () => clearInterval(slideInterval));
+		slider.addEventListener('mouseleave', startAutoSlide);
+	  });
+	  </script>
+
+
+		<!-- Bootstrap Modal -->
+		<div class="modal fade" id="appointmentModal" tabindex="-1" role="dialog" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg"  role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="background:#00b32e">
+				<h5 class="modal-title" style="background:#00b32e; font-weigth:bolder" id="appointmentModalLabel">Book an Appointment</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				</div>
+				<div class="modal-body" style="background:#00b32e">
+				<!-- Appointment Section -->
+				<section class="ftco-appointment ftco-section ftco-no-pt ftco-no-pb img" style="background-image: url({% static 'images/bg_3.jpg' %});">
+					<div class="overlay"></div>
+					<div class="container">
+					<div class="row d-md-flex justify-content-end">
+						<div class="col-md-12 col-lg-6 half p-3 py-5 pl-lg-5 ftco-animate heading-section heading-section-white">
+						<span class="subheading">Booking an Appointment</span>
+						<h2 class="mb-4">Free Consultation</h2>
+						<form action="#" class="appointment">
+							<div class="row">
+							<div class="col-md-12">
+								<div class="form-group">
+								<div class="form-field">
+									<div class="select-wrap">
+									<div class="icon"><span class="fa fa-chevron-down"></span></div>
+									<select name="" id="" class="form-control">
+										<option value="">Select services</option>
+										<option value="">Change Oil</option>
+										<option value="">Engine Repair</option>
+										<option value="">Battery Replace</option>
+										<option value="">Change Tire</option>
+										<option value="">Tow Truck</option>
+									</select>
+									</div>
+								</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+								<input type="text" class="form-control" placeholder="Your Name">
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+								<input type="text" class="form-control" placeholder="Vehicle number">
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+								<div class="input-wrap">
+									<div class="icon"><span class="fa fa-calendar"></span></div>
+									<input type="text" class="form-control appointment_date" placeholder="Date">
+								</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+								<div class="input-wrap">
+									<div class="icon"><span class="fa fa-clock-o"></span></div>
+									<input type="text" class="form-control appointment_time" placeholder="Time">
+								</div>
+								</div>
+							</div>
+							<div class="col-md-12">
+								<div class="form-group">
+								<textarea name="" id="" cols="30" rows="7" class="form-control" placeholder="Message"></textarea>
+								</div>
+							</div>
+							<div class="col-md-12">
+								<div class="form-group">
+								<input type="submit" value="Send message" class="btn btn-dark py-3 px-4">
+								</div>
+							</div>
+							</div>
+						</form>
+						</div>
+					</div>
+					</div>
+				</section>
+				</div>
+			</div>
+			</div>
+		</div>
+  
+  
+		
+		<section class="intro" >
+			<div class="container intro-wrap">
+				<div class="row no-gutters">
+					<div class="col-md-12 col-lg-9 bg-intro d-sm-flex align-items-center align-items-stretch" >
+						<div class="intro-box d-flex align-items-center" style="color:grey; background: #202020;">
+							<div class="icon d-flex align-items-center justify-content-center">
+								{% comment %} <i class="flaticon-repair"></i> {% endcomment %}
+								<i class="fa-solid fa-laptop-code"></i>
+							</div>
+							<h2 class="mb-0" style="color:lightgrey !important;">Dream it in your mind?<span style="color:lightgreen;"> &nbsp;Let’s make it online!</span></h2>
+						</div>
+						<a href="{% url 'login' %}" class="bg-catelogue btn-custom d-flex align-items-center"><span>Lets Begin Our Journey</span></a>
+					</div>
+				</div>
+			</div>	
+		</section>
+
+		<style>
+			{% comment %} .bg-intro .intro-box {
+				width: calc(100% - 240px);
+				padding: 15px 0;
+			}
+			.intro-wrap {
+				margin-top: -30px;
+			} {% endcomment %}
+			/* Round design for the icon container */
+			/* Make the icon white using CSS filter */
+			{% comment %} .white-icon {
+			  filter: brightness(100) invert(1); /* Converts icon to white */
+			} {% endcomment %}
+
+			
+			/* Round design for the icon container */
+			.icon {
+			  {% comment %} width: 50px; /* Adjust size of the round container */
+			  
+			  border-radius: 50%; /* Makes it round */
+			  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */ {% endcomment %}
+			  height: 50px; 
+			  width: 50px; 
+			  padding-inline:5px;
+			  display: flex;
+			  justify-content: center;
+			  align-items: center;
+			  
+			}
+			
+			/* Smaller icon size */
+			.icon-img {
+			  width: 15px; /* Adjust icon size */
+			  height: 15px; /* Adjust icon size */
+			  transition: transform 0.3s ease; /* Smooth hover effect */
+			  padding: 5px;
+			}
+			
+			/* Hover effect for the icon */
+			.icon:hover .icon-img {
+			  transform: scale(1.03); /* Slightly enlarge on hover */
+			}
+
+			
+			.services .icon img {
+			  max-width: 100%; /* Ensure the icon fits within the container */
+			  max-height: 100%;
+			}
+			
+			.services .media-body {
+			  flex: 1; /* Allow the text to take up remaining space */
+			}
+			
+			/* Optional: Add hover effects for better interactivity */
+			.services .d-block.d-flex:hover {
+			  transform: translateY(-5px);
+			  transition: transform 0.3s ease;
+			}
+
+			.block-23 ul li, .block-23 ul li > a{
+			display: block;
+			line-height: 1.5;
+			margin-bottom: 0px !important;
+			}
+			.services .media-body p {
+				height: 100px; /* Adjust the height as needed */
+				overflow: hidden;
+				text-overflow: ellipsis;
+				display: -webkit-box;
+				-webkit-line-clamp: 3; /* Limits text to 3 lines */
+				-webkit-box-orient: vertical;
+			}
+			/* Ensure uniform height for the heading (category name) */
+			.services .heading {
+				font-size: 14px !important;
+				font-weight: bold;
+				height: 50px; /* Adjust this as needed */
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			
+
+		</style>
+
+		<section class="ftco-section testimony-section bg-light">
+			<div class="container">
+				<div class="row justify-content-center pb-5">
+					<div class="col-md-7 heading-section text-center ftco-animate">
+						<span class="subheading">Reliable Digital/Business Solutions</span>
+						<h2>Our Services</h2>
+					</div>
+				</div>
+				<div class="row">
+					{% for category in total_categories %}
+					<div class="col-md-4 services ftco-animate" style="min-height: 200px;">
+						<div class="d-block d-flex align-items-center">
+							<div class="icon d-flex justify-content-center align-items-center" style="min-width: 50px; min-height: 50px;">
+								{% if category.image %}
+								<img src="{{ category.image.url }}" 
+									 alt="{{ category.name }}" 
+									 class="icon-img white-icon" 
+									 style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;" 
+									 loading="lazy">
+								{% else %}
+								<img src="{% static 'icons/category.png' %}" 
+									 alt="Category Icon" 
+									 class="icon-img white-icon" 
+									 style="width: 60px; height: 60px;" 
+									 loading="lazy">
+								{% endif %}
+							</div>
+							<div class="media-body pl-3">
+								<!-- Make the title clickable -->
+								<a href="{% url 'products_by_category' category.id %}" style="text-decoration: none; color: inherit;">
+									<h3 class="heading">{{ category.name }}</h3>
+								</a>
+								<p style="margin-bottom: 0;">{{ category.description }}</p>
+							</div>
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		</section>
+		  
+		  
+   	
+    <section class="ftco-section">
+    	<div class="container">
+    		<div class="row d-flex no-gutters">
+				<div class="col-md-6 d-flex">
+					<div id="about-page-image-home" class="img img-video d-flex align-self-stretch align-items-center justify-content-center mb-4 mb-sm-0"
+						 style="background-image: url('{% static 'images/about.jpg' %}');">
+					  <!-- Uncomment the below part when needed -->
+					  <a href="https://vimeo.com/45830194" class="icon-video popup-vimeo d-flex justify-content-center align-items-center">
+						<span class="fa fa-play"></span>
+					  </a>
+					</div>
+				  </div>
+				  
+				<div class="col-md-6 pl-md-5">
+					<div class="row justify-content-start py-5">
+						<div class="col-md-12 heading-section ftco-animate">
+							<span class="subheading">Welcome to CODESPIKE STUDIO</span>
+							<h2 class="mb-4">CODESPIKE STUDIO: Your Trusted Partner for Web Design & Development Solutions</h2>
+							<p>At CODESPIKE STUDIO, we take pride in being a leading startup in the web design and development industry. As a passionate team of developers and designers, we specialize in delivering high-quality, trend-oriented websites for our clients. We offer a wide range of pre-built, visually appealing templates that clients can choose from, ensuring each project reflects their unique brand. 
+				
+							With 16+ satisfied clients, we’re committed to meeting strict timelines while offering personalized attention to each project. Our three-phase UAT process ensures that we deliver exactly what our clients need, all while providing cost-effective solutions to fit any budget.
+							</p>
+						</div>
+					</div>
+				</div>				
+	        </div>
+        </div>
+    	</div>
+    </section>
+
+
+		{% comment %} <section class="ftco-appointment ftco-section ftco-no-pt ftco-no-pb img" style="background-image: url({% static 'images/bg_3.jpg' %});">
+			<div class="overlay"></div>
+    	<div class="container">
+    		<div class="row d-md-flex justify-content-end">
+    			<div class="col-md-12 col-lg-6 half p-3 py-5 pl-lg-5 ftco-animate heading-section heading-section-white">
+    				<span class="subheading">Booking an Appointment</span>
+    				<h2 class="mb-4">Free Consultation</h2>
+    				<form action="#" class="appointment">
+    					<div class="row">
+    						<div class="col-md-12">
+									<div class="form-group">
+			    					<div class="form-field">
+	          					<div class="select-wrap">
+	                      <div class="icon"><span class="fa fa-chevron-down"></span></div>
+	                      <select name="" id="" class="form-control">
+	                      	<option value="">Select services</option>
+	                        <option value="">Change Oil</option>
+	                        <option value="">Engine Repair</option>
+	                        <option value="">Battery Replace</option>
+	                        <option value="">Change Tire</option>
+	                        <option value="">Tow Truck</option>
+	                      </select>
+	                    </div>
+			              </div>
+			    				</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+			              <input type="text" class="form-control" placeholder="Your Name">
+			            </div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+			              <input type="text" class="form-control" placeholder="Vehicle number">
+			            </div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+			    					<div class="input-wrap">
+			            		<div class="icon"><span class="fa fa-calendar"></span></div>
+			            		<input type="text" class="form-control appointment_date" placeholder="Date">
+		            		</div>
+			    				</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+			    					<div class="input-wrap">
+			            		<div class="icon"><span class="fa fa-clock-o"></span></div>
+			            		<input type="text" class="form-control appointment_time" placeholder="Time">
+		            		</div>
+			    				</div>
+								</div>
+								<div class="col-md-12">
+									<div class="form-group">
+			              <textarea name="" id="" cols="30" rows="7" class="form-control" placeholder="Message"></textarea>
+			            </div>
+								</div>
+								<div class="col-md-12">
+									<div class="form-group">
+			              <input type="submit" value="Send message" class="btn btn-dark py-3 px-4">
+			            </div>
+								</div>
+    					</div>
+	          </form>
+    			</div>
+    		</div>
+    	</div>
+    </section> {% endcomment %}
+
+	<section class="ftco-section custom-product-section bg-light mt-5 pt-5">
+		<div class="container">
+			<div class="row justify-content-center mb-4">
+				<div class="col-md-7 heading-section text-center ftco-animate">
+					<span class="subheading">Our Products</span>
+					<h2>Check our Designs here</h2>
+				</div>
+			</div>
+	
+			{% for cat in category_products %}
+			<h5 class="text-center my-4">{{ cat.category.name }}</h5>
+		
+			<div class="product-grid d-flex flex-wrap justify-content-center mb-5">
+				{% for product in cat.products %}
+				<div class="blog-entry responsive-card d-flex flex-column m-2">
+					<a href="{% url 'product_detail' product.sku %}" class="block-20">
+						<img src="{{ product.images.url|default:'/static/images/placeholder.jpg' }}" 
+							 alt="{{ product.name }}" class="product-image img-fluid">
+					</a>
+					<div class="text d-flex flex-column flex-grow-1 justify-content-between p-3">
+						<h3 class="heading text-center">
+							<a href="{% url 'product_detail' product.sku %}">{{ product.name }}</a>
+						</h3>
+						<p class="text-center font-weight-bold mt-auto">
+							<strong>Price:</strong> ₹{{ product.price }}
+						</p>
+					</div>
+				</div>
+				{% empty %}
+				<p class="text-center">No products available in {{ cat.category }}.</p>
+				{% endfor %}
+			</div>
+		{% endfor %}
+		
+		
+		
+		</div>
+	</section>
+	
+	<!-- CSS for Styling -->
+	<style>
+
+		/* Default style (desktop and up) */
+		.responsive-card {
+			width: 220px;
+		}
+
+		/* Mobile view: full width */
+		@media (max-width: 576px) {
+			.responsive-card {
+				width: 100% !important;
+			}
+		}
+		/* Scoped Styles - Only Applies to .custom-product-section */
+		.custom-product-section .product-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 20px;
+			justify-content: center;
+			padding: 20px;
+		}
+	
+		/* 4 products per row on large screens */
+		@media (min-width: 992px) { 
+			.custom-product-section .product-grid {
+				grid-template-columns: repeat(4, 1fr);
+			}
+		}
+	
+		/* 2 products per row on tablets */
+		@media (max-width: 991px) {
+			.custom-product-section .product-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+	
+		/* 1 product per row on mobile */
+		@media (max-width: 576px) {
+			.custom-product-section .product-grid {
+				grid-template-columns: repeat(1, 1fr);
+			}
+		}
+	
+		/* Product Card */
+		.custom-product-section .blog-entry {
+			background: #fff;
+			text-align: center;
+			border-radius: 10px;
+			overflow: hidden;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			padding: 15px;
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+		}
+	
+		.custom-product-section .blog-entry:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+		}
+	
+		/* Square Product Image */
+		.custom-product-section .product-image {
+			width: 100%;
+			height: 250px;
+			object-fit: cover;
+		}
+	
+		/* Text Area for Uniform Height */
+		.custom-product-section .text {
+			padding: 15px;
+			min-height: 120px;
+		}
+	
+		.custom-product-section .text h3 {
+			font-size: 1.2rem;
+			margin-bottom: 10px;
+		}
+	
+		.custom-product-section .text p {
+			font-size: 0.9rem;
+			color: #555;
+		}
+	
+		.custom-product-section .text a {
+			color: #020101;
+			text-decoration: none;
+		}
+	
+		.custom-product-section .text a:hover {
+			color: #007bff;
+		}
+		.testimony-wrap {
+			min-height: 320px; /* Ensures all cards have the same height */
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			align-items: center;
+			padding: 20px;
+			text-align: center;
+		}
+		
+		.testimony-wrap .text {
+			flex-grow: 1; /* Ensures the text section expands to fill space */
+			min-height: 150px; /* Keeps text areas uniform */
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+		}
+		
+		.testimony-wrap .d-flex {
+			align-items: center;
+			justify-content: center;
+		}
+		.testimony-wrap p {
+			font-size: 14px;
+			line-height: 1.5;
+		}
+		
+		.carousel-testimony .item {
+			display: flex;
+			justify-content: center;
+		}
+		.user-img {
+			width: 40px;  /* Fixed width */
+			height: 40px; /* Fixed height */
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			border-radius: 50%;
+			border: 2px solid #fff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 24px;
+			font-weight: bold;
+			text-transform: uppercase;
+			color: #fff;
+		}
+		
+		.default-img {
+			background-color: #3d3d3d; /* Placeholder color */
+		}
+		
+		.rating {
+			display: flex;
+			gap: 2px;
+		}
+		
+		.rating .fa-star {
+			color: lightgray;
+			font-size: 14px;
+		}
+		
+		.rating .fa-star.filled {
+			color: green;
+		}
+		/* Change the active carousel button color to green */
+		.owl-carousel .owl-dots .owl-dot.active span,
+		.owl-carousel .owl-dots .owl-dot:hover span {
+			background-color: green !important; /* Change to green */
+		}
+
+		/* Optional: Change the default color of inactive dots */
+		.owl-carousel .owl-dots .owl-dot span {
+			background-color: #ccc; /* Default color for inactive dots */
+		}
+
+		.testimony-section .owl-dots .owl-dot.active{
+			background-color: green !important; /* Change to green */
+			
+		}
+		.testimony-section .owl-dots .owl-dot.active:after{
+			border-color: green !important; /* Change to green */
+
+		}
+		.owl-carousel.home-slider .owl-dots .owl-dot.active{
+
+			background-color: green !important; /* Change to green */
+			border-color: green !important; /* Change to green */
+
+		}
+
+		
+		
+
+	</style>
+	
+	
+	<section class="ftco-section testimony-section">
+		<div class="container">
+			<div class="row justify-content-center pb-5 mb-3">
+				<div class="col-md-7 heading-section heading-section-white text-center ftco-animate">
+					<span class="subheading" style="color:green !important;">Testimonies</span>
+					<h2>Happy Clients &amp; Feedbacks</h2>
+				</div>
+			</div>
+			<div class="row ftco-animate">
+				<div class="col-md-12">
+					<div class="carousel-testimony owl-carousel ftco-owl">
+						{% for review in reviews %}
+						<div class="item">
+							<div class="testimony-wrap py-4">
+								<div class="icon d-flex align-items-center justify-content-center">
+									<span class="fa fa-quote-left"></span>
+								</div>
+								<div class="text">
+									<p class="mb-4">{{ review.review_content }}</p>
+									<div class="d-flex align-items-center justify-content-between">
+										<!-- Profile Image or Initial -->
+										{% if review.image %}
+										<div class="user-img" style="background-image: url({{ review.image.url }});">
+										</div>
+										{% else %}
+										<div class="user-img default-img d-flex align-items-center justify-content-center">
+											<span>{{ review.customer_name|first|upper }}</span>
+										</div>
+										{% endif %}
+	
+										<!-- Name and Star Rating -->
+										<div class="pl-3 flex-grow-1 d-flex flex-column align-items-end">
+											<p class="name m-0" style="font-size: 12px !important; max-width: 150px;">
+												{{ review.customer_name }}
+											</p>
+											<div class="rating mt-1">
+												{% for _ in "12345"|make_list %}
+												<span class="fa fa-star {% if forloop.counter <= review.review_rating %}filled{% endif %}"></span>
+												{% endfor %}
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						{% empty %}
+						<p class="text-center">No reviews available.</p>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	
+	
+	
+	
+
+
+    {% comment %} <section class="ftco-section bg-light">
+    	<div class="container">
+    		<div class="row justify-content-center pb-5 mb-3">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+          	<span class="subheading">Price &amp; Plans</span>
+            <h2>Pricing</h2>
+          </div>
+        </div>
+    		<div class="row">
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+	          <div class="block-7">
+	            <div class="text-center">
+            	<span class="excerpt d-block">First PMS</span>
+	            <span class="price"><sup>$</sup> <span class="number">78.98</span></span>
+	            
+	            <div class="pricing-text">
+	              <p>A small river named Duden flows by their place and supplies it with the necessary regelialia.</p>
+	            </div>
+
+	            <a href="#" class="btn btn-secondary d-block px-2 py-3">Get Started</a>
+	            </div>
+	          </div>
+	        </div>
+	        <div class="col-md-6 col-lg-3 ftco-animate">
+	          <div class="block-7">
+	            <div class="text-center">
+            	<span class="excerpt d-block">Engine Diagnostics</span>
+	            <span class="price"><sup>$</sup> <span class="number">83.75</span></span>
+	            
+	            <div class="pricing-text">
+	              <p>A small river named Duden flows by their place and supplies it with the necessary regelialia.</p>
+	            </div>
+
+	            <a href="#" class="btn btn-secondary d-block px-2 py-3">Get Started</a>
+	            </div>
+	          </div>
+	        </div>
+	        <div class="col-md-6 col-lg-3 ftco-animate">
+	          <div class="block-7">
+	            <div class="text-center">
+            	<span class="excerpt d-block">Tow Truck</span>
+	            <span class="price"><sup>$</sup> <span class="number">85.00</span></span>
+	            
+	            <div class="pricing-text">
+	              <p>A small river named Duden flows by their place and supplies it with the necessary regelialia.</p>
+	            </div>
+
+	            <a href="#" class="btn btn-secondary d-block px-2 py-3">Get Started</a>
+	            </div>
+	          </div>
+	        </div>
+	        <div class="col-md-6 col-lg-3 ftco-animate">
+	          <div class="block-7">
+	            <div class="text-center">
+            	<span class="excerpt d-block">Car Wash</span>
+	            <span class="price"><sup>$</sup> <span class="number">30.50</span></span>
+	            
+	            <div class="pricing-text">
+	              <p>A small river named Duden flows by their place and supplies it with the necessary regelialia.</p>
+	            </div>
+
+	            <a href="#" class="btn btn-secondary d-block px-2 py-3">Get Started</a>
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+    	</div>
+    </section> {% endcomment %}
+
+	
+    <section class="ftco-counter" id="section-counter">
+    	<div class="container">
+				<div class="row">
+          <div class="col-md-6 col-lg-3 d-flex justify-content-center counter-wrap ftco-animate">
+            <div class="block-18 text-center">
+              <div class="text">
+                <strong class="number" data-number="5">0</strong>
+              </div>
+              <div class="text">
+              	<span>Years of Experienced</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 d-flex justify-content-center counter-wrap ftco-animate">
+            <div class="block-18 text-center">
+              <div class="text">
+                <strong class="number" data-number="43">0</strong>
+              </div>
+              <div class="text">
+              	<span>Project completed</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 d-flex justify-content-center counter-wrap ftco-animate">
+            <div class="block-18 text-center">
+              <div class="text">
+                <strong class="number" data-number="43">0</strong>
+              </div>
+              <div class="text">
+              	<span>Happy Customers</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 d-flex justify-content-center counter-wrap ftco-animate">
+            <div class="block-18 text-center">
+              <div class="text">
+                <strong class="number" data-number="10">0</strong>
+              </div>
+              <div class="text">
+              	<span>Our Team Members</span>
+              </div>
+            </div>
+          </div>
+        </div>
+    	</div>
+    </section>
+	<section class="ftco-map ftco-no-pb">
+		<div class="container"  style="margin-block: 40px !important;">
+			<div class="row justify-content-center">
+				<div class="col-md-7 heading-section text-center ftco-animate">
+					<span class="subheading">Location</span>
+					<h2>Find Us on the Map</h2>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid px-md-0">
+			<div class="row no-gutters">
+				<div class="col-md-12 ftco-animate">
+					<!-- Google Map Embed using iframe with marker -->
+					<iframe 
+						src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2937472.825135489!2d76.62028135!3d10.45282775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88fdba85cc7387a3%3A0x51b8faf0624efd71!2sCodespikeStudio!5e1!3m2!1sen!2sin!4v1745066902786!5m2!1sen!2sin" 
+						width="100%" 
+						height="800" 
+						style="border:0;" 
+						allowfullscreen="" 
+						loading="lazy" 
+						referrerpolicy="no-referrer-when-downgrade">
+					</iframe>
+				</div>
+			</div>
+		</div>
+	</section>
+	{% endblock %}
+
+
+  
+	<footer class="footer ftco-section" style="background: #202020 !important;">
+		<div class="container px-3 px-md-5 py-4 py-lg-5"> <!-- Added horizontal padding -->
+		  <div class="row g-4 g-lg-5 mb-5">
+			<!-- Logo and Info Column -->
+			<div class="col-12 col-md-6 col-lg">
+			  <div class="ftco-footer-widget mb-2 text-md-left mx-auto" style="width: 255px;"> <!-- Centered with max-width -->
+				<div class="d-flex align-items-left justify-content-center justify-content-md-start">
+				  <a href="{% url 'dashboard' %}" class="app-footer-link">
+					<span class="app-footer-logo demo m-3">
+					  <div id="logo-footer-loader" class="dot-loader">
+						<span></span>
+						<span></span>
+						<span></span>
+					  </div>
+					  <img id="company-footer-logo-svg" 
+						   alt="Company Logo" 
+						   style="width: 185px; height: 65px; object-fit: contain; display: none;" />
+					</span>
+				  </a>
+				</div>
+				<p id="company-tagline" class="text-left"><b>Empowering garages with innovative tools, reliability, and global-quality solutions for every need.</b></p>
+				<div class="social-media">
+					<p class="mb-0 d-flex">
+						<a id="facebook-link-footer" href="#" class="d-flex align-items-center justify-content-center">
+							<span style="background-color: transparent !important;" class="fab fa-facebook">
+								<i class="sr-only">Facebook</i>
+							</span>
+						</a>
+						<a id="instagram-link-footer" href="#" class="d-flex align-items-center justify-content-center">
+							<span style="background-color: transparent !important;" class="fab fa-instagram">
+								<i class="sr-only">Instagram</i>
+							</span>
+						</a>
+						<a id="google-link-footer" href="#" class="d-flex align-items-center justify-content-center">
+							<span style="background-color: transparent !important;" class="fab fa-google">
+								<i class="sr-only">Google</i>
+							</span>
+						</a>
+					</p>					
+				</div>
+			  </div>
+			</div>
+	  
+			<!-- Services Column -->
+			<div class="col-12 col-md-6 col-lg">
+			  <div class="ftco-footer-widget text-left mx-auto" style="width: 180px;"> <!-- Centered with max-width -->
+				<h2 class="ftco-heading-2 mb-3">Our Services</h2>
+				<div class="services-list">
+				  <ul class="list-unstyled pl-0 ml-0">
+					{% for category in total_categories %}
+					<li class="mb-2 text-left"> <!-- Force left alignment -->
+						<span class="fa fa-check mr-2"></span>{{ category.name }}
+					</li>
+					{% endfor %}
+				  </ul>
+				</div>
+			  </div>
+			</div>
+	  
+			<!-- Contact Column -->
+			<div class="col-12 col-md-6 col-lg">
+			  <div class="ftco-footer-widget text-left mx-auto" style="width: 250px;"> <!-- Centered with max-width -->
+				<h2 class="ftco-heading-2">Contact</h2>
+				<div class="block-23" style="margin-bottom: 5px !important">
+				  <ul class="text-left pl-0 ml-0">
+					<li class="py-0"><span class="icon fa fa-user"></span><span id="contact-name" class="text">Satheesh A</span></li>
+					<li class="py-0"><span class="icon fa fa-map-marker"></span><span id="contact-address-footer" class="text"></span></li>
+					{% comment %} <li class="py-0"><span class="icon fa fa-bank"></span><span id="contact-gstin" class="text">33BHTPR6598F1ZI</span></li> {% endcomment %}
+					<li class="py-0"><span class="icon fa fa-phone"></span><span id="contact-phone" class="text">(+91)7736500760</span></li>
+					<li class="py-0"><span class="icon fa fa-paper-plane"></span><span id="contact-email" class="text">info@iron_suite.in</span></li>
+				  </ul>
+				</div>
+			  </div>
+			</div>
+	  
+			<!-- Business Hours Column -->
+			<div class="col-12 col-md-6 col-lg">
+			  <div class="ftco-footer-widget text-left mx-auto" style="max-width: 200px;"> <!-- Centered with max-width -->
+				<h2 class="ftco-heading-2">Business Hours</h2>
+				<div class="opening-hours">
+				  <h4>Opening Days:</h4>
+				  <p id="opening-hours" class="text-left"></p> <!-- Force left alignment -->
+				  <h4>Holiday:</h4>
+				  <p id="holiday-info" class="text-left"></p> <!-- Force left alignment -->
+				</div>
+			  </div>
+			</div>
+		  </div>
+	  
+		  <!-- Copyright Row -->
+		  <div class="row">
+			<div class="col-md-12 text-center">
+			  <p>
+				Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | codespikestudio.com<i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://codespikestudio.onrender.com/" target="_blank">codespikestudio</a>
+			  </p>
+			</div>
+		  </div>
+		</div>
+	  </footer>
+  <!-- loader -->
+  <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+  <script>
+	document.addEventListener('DOMContentLoaded', function() {
+	  const logoImg = document.getElementById('company-logo-svg');
+	  const logoFooterImg = document.getElementById('company-footer-logo-svg');
+	  const loader = document.getElementById('logo-loader');
+	  const footerloader = document.getElementById('logo-footer-loader');
+	  const faviconLink = document.querySelector("link[rel='icon']");
+	  const openingDays = document.getElementById('opening-hours');
+	  const holiday = document.getElementById('holiday-info');
+	  const gstn = document.getElementById('gstn');
+	  const contactName = document.getElementById('contact-name');
+	  const page_title = document.getElementById('page-title');
+	  const contactAddress = document.getElementById('contact-address');
+	  const contactAddressFooter = document.getElementById('contact-address-footer');
+	  const contactGstin = document.getElementById('contact-gstin');
+	  const contactPhone = document.getElementById('contact-phone');
+	  const info_mobile = document.getElementById('info-mobile');
+	  const wtinfo_mobile = document.getElementById('wtinfo-mobile');
+	  const wtinfo_mobile_text = document.getElementById('wtinfo-mobile-text');
+	  const contactEmail = document.getElementById('contact-email');
+	  const companyTagline = document.getElementById('company-tagline');
+	  const facebookLink = document.getElementById('facebook-link');
+	  const instagramLink = document.getElementById('instagram-link');
+	  const googleLink = document.getElementById('google-link');
+	  const facebookLinkfooter = document.getElementById('facebook-link-footer');
+	  const instagramLinkfooter = document.getElementById('instagram-link-footer');
+	  const googleLinkfooter = document.getElementById('google-link-footer');
+	  const breadcrumbHero = document.getElementById('breadcrumb-hero');
+	  const aboutPageImageHome = document.getElementById('about-page-image-home');
+	  const aboutPageImage = document.getElementById('about-page-image');
+	
+	  fetch('/api/company-data/')
+		.then(response => response.json())
+		.then(data => {
+			// Load Category Name
+			console.log("data.category_names", data.category_names);
+
+			const servicesList = document.querySelector('.services-list ul');
+
+			if (servicesList && data.category_names && Array.isArray(data.category_names)) {
+			servicesList.innerHTML = ''; // Clear any existing content
+
+			data.category_names.forEach(name => {
+				const li = document.createElement('li');
+				li.className = 'mb-2 text-left';
+
+				li.innerHTML = `
+				<span  class="py-1 d-block text-decoration-none">
+					<span class="fa fa-check mr-2"></span>${name}
+				</span>
+				`;
+
+				servicesList.appendChild(li);
+			});
+		}
+		  // ✅ Load company logo
+		  if (data.company_logo_url) {
+			if (logoImg) {
+			  logoImg.src = data.company_logo_url;
+			  logoImg.alt = data.company_name + " Logo";
+			  logoImg.style.display = "block";
+			}
+			if (logoFooterImg) {
+			  logoFooterImg.src = data.company_logo_url;
+			  logoFooterImg.alt = data.company_name + " Logo";
+			  logoFooterImg.style.display = "block";
+			}
+			if (loader) loader.style.display = "none";
+			if (footerloader) footerloader.style.display = "none";
+		  } else {
+			if (loader) loader.innerHTML = "No Logo Available";
+			if (footerloader) footerloader.innerHTML = "No Logo Available";
+		  }
+	
+		  if (data.breadcrumb_image_url && breadcrumbHero) {
+			breadcrumbHero.style.backgroundImage = `url('${data.breadcrumb_image_url}')`;
+		  }
+	
+		  if (data.about_page_image_url) {
+			if (aboutPageImage) {
+			  aboutPageImage.style.backgroundImage = `url('${data.about_page_image_url}')`;
+			}
+			if (aboutPageImageHome) {
+			  aboutPageImageHome.style.backgroundImage = `url('${data.about_page_image_url}')`;
+			}
+		  }
+	
+		  // ✅ Load favicon
+		  if (data.company_favicon_url && faviconLink) {
+			faviconLink.href = data.company_favicon_url;
+		  }
+	
+		  // ✅ Update business hours
+		  if (data.opening_time && data.closing_time && data.closed_days) {
+			let openingDaysText = '';
+			let holidayText = '';
+	
+			openingDaysText += `<span>Monday – Friday : ${data.opening_time} to ${data.closing_time}</span><br>`;
+			openingDaysText += `<span>Saturday : ${data.opening_time} to ${data.closing_time}</span>`;
+	
+			if (data.closed_days.length > 0) {
+			  holidayText += `<span>All ${data.closed_days.join(', ')}</span><br>`;
+			} else {
+			  holidayText += `<span>No holidays</span><br>`;
+			}
+	
+			if (openingDays) openingDays.innerHTML = openingDaysText;
+			if (holiday) holiday.innerHTML = holidayText;
+		  } else {
+			if (openingDays) openingDays.innerHTML = '<span>No opening hours available</span>';
+			if (holiday) holiday.innerHTML = '<span>No holiday information available</span>';
+		  }
+	
+		  // ✅ Update contact info
+		  if (data.company_name) {
+			if (contactName) contactName.textContent = data.company_name;
+			if (page_title) page_title.textContent = data.company_name;
+		  }
+		  if (data.gstn && gstn) {
+			gstn.textContent = data.gstn;
+		  }
+		  console.log('data.company_addressdata.company_addressdata.company_address', data.company_address)
+		  if (data.company_address && contactAddress) {
+			contactAddress.textContent = data.company_address;
+			contactAddressFooter.textContent = data.company_address;
+		  }
+		  if (data.company_gstin && contactGstin) {
+			contactGstin.textContent = data.company_gstin;
+		  }
+		  if (data.info_mobile) {
+			const sanitizedNumber = data.info_mobile.replace(/\D/g, '');
+			info_mobile.textContent = data.info_mobile;
+			if (wtinfo_mobile) wtinfo_mobile.href = `https://wa.me/+${sanitizedNumber}`;
+			if (contactPhone) contactPhone.href = `tel:+${sanitizedNumber}`;
+		  }
+		  if (data.info_email && contactEmail) {
+			contactEmail.textContent = data.info_email;
+		  }
+	
+		  // ✅ Update tagline
+		  if (companyTagline) {
+			companyTagline.innerHTML = data.company_tagline ? `<b>${data.company_tagline}</b>` : '<b>No tagline available</b>';
+		  }
+	
+		  // ✅ Update social media
+		  if (data.company_facebook && facebookLink) {
+			console.log('data.company_facebook', data.company_facebook)
+			facebookLink.href = data.company_facebook;
+			facebookLinkfooter.href = data.company_facebook;
+			
+		  }
+		  if (data.company_instagram && instagramLink) {
+			console.log('data.company_instagram', data.company_instagram)
+			instagramLink.href = data.company_instagram;
+			instagramLinkfooter.href = data.company_instagram;
+		  }
+		  if (data.company_email_ceo && googleLink) {
+			googleLink.href = data.company_email_ceo;
+			googleLinkfooter.href = data.company_email_ceo;
+		  }
+		})
+		.catch(error => {
+		  console.error('Error fetching company data:', error);
+		  if (loader) loader.innerHTML = "Failed to load logo";
+		  if (footerloader) footerloader.innerHTML = "Failed to load logo";
+		  if (openingDays) openingDays.innerHTML = '<span>Failed to load opening hours</span>';
+		  if (holiday) holiday.innerHTML = '<span>Failed to load holiday information</span>';
+		  if (contactName) contactName.textContent = 'Failed to load contact name';
+		  if (contactAddress) contactAddress.textContent = 'Failed to load contact address';
+		  if (contactGstin) contactGstin.textContent = 'Failed to load GSTIN';
+		  if (contactPhone) contactPhone.textContent = 'Failed to load phone number';
+		  if (contactEmail) contactEmail.textContent = 'Failed to load email address';
+		  if (companyTagline) companyTagline.innerHTML = '<b>Failed to load tagline</b>';
+		  if (facebookLink) facebookLink.href = '#';
+		  if (instagramLink) instagramLink.href = '#';
+		  if (googleLink) googleLink.href = '#';
+		});
+	});
+	</script>
+	
+  <script>
+	document.addEventListener('DOMContentLoaded', function() {
+	  // Function to get CSRF token from cookie
+	  function getCSRFToken() {
+		  let cookieValue = null;
+		  if (document.cookie && document.cookie !== '') {
+			  const cookies = document.cookie.split(';');
+			  for (let i = 0; i < cookies.length; i++) {
+				  const cookie = cookies[i].trim();
+				  if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken' + '=')) {
+					  cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+					  break;
+				  }
+			  }
+		  }
+		  return cookieValue;
+	  }
+
+
+  
+      // Function to update quantity and recalculate totals
+      function updateQuantity(input, productSku) {
+		let quantity = parseInt(input.value, 10);
+		if (isNaN(quantity) || quantity <= 0) {
+			quantity = 1; // Default to 1 if invalid
+			input.value = 1;
+		}
+
+		// Send updated quantity to the server
+		fetch('/update-cart/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': getCSRFToken() // Include CSRF token for Django
+			},
+			body: JSON.stringify({
+				product_sku: productSku,
+				action: "update_qty",
+				quantity: quantity
+			})
+		})
+		.then(response => response.json())
+		.then(data => {
+		  console.log('datadatadatadatadatadatadata', data)
+			if (data.success) {
+				let cartCount = data.cart_count;
+				document.getElementById('cart-badge').textContent = cartCount;
+				// Find the updated item in the cart_items list
+				const updatedItem = data.cart_items.find(item => item.product.sku === productSku);
+				
+				if (updatedItem) {
+					// Update quantity input
+					document.getElementById(`item-count-${productSku}`).value = updatedItem.quantity;
+					
+					// Update total price for the item
+					const row = document.querySelector(`#item-count-${productSku}`).closest('tr');
+					row.querySelector('.total').textContent = `INR ${updatedItem.total_price}`;
+				}
+				
+				// Update cart summary
+				document.getElementById('cart-subtotal').textContent = `INR ${data.cart_subtotal}`;
+				document.getElementById('cart-total').textContent = `INR ${data.cart_total}`;
+				document.getElementById('cart-count').textContent = data.cart_count;
+			} else {
+				console.error('Error updating cart:', data.error);
+			}
+		})
+		.catch(error => {
+			console.error('Error updating cart:', error);
+		});
+	}
+  
+	  // Add event listeners to quantity inputs
+	  document.querySelectorAll('[id^="item-count-"]').forEach(function(input) {
+		  input.addEventListener('input', function() {
+			  updateQuantity(this, this.id.split('-')[2]);
+		  });
+	  });
+  
+	  // Fetch initial cart count from the server
+	  fetch('/get-cart-count/', {
+		  method: 'GET',
+		  headers: {
+			  'Content-Type': 'application/json',
+			  'X-CSRFToken': getCSRFToken() // Include CSRF token for Django
+		  }
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+		  let cartCount = data.cart_count || 0;
+		  document.getElementById('cart-badge').textContent = cartCount;
+	  })
+	  .catch(error => {
+		  console.error('Error fetching cart count:', error);
+	  });
+	  document.addEventListener('DOMContentLoaded', function() {
+		// Get the Add to Cart button element
+		var addToCartBtn = document.getElementById('add-to-cart-btn');
+		
+		// Check if the element exists
+		if (addToCartBtn) {
+		  addToCartBtn.addEventListener('click', function() {
+			let itemCount = document.getElementById('item-count').value;
+			itemCount = parseInt(itemCount, 10);
+			if (isNaN(itemCount) || itemCount <= 0) {
+			  itemCount = 1; // Default to 1 if invalid
+			}
+	
+			// Update the cart count
+			let cartCount = parseInt(document.getElementById('cart-badge').textContent, 10);
+			cartCount += itemCount;
+			document.getElementById('cart-badge').textContent = cartCount;
+	
+			// Update the cart badge with animation
+			let cartBadge = document.getElementById('cart-badge');
+			cartBadge.classList.add('animate');
+	
+			// Remove the animation class after the animation ends
+			setTimeout(() => {
+			  cartBadge.classList.remove('animate');
+			}, 300); // Match the duration of the transition
+	
+			// Get the product_id from the hidden input field
+			let product_id = document.getElementById('product_id').value;
+	
+			// Send cart update to the server
+			fetch('/update-cart/', {
+			  method: 'POST',
+			  headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': getCSRFToken() // Include CSRF token for Django
+			  },
+			  body: JSON.stringify({
+				product_id: product_id,
+				quantity: itemCount
+			  })
+			})
+			.then(response => response.json())
+			.then(data => {
+			  console.log('Updating cart:', data);
+			})
+			.catch(error => {
+			  console.error('Error updating cart:', error);
+			});
+		  });
+		} else {
+		  console.error('Add to Cart button not found.');
+		}
+	  }); 
+
+	});
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script src="{% static 'js/jquery.min.js' %}"></script>
+  <script src="{% static 'js/jquery-migrate-3.0.1.min.js' %}"></script>
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'js/jquery.easing.1.3.js' %}"></script>
+  <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+  <script src="{% static 'js/jquery.stellar.min.js' %}"></script>
+  <script src="{% static 'js/jquery.animateNumber.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap-datepicker.js' %}"></script>
+  <script src="{% static 'js/jquery.timepicker.min.js' %}"></script>
+  <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+  <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+  <script src="{% static 'js/scrollax.min.js' %}"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+    
+  </body>
+</html>

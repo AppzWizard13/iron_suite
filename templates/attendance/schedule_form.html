@@ -1,0 +1,51 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Manage / Schedule /</span> Create
+  </h4>
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          {{ form.name.label_tag }} {{ form.name }}
+          {% for error in form.name.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.start_time.label_tag }} {{ form.start_time }}
+          {% for error in form.start_time.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.end_time.label_tag }} {{ form.end_time }}
+          {% for error in form.end_time.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.capacity.label_tag }} {{ form.capacity }}
+          {% for error in form.capacity.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.status.label_tag }} {{ form.status }}
+          {% for error in form.status.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.trainer.label_tag }} {{ form.trainer }}
+          {% for error in form.trainer.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="d-flex">
+          <button type="submit" class="btn btn-primary">Create</button>
+          <a href="{% url 'schedule_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

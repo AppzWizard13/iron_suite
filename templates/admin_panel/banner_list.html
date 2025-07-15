@@ -1,0 +1,88 @@
+{% extends 'admin_panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Manage Banners</h5>
+
+      <!-- Add Banner Button -->
+      <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'banner_create' %}" class="btn btn-success btn-sm">+ Add Banner</a>
+      </div>
+
+      <!-- Banners Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Series</th>
+              <th>Image</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for banner in banners %}
+            <tr>
+              <td>{{ banner.id }}</td>
+              <td>{{ banner.name }}</td>
+              <td>{{ banner.series }}</td>
+              <td><img src="{{ banner.image.url }}" alt="{{ banner.name }}" width="100"></td>
+              <td class="text-center">
+                <a href="{% url 'banner_edit' banner.id %}" class="btn btn-info btn-sm">Edit</a>
+                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-banner-id="{{ banner.id }}" data-banner-name="{{ banner.name }}">
+                  Delete
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">No banners found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the banner <strong id="bannerName"></strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var bannerId = button.getAttribute('data-banner-id');
+      var bannerName = button.getAttribute('data-banner-name');
+
+      document.getElementById('bannerName').textContent = bannerName;
+      var deleteUrl = "{% url 'banner_delete' 0 %}".replace('0', bannerId);
+      document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+    });
+  });
+</script>
+
+{% endblock %}

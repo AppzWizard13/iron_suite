@@ -1,0 +1,157 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Manage /</span> Packages</h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <h5 class="card-header">Package List</h5>
+      <div class="card-body">
+
+        <!-- Add Package Button and Search -->
+        <div class="d-flex justify-content-between mb-3">
+          <a href="{% url 'package_add' %}" class="btn btn-primary">
+            <i class="bx bx-plus me-1"></i> Add Package
+          </a>
+
+          <!-- Search Form -->
+          <form method="GET" action="{% url 'package_list' %}" class="d-flex" style="max-width: 500px;">
+            <div class="input-group">
+              <input type="text" name="search" class="form-control" placeholder="Search packages..." value="{{ query }}">
+              <button type="submit" class="btn btn-primary">
+                <i class="bx bx-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Package Table -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Package</th>
+                <th>Type</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for package in packages %}
+              <tr>
+                <td>{{ package.id }}</td>
+                <td>{{ package.name }}</td>
+                <td>{{ package.type|title }}</td>
+                <td>{{ package.duration }} days</td>
+                <td>₹{{ package.price }}</td>
+                <td>
+                  {% if package.discount_type == 'percentage' %}
+                    {{ package.discount_value }}%
+                  {% elif package.discount_type == 'fixed' %}
+                    ₹{{ package.discount_value }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td>
+                  {% if package.is_active %}
+                    <span class="badge bg-success">Active</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <a href="{% url 'package_edit' package.id %}" class="btn btn-sm btn-icon btn-secondary">
+                    <i class="bx bx-edit"></i>
+                  </a>
+                  <button class="btn btn-sm btn-icon btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                          data-package-id="{{ package.id }}" data-package-name="{{ package.name }}">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center py-4">
+                  <div class="text-muted">No packages found</div>
+                  <a href="{% url 'package_add' %}" class="btn btn-primary mt-2">
+                    <i class="bx bx-plus me-1"></i> Add New Package
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <strong id="packageName"></strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var packageId = button.getAttribute('data-package-id');
+      var packageName = button.getAttribute('data-package-name');
+      document.getElementById('packageName').textContent = packageName;
+      var deleteUrl = "{% url 'package_delete' 0 %}".replace('0', packageId);
+      document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+    });
+
+    // Auto-dismiss toast messages
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

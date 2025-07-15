@@ -1,0 +1,80 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">System /</span> Reset Panel
+    </h4>
+
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}primary{% else %}success{% endif %} border-0 show" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">{{ message }}</div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">System Reset Options</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          {% for item in reset_options %}
+          <div class="col-md-6 col-lg-4">
+            <div class="d-grid">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmResetModal"
+                      data-action="{{ item.action }}" data-label="{{ item.label }}">
+                {{ item.label }}
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div class="modal fade" id="confirmResetModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm System Reset</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to perform <strong id="resetLabel"></strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{% url 'system_reset' %}">
+          {% csrf_token %}
+          <input type="hidden" name="reset_type" id="resetTypeInput">
+          <button type="submit" class="btn btn-primary">Confirm Reset</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const resetModal = document.getElementById('confirmResetModal');
+  resetModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const label = button.getAttribute('data-label');
+    const action = button.getAttribute('data-action');
+    document.getElementById('resetLabel').innerText = label;
+    document.getElementById('resetTypeInput').value = action;
+  });
+</script>
+
+{% endblock %}

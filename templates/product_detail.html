@@ -1,0 +1,558 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{{ product.images.url }}'); background-position: center; background-size: cover; background-repeat: no-repeat; height: 50%;">
+    <div class="overlay"></div>   
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-end">
+            <div class="col-md-9 ftco-animate pb-5">
+                <p class="breadcrumbs mb-2">
+                    <span class="mr-2"><a href="{% url 'home' %}">Home <i class="fa fa-chevron-right"></i></a></span>
+                    <span>Products <i class="fa fa-chevron-right"></i></span>
+                </p>
+                <h1 class="mb-0 bread" style="color:grey!important;">Products</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="ftco-section mb-5" style="padding: 3rem;">
+    <div class="container">
+        <div class="row justify-content-center pb-5 mb-3">
+            <div class="col-md-7 heading-section text-center ftco-animate">
+                <span class="subheading">Product Details</span>
+                <h2>{{ product.name }}</h2>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+
+            <!-- Main Image Section -->
+            <div class="col-md-6 ftco-animate">
+                <div class="blog-entry align-self-stretch">
+                    <!-- Main Image with Click Event -->
+                    <img id="mainImage" src="{{ product.images.url }}" alt="{{ product.name }}" class="img-fluid main-product-image" data-toggle="modal" data-target="#imageModal" onclick="updateModalImage(this.src)">
+                </div>
+
+                <!-- Additional Images (Thumbnails) -->
+                <div class="row mt-3 justify-content-center">
+                    {% if product.images %}
+                        <div class="col-2">
+                            <img src="{{ product.images.url }}" class="img-fluid thumbnail-image active-thumbnail" onclick="changeImage(this)">
+                        </div>
+                    {% endif %}
+                    {% if product.image_1 %}
+                        <div class="col-2">
+                            <img src="{{ product.image_1.url }}" class="img-fluid thumbnail-image" onclick="changeImage(this)">
+                        </div>
+                    {% endif %}
+                    {% if product.image_2 %}
+                        <div class="col-2">
+                            <img src="{{ product.image_2.url }}" class="img-fluid thumbnail-image" onclick="changeImage(this)">
+                        </div>
+                    {% endif %}
+                    {% if product.image_3 %}
+                        <div class="col-2">
+                            <img src="{{ product.image_3.url }}" class="img-fluid thumbnail-image" onclick="changeImage(this)">
+                        </div>
+                    {% endif %}
+                    {% if product.image_4 %}
+                        <div class="col-2">
+                            <img src="{{ product.image_4.url }}" class="img-fluid thumbnail-image" onclick="changeImage(this)">
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Product Details Section -->
+            <div class="col-md-6 ftco-animate">
+                <div class="text mt-3">
+                    <h3 class="heading">{{ product.name }}</h3>
+                    <h5 class="heading"><p>Price  &nbsp;&nbsp;(starts from)&nbsp;:<strong> &nbsp; {{ product.price }}</strong></p></h5>
+                    <p><strong>Category:</strong> {{ product.category.name }}</p>
+                    {% if product.subcategory %}
+                        <p><strong>Subcategory:</strong> {{ product.subcategory.name }}</p>
+                    {% endif %}
+                    {% if product.catalogues %}
+                    <p><strong>Catalogue:</strong>
+                            <a href="{{ product.catalogues }}" target="_blank">View Catalogue</a>
+                    </p>
+                    {% endif %}
+                    <p><strong>Description:</strong> </br>{{ product.description }}</p>
+
+                    <!-- WhatsApp Button -->
+                    {% if enable_cart.value == "True" %}
+                    <div class="cart-actions" style="margin-bottom: 30px;">
+                        <input type="number" id="item-count" class="form-control small-width" min="1" value="1" oninput="validateCount(this)">
+                        <button id="add-to-cart-btn" 
+                            data-product-sku="{{ product.sku }}" 
+                            class="btn btn-primary"
+                            style="background: green; color: white; 
+                                --bs-btn-hover-bg: green; --bs-btn-hover-border-color: #2cf724; --bs-btn-hover-color: white;">
+                            Add to Cart
+                        </button>
+                    </div>
+                    {% endif %}
+                    
+                    
+                    <!-- WhatsApp Button -->
+                    <a href="https://wa.me/+919940100506?text=Hi, I am interested in your product: {{ product.name }}. Price: {{ product.price }}, Category: {{ product.category.name }}{% if product.subcategory %}, Subcategory: {{ product.subcategory.name }}{% endif %}. Additional Information: {{ product.additional_information }}. Product UID: {{ product.product_uid }}" 
+                       class="btn btn-primary mt-3 whatsapp-btn" 
+                       style="background: green;  color: white; --bs-btn-hover-bg: green; --bs-btn-hover-border-color: #2cf724; --bs-btn-hover-color: white;">
+                       Contact Us via WhatsApp
+                    </a>
+                    <style>
+                        .small-width {
+                            width: 50px; /* Adjust the width as needed */
+                            display: inline-block;
+                            margin-right: 10px; /* Add some space between input and button */
+                        }
+                    
+                        .cart-actions {
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 30px; /* Ensure the cart actions have a margin at the bottom */
+                        }
+                    
+                        .whatsapp-btn {
+                            display: block;
+                            width: 300px;
+                            margin-bottom: 30px; /* Ensure the WhatsApp button has a margin at the bottom */
+                        }
+                    </style>
+                    
+
+                </div>
+            </div>
+        </div>
+        
+
+        <!-- Modal for Displaying Larger Image -->
+        <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <img id="modalImage" src="" alt="Enlarged Product Image" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Description Section -->
+        {% comment %} <div class="col-md-12 mt-5">
+            <p><strong>Description:</strong> </br>{{ product.description }}</p>
+          
+        </div> {% endcomment %}
+
+        <!-- Description & Specifications Section -->
+        <div class="row mt-5">
+
+            {% comment %} <!-- Description Section -->
+            <div class="col-md-4">
+                <p><strong>Description:</strong> </br>{{ product.description }}</p>
+                <p><strong>Additional Information:</strong> </br>{{ product.additional_information }}</p>
+            </div> {% endcomment %}
+
+            <!-- Specifications Section -->
+            <div class="col-md-12">
+                <div id="specifications-table" class="specifications-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Specification</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table rows will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description Section -->
+        <div class="col-md-12 mt-5">
+            <p><strong>Additional Information:</strong> </br>{{ product.additional_information }}</p>
+        </div>
+
+        <!-- Same Category Products -->
+        <div class="row mt-5">
+            <div class="col-md-12 heading-section text-center ftco-animate">
+                <h3>More from {{ product.category.name }}</h3>
+            </div>
+            <div class="product-grid">
+                {% for item in  same_subcategory_products %}
+                    <div class="blog-entry">
+                        <a href="{% url 'product_detail' item.sku %}" class="block-20">
+                            <img src="{{ item.images.url|default:'/static/images/placeholder.jpg' }}" class="product-image">
+                        </a>
+                        <div class="text">
+                            <h3 class="heading"><a href="{% url 'product_detail' item.sku %}">{{ item.name }}</a></h3>
+                            <p><strong>Price:</strong> ₹{{ item.price }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-center">No similar products available.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Same Subcategory Products -->
+        {% if same_subcategory_products %}
+        <div class="row mt-5">
+            <div class="col-md-12 heading-section text-center ftco-animate">
+                <h3>Related Products</h3>
+            </div>
+            <div class="product-grid">
+                {% for item in same_category_products %}
+                    <div class="blog-entry">
+                        <a href="{% url 'product_detail' item.sku %}" class="block-20">
+                            <img src="{{ item.images.url|default:'/static/images/placeholder.jpg' }}" class="product-image">
+                        </a>
+                        <div class="text">
+                            <h3 class="heading"><a href="{% url 'product_detail' item.sku %}">{{ item.name }}</a></h3>
+                            <p><strong>Price:</strong> ₹{{ item.price }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-center">No similar products available.</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- JavaScript for Image Switching -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+    
+        const specificationsText = "{{ product.specifications|escapejs }}";
+        console.log("specificationsText:", specificationsText); 
+        
+        // Split the specifications into key-value pairs
+        const specificationsArray = specificationsText.split(", ");
+        
+        // Get the table body
+        const tableBody = document.querySelector("#specifications-table tbody");
+        
+        // Loop through the specifications and add rows to the table
+        specificationsArray.forEach(spec => {
+            const [key, value] = spec.split(/:(.+)/); // Split only on the first occurrence of ':'
+            if (key && value) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td>${key.trim()}</td><td>${value.trim()}</td>`;
+                tableBody.appendChild(row);
+            }
+        });
+    });
+    function updateModalImage(imageSrc) {
+        document.getElementById('modalImage').src = imageSrc;
+    }
+
+    function changeImage(element) {
+        var mainImage = document.getElementById("mainImage");
+        mainImage.src = element.src;
+
+        // Remove active class from all thumbnails
+        document.querySelectorAll(".thumbnail-image").forEach(img => {
+            img.classList.remove("active-thumbnail");
+        });
+
+        // Add active class to clicked thumbnail
+        element.classList.add("active-thumbnail");
+    }
+</script>
+
+
+
+<script>
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to get CSRF token from cookie
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken' + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        // Function to validate the count input
+        function validateCount(input) {
+            let value = input.value;
+            if (value <= 0) {
+                input.value = 1; // Reset to 1 if invalid
+            }
+        }
+
+        // Function to safely set text content
+        function safeSetTextContent(elementId, text) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = text;
+            } else {
+                console.error(`Element with ID ${elementId} not found.`);
+            }
+        }
+
+        // Add event listener to the Add to Cart button
+        document.getElementById('add-to-cart-btn').addEventListener('click', function() {
+            let itemCount = document.getElementById('item-count').value;
+            itemCount = parseInt(itemCount, 10) || 1;
+            
+            // Get product ID from data attribute
+            let productSku = this.getAttribute('data-product-sku');
+            
+            
+            // Get the username from the hidden input field
+            let username = document.getElementById('username').value;
+
+            // Send cart update to the server
+            fetch('/update-cart/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken() // Include CSRF token for Django
+                },
+                body: JSON.stringify({
+                    product_sku: productSku,
+                    quantity: itemCount,
+                    action: "add_qty",
+                    timestamp: new Date().toISOString(),
+                    username: username // Include the username in the payload
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("datadatadatadatadatadatadata", data);
+                // Update the cart badge
+                let cartBadge = document.getElementById('cart-badge');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cart_count;
+                    cartBadge.classList.add('animate');
+                    
+                    // Remove the animation class after the animation ends
+                    setTimeout(() => {
+                        cartBadge.classList.remove('animate');
+                    }, 300);
+                } else {
+                    console.error('Element with ID cart-badge not found.');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart:', error);
+            });
+        });
+    });
+</script>
+
+<!-- CSS for Styling -->
+<style>
+    .badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 30px;
+        height: 30px;
+        background-color: red;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        transition: transform 0.3s ease; /* Add transition for animation */
+    }
+
+    .badge.animate {
+        transform: scale(1.2); /* Scale up the badge */
+    }
+    .small-width {
+        width: 60px; /* Adjust the width as needed */
+        height: 40px!important; 
+        font-size: 16px !important; 
+    }
+    /* Table Styling */
+    .specifications-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .specifications-table th, 
+    .specifications-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    .specifications-table th {
+        background-color: #f2f2f2;
+        text-align: left;
+    }
+    
+    /* Main Product Image */
+    .main-product-image {
+        width: 100%;
+        height: 400px; /* Fixed height for consistency */
+        object-fit: cover; /* Ensures image fills without distortion */
+        border-radius: 10px;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    /* Thumbnail Images */
+    .thumbnail-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover; /* Ensures thumbnails fill space properly */
+        border: 2px solid transparent;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 5px;
+        transition: border-color 0.3s ease-in-out, transform 0.2s;
+    }
+    .thumbnail-image:hover {
+        border-color: #007bff;
+        transform: scale(1.05);
+    }
+    .active-thumbnail {
+        border: 2px solid #007bff;
+    }
+    
+    /* Modal Image */
+    #modalImage {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain; /* Ensures image is fully visible */
+        margin: 0 auto;
+        display: block;
+    }
+    
+    /* Product Grid */
+    .product-grid {
+        display: grid;
+        gap: 20px;
+        justify-content: center;
+        padding: 20px;
+    }
+    @media (min-width: 992px) {
+        .product-grid {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+    @media (max-width: 991px) {
+        .product-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (max-width: 576px) {
+        .product-grid {
+            grid-template-columns: repeat(1, 1fr);
+        }
+    }
+    
+    /* Product Image */
+    .product-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+    }
+    
+    /* Prevent Overlapping */
+    .row.mt-5, .row.mt-3 {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .col-md-6 {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* More from Section - 4 Images Per Row */
+    .more-from-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+    .more-from-grid img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    
+    /* Responsive Fixes */
+    @media (max-width: 768px) {
+        .footer-col .col-md-6 {
+            width: 100%;
+            display: block !important;
+        }
+        .main-product-image {
+            height: 350px; /* Slightly smaller for mobile */
+        }
+        .thumbnail-image {
+            width: 80px;
+            height: 80px;
+        }
+        .more-from-grid {
+            grid-template-columns: repeat(2, 1fr); /* 2 images per row on smaller screens */
+        }
+    }
+    /* Ensure uniform height for blog entry */
+    .blog-entry {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%; /* Ensures each product card has equal height */
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    /* Set a fixed height for product names to ensure alignment */
+    .blog-entry .heading {
+        min-height: 50px; /* Adjust as needed */
+        display: flex;
+        font-size: 14px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* Ensures text section fills available space while keeping the price at the bottom */
+    .blog-entry .text {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        justify-content: space-between;
+        text-align: center;
+    }
+
+    /* Align price to the bottom */
+    .blog-entry p {
+        margin-top: auto;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Ensure uniform product image */
+    .product-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+</style>
+
+{% endblock %}

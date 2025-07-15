@@ -1,0 +1,98 @@
+{% extends 'admin_panel/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Manage Reviews</h5>
+
+      <!-- Add Review Button -->
+      <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'review_create' %}" class="btn btn-success btn-sm">+ Add Review</a>
+      </div>
+
+      <!-- Search Form -->
+      <form method="GET" action="{% url 'review_list' %}" class="mb-3">
+        <div class="input-group">
+          <input type="text" name="search" class="form-control" placeholder="Search reviews..." value="{{ query }}">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
+
+      <!-- Reviews Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Customer Name</th>
+              <th>Rating</th>
+              <th>Review Content</th>
+              <th>Review Date</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for review in reviews %}
+            <tr>
+              <td>{{ review.id }}</td>
+              <td>{{ review.customer_name }}</td>
+              <td>{{ review.review_rating }} ★</td>
+              <td>{{ review.review_content|truncatewords:10 }}</td>
+              <td>{{ review.review_date|date:"M d, Y" }}</td>
+              <td class="text-center">
+                <a href="{% url 'review_edit' review.id %}" class="btn btn-info btn-sm">Edit</a>
+                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-review-id="{{ review.id }}" data-review-name="{{ review.customer_name }}">
+                  Delete
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center">No reviews found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the review from <strong id="reviewName"></strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var reviewId = button.getAttribute('data-review-id');
+      var reviewName = button.getAttribute('data-review-name');
+
+      document.getElementById('reviewName').textContent = reviewName;
+      var deleteUrl = "{% url 'review_delete' 0 %}".replace('0', reviewId);
+      document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+    });
+  });
+</script>
+
+{% endblock %}

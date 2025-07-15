@@ -1,0 +1,509 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SAP ADMIN PANEL</title>
+  {% comment %} <link rel="shortcut icon" type="image/png" href="{% static 'admin_panel/images/logos/favicon.png' %}" /> {% endcomment %}
+  <link rel="stylesheet" href="{% static 'admin_panel/css/styles.min.css' %}" />
+</head>
+<style>
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px; /* Space below logo */
+  }
+
+  .logo-img {
+    max-width: 150px; /* Further reduced size */
+    height: auto; /* Maintain aspect ratio */
+  }
+  .close-btn {
+    width: 40px;
+    height: 40px;
+    background-color: lightgrey;
+    color: #333;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+  }
+
+  .close-btn:hover {
+      background-color: #e0e0e0;
+      transform: scale(1.1);
+  }
+
+  .close-btn i {
+      font-size: 20px; /* Adjust icon size */
+  }
+  .logo-container {
+    gap: 20px; /* Adjust spacing */
+  }
+</style>
+
+
+
+<body>
+  <!--  Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <!-- Sidebar Start -->
+    <aside class="left-sidebar">
+      <!-- Sidebar scroll-->
+      <div>
+        <div class="brand-logo d-flex flex-column align-items-center position-relative">
+          <div class="logo-container mt-3 d-flex align-items-center w-100 px-3" style="gap: 20px;">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'images/main_logo.png' %}" alt="CODESPIKE STUDIO" class="logo-img">
+            </a>
+            <div class="close-btn d-xl-none d-flex justify-content-center align-items-center cursor-pointer sidebartoggler ms-auto" id="sidebarCollapse">
+                <i class="ti ti-arrow-left fs-5"></i>
+            </div>
+        </div>
+        
+
+        </div>
+        
+        
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+          <ul id="sidebarnav">
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Home</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'dashboard' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Inventory Management</span>
+            </li>
+            
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'category_list' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-article"></i>
+                </span>
+                <span class="hide-menu">Manage Category</span>  
+              </a>
+            </li>
+            
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'subcategory_list' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-alert-circle"></i>
+                </span>
+                <span class="hide-menu">Manage Sub Category</span>
+              </a>
+            </li>
+            
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'product_list' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-cards"></i>
+                </span>
+                <span class="hide-menu">Manage Products</span>
+              </a>
+            </li>
+            
+            {% comment %} <li class="sidebar-item">
+              <a class="sidebar-link" href="./ui-forms.html" aria-expanded="false">
+                <span>
+                  <i class="ti ti-file-description"></i>
+                </span>
+                <span class="hide-menu">Forms</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./ui-typography.html" aria-expanded="false">
+                <span>
+                  <i class="ti ti-typography"></i>
+                </span>
+                <span class="hide-menu">Typography</span>
+              </a>
+            </li> {% endcomment %}
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Enquiry Log</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'enquiry_list' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-login"></i>
+                </span>
+                <span class="hide-menu">View Enquiries</span>
+              </a>
+            </li>
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Manage Home Page</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'review_list' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-login"></i>
+                </span>
+                <span class="hide-menu">View Reviews</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'banner_list' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-mood-happy"></i>
+                </span>
+                <span class="hide-menu">View Banner</span>
+              </a>
+            </li>  
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Employee Management</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'user_list' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-mood-happy"></i>
+                </span>
+                <span class="hide-menu">View Employee</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'download_database' %}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-download"></i>
+                </span>
+                <span class="hide-menu">DB backup</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'download_all_media' %}" 
+                 aria-expanded="false"
+                 onclick="return confirm('This will download all media files as a ZIP archive. Continue?')">
+                <span>
+                  <i class="ti ti-download"></i>
+                </span>
+                <span class="hide-menu">Download All Media</span>
+              </a>
+            </li>
+            {% comment %} <li class="sidebar-item">
+              <a class="sidebar-link" href="./sample-page.html" aria-expanded="false">
+                <span>
+                  <i class="ti ti-aperture"></i>
+                </span>
+                <span class="hide-menu">Sample Page</span>
+              </a>
+            </li> {% endcomment %}
+          </ul>
+        </nav>
+        <!-- End Sidebar navigation -->
+      </div>
+      <!-- End Sidebar scroll-->
+    </aside>
+    <!--  Sidebar End -->
+    <!--  Main wrapper -->
+    <div class="body-wrapper">
+      <!--  Header Start -->
+      <header class="app-header">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <ul class="navbar-nav">
+            <li class="nav-item d-block d-xl-none">
+              <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
+                <i class="ti ti-menu-2"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-icon-hover" href="{% url 'home' %}">
+                <i class="ti ti-home"></i>
+                {% comment %} <div class="notification bg-primary rounded-circle"></div> {% endcomment %}
+              </a>
+            </li>
+          </ul>
+          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+              <li class="nav-item dropdown">
+                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  <img src="{% static 'admin_panel/images/profile/user-1.jpg' %}" alt="" width="35" height="35" class="rounded-circle">
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                  <div class="message-body">
+                    <a href="{% url 'home' %}" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-user fs-6"></i>
+                      <p class="mb-0 fs-3">Go to Home</p>
+                    </a>
+                    {% comment %} <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-mail fs-6"></i>
+                      <p class="mb-0 fs-3">My Account</p>
+                    </a>
+                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-list-check fs-6"></i>
+                      <p class="mb-0 fs-3">My Task</p>
+                    </a> {% endcomment %}
+                    <a href="{% url 'logout' %}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </header>
+      <!--  Header End -->
+        {% block content %}
+        <div class="container-fluid" style="max-width: none;">
+        <!--  Row 1 -->
+        <div class="row">
+          <div class="col-lg-3 col-md-6">
+            <!-- Enquiries Card -->
+            <div class="card overflow-hidden">
+              <div class="card-body p-4">
+                <h5 class="card-title mb-9 fw-semibold">Enquiries Count</h5>
+                <div class="row align-items-center">
+                  <div class="col-8">
+                    <h4 class="fw-semibold mb-3">{{total_enquiries}}</h4>
+                    <div class="d-flex align-items-center mb-3">
+                      {% comment %} <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-arrow-up-left text-success"></i>
+                      </span> {% endcomment %}
+                      {% comment %} <p class="text-dark me-1 fs-3 mb-0">+9%</p> {% endcomment %}
+                      {% comment %} <p class="fs-3 mb-0">last year</p> {% endcomment %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="col-lg-3 col-md-6">
+            <!-- Categories Card -->
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title mb-9 fw-semibold">Categories</h5>
+                <h4 class="fw-semibold mb-3">{{total_cat_count}}</h4>
+                <div class="d-flex align-items-center pb-1">
+                  {% comment %} <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-arrow-down-right text-danger"></i>
+                  </span> {% endcomment %}
+                  {% comment %} <p class="text-dark me-1 fs-3 mb-0">+9%</p> {% endcomment %}
+                  {% comment %} <p class="fs-3 mb-0">last year</p> {% endcomment %}
+                </div>
+              </div>
+            </div>
+          </div>
+        
+
+        
+          <div class="col-lg-3 col-md-6">
+            <!-- Sub Categories Card -->
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title mb-9 fw-semibold">Sub Categories</h5>
+                <h4 class="fw-semibold mb-3">{{total_subcat_count}}</h4>
+                <div class="d-flex align-items-center pb-1">
+                  {% comment %} <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-arrow-down-right text-danger"></i>
+                  </span> {% endcomment %}
+                  {% comment %} <p class="text-dark me-1 fs-3 mb-0">+9%</p> {% endcomment %}
+                  {% comment %} <p class="fs-3 mb-0">last year</p> {% endcomment %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <!-- Total Products Card -->
+            <div class="card overflow-hidden">
+              <div class="card-body p-4">
+                <h5 class="card-title mb-9 fw-semibold">Total Products</h5>
+                <h4 class="fw-semibold mb-3">{{total_products_count}}</h4>
+                <div class="d-flex align-items-center mb-3">
+                  {% comment %} <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-arrow-up-left text-success"></i>
+                  </span> {% endcomment %}
+                  {% comment %} <p class="text-dark me-1 fs-3 mb-0">+9%</p> {% endcomment %}
+                  {% comment %} <p class="fs-3 mb-0">last year</p> {% endcomment %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="row">
+          <div class="row">
+            <div class="container-fluid">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title fw-semibold mb-4">Find Products</h5>
+          
+                  <!-- Filter & Search Form -->
+                  <form method="GET" action="{% url 'dashboard_search_list' %}" class="mb-3">
+                    <div class="row g-2">
+                      <div class="col-12 col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Search product..." value="{{ query }}">
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <select name="category" class="form-control" onchange="this.form.submit()">
+                          <option value="">Filter by Category</option>
+                          {% for category in total_categories %}
+                          <option value="{{ category.id }}" {% if category.id|stringformat:"s" == selected_category %}selected{% endif %}>{{ category.name }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <select name="subcategory" class="form-control" onchange="this.form.submit()">
+                          <option value="">Filter by subcategory</option>
+                          {% for subcategory in total_subcategories %}
+                          <option value="{{ subcategory.id }}" {% if subcategory.id|stringformat:"s" == selected_subcategory %}selected{% endif %}>{{ subcategory.name }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                      </div>
+                    </div>
+                  </form>
+          
+                  <!-- Product Table -->
+                  <div class="table-responsive">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Name</th>
+                          <th>Price</th>
+                          <th>Category</th>
+                          <th>subcategory</th>
+                          <th>Image</th>
+                          <th>Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for product in products %}
+                        <tr>
+                          <td>{{ product.id }}</td>
+                          <td>{{ product.name }}</td>
+                          <td>₹{{ product.price }}</td>
+                          <td>{{ product.category.name }}</td>
+                          <td>{{ product.subcategory.name }}</td>
+                          <td>
+                            {% if product.images %}
+                              <img src="{{ product.images.url }}" alt="Product Image" class="img-thumbnail" width="50">
+                            {% else %}
+                              No Image
+                            {% endif %}
+                          </td>
+                          <td>{{ product.description }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                          <td colspan="7" class="text-center">No products found</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+          <script>
+            $(document).ready(function () {
+              function fetchProducts() {
+                var searchQuery = $('input[name="search"]').val();
+                var category = $('select[name="category"]').val();
+                var subcategory = $('select[name="subcategory"]').val();
+          
+                $.ajax({
+                  url: searchUrl, // Passed from template
+                  type: "GET",
+                  data: {
+                    search: searchQuery,
+                    category: category,
+                    subcategory: subcategory
+                  },
+                  dataType: "json",
+                  success: function (response) {
+                    var productTable = $("table tbody");
+                    productTable.empty();
+          
+                    if (response.products.length > 0) {
+                      $.each(response.products, function (index, product) {
+                        var imageTag = product.images ? `<img src="${product.images}" width="50" class="img-thumbnail">` : "No Image";
+                        var row = `
+                          <tr>
+                            <td>${product.id}</td>
+                            <td>${product.name}</td>
+                            <td>₹${product.price}</td>
+                            <td>${product.category__name}</td>
+                            <td>${product.subcategory__name}</td>
+                            <td>${imageTag}</td>
+                            <td>${product.description}</td>
+                          </tr>
+                        `;
+                        productTable.append(row);
+                      });
+                    } else {
+                      productTable.append('<tr><td colspan="7" class="text-center">No products found</td></tr>');
+                    }
+                  },
+                  error: function () {
+                    alert("Error fetching data. Please try again.");
+                  }
+                });
+              }
+          
+              $('input[name="search"]').on("keyup", fetchProducts);
+              $('select[name="category"], select[name="subcategory"]').on("change", fetchProducts);
+            });
+            
+          </script>
+          <!-- JavaScript -->
+          <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const sidebar = document.getElementById("sidebar");
+                const sidebarCollapse = document.getElementById("sidebarCollapse");
+
+                // Toggle Sidebar
+                sidebarCollapse.addEventListener("click", function () {
+                    sidebar.classList.toggle("active"); // Add your sidebar open/close class
+                });
+
+                // Close Sidebar on Outside Click
+                document.addEventListener("click", function (event) {
+                    if (!sidebar.contains(event.target) && !sidebarCollapse.contains(event.target)) {
+                        sidebar.classList.remove("active");
+                    }
+                });
+            });
+          </script>
+          
+          
+          {% endblock %}
+        </div>
+        <div class="py-6 px-6 text-center">
+          <p class="mb-0 fs-4">Design and Developed by <a href="https://adminmart.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">codespikestudio.com</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="{% static 'admin_panel/libs/jquery/dist/jquery.min.js' %}"></script>
+  <script src="{% static 'admin_panel/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'admin_panel/js/sidebarmenu.js' %}"></script>
+  <script src="{% static 'admin_panel/js/app.min.js' %}"></script>
+  <script src="{% static 'admin_panel/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+  <script src="{% static 'admin_panel/libs/simplebar/dist/simplebar.js' %}"></script>
+  <script src="{% static 'admin_panel/js/dashboard.js' %}"></script>
+</body>
+
+</html>

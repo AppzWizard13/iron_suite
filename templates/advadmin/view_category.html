@@ -1,0 +1,124 @@
+{% extends 'advadmin/index.html' %}
+{% load static %} 
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Manage /</span> Categories</h4>
+
+    <div class="card">
+      <h5 class="card-header">Categories</h5>
+      <div class="card-body">
+        <!-- Add Subcategory Button -->
+        <div class="d-flex justify-content-between mb-3">
+          <a href="{% url 'add_category' %}" class="btn btn-primary">
+            <i class="bx bx-plus me-1"></i> Add Category
+          </a>
+          
+          <!-- Search Form -->
+          <form method="GET" action="{% url 'category_list' %}" class="d-flex" style="max-width: 300px;">
+            <div class="input-group">
+              <input type="text" name="search" class="form-control" placeholder="Search category..." value="{{ query }}">
+              <button type="submit" class="btn btn-primary">
+                <i class="bx bx-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        {% comment %} <!-- Add Category Button -->
+        <div class="d-flex justify-content-end mb-3">
+          <a href="{% url 'add_category' %}" class="btn btn-success btn-sm">+ Add Category</a>
+        </div>
+
+        <!-- Search Form -->
+        <form method="GET" action="{% url 'category_list' %}" class="mb-3">
+          <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search category..." value="{{ query }}">
+            <button type="submit" class="btn btn-primary">Search</button>
+          </div>
+        </form> {% endcomment %}
+
+        <!-- Categories Table -->
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for category in categories %}
+              <tr>
+                <td>{{ category.id }}</td>
+                <td class="text-center">
+                  {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                  {% else %}
+                    <img src="{% static 'icons/default-category.png' %}" alt="No Image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                  {% endif %}
+                </td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.description }}</td>
+                <td class="text-center">
+                    <a href="{% url 'edit_category' category.id %}" class="btn btn-secondary btn-sm mb-2">
+                      <i class="bx bx-edit"></i>
+                    </a>
+                  
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                            data-category-id="{{ category.id }}" data-category-name="{{ category.name }}">
+                            <i class="bx bx-trash"></i>
+                    </button>
+                  </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center">No categories found</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <strong id="categoryName"></strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var categoryId = button.getAttribute('data-category-id');
+      var categoryName = button.getAttribute('data-category-name');
+      document.getElementById('categoryName').textContent = categoryName;
+      var deleteUrl = "{% url 'delete_category' 0 %}".replace('0', categoryId);
+      document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+    });
+  });
+</script>
+
+{% endblock %}

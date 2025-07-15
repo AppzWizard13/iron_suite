@@ -1,0 +1,136 @@
+{% extends 'admin_panel/index.html' %}
+{% block content %}
+
+<!-- Toast Messages -->
+{% if messages %}
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    {% for message in messages %}
+    <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ message }}
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="container-fluid" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">
+        {% if form %} 
+          {% if user %} Edit {% else %} Add {% endif %} User
+        {% else %}
+          Manage Users
+        {% endif %}
+      </h5>
+
+      {% if form %}
+      <!-- Add/Edit User Form -->
+      <form method="post">
+        {% csrf_token %}
+        <div class="row">
+          {% for field in form %}
+          <div class="col-md-6">
+            <label>{{ field.label }}:</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="text-danger">{{ field.errors.0 }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-3">
+          <button type="submit" class="btn btn-success">
+            {% if user %} Update {% else %} Add {% endif %} User
+          </button>
+          <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+      {% else %}
+      <!-- User List -->
+      <div class="d-flex justify-content-end mb-2">
+        <a href="{% url 'user_registration' %}" class="btn btn-primary">Add User</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Phone Number</th>
+              <th>Staff Role</th>
+              <th>City</th>
+              <th>State</th>
+              <th>Pincode</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user.employee_id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.first_name }}</td>
+              <td>{{ user.last_name }}</td>
+              <td>{{ user.phone_number }}</td>
+              <td>{{ user.staff_role }}</td>
+              <td>{{ user.city }}</td>
+              <td>{{ user.state }}</td>
+              <td>{{ user.pincode }}</td>
+              <td>
+                <a href="{% url 'user_edit' user.username %}" class="btn btn-warning btn-sm">Edit</a>
+                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUser{{ user.username }}">Delete</button>
+
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" id="deleteUser{{ user.username }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ user.username }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to delete user "<strong>{{ user.first_name }} {{ user.last_name }}</strong>"?
+                      </div>
+                      <div class="modal-footer">
+                        <a href="{% url 'user_delete' user.username %}" class="btn btn-danger">Delete</a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="10" class="text-center text-muted">No Members found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Enable Bootstrap Toasts -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+    var toastList = toastElList.map(function(toastEl) {
+      return new bootstrap.Toast(toastEl)
+    });
+    toastList.forEach(toast => toast.show());
+  });
+</script>
+
+{% endblock %}

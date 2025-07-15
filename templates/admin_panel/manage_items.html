@@ -1,0 +1,179 @@
+{% extends 'admin_panel/index.html' %}
+{% block content %}
+<div class="container-fluid" style="max-width: none;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Manage Categories, Subcategories & Products</h5>
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs" id="manageTabs">
+        <li class="nav-item">
+          <a class="nav-link active" data-bs-toggle="tab" href="#categories">Categories</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="tab" href="#subcategories">Subcategories</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="tab" href="#products">Products</a>
+        </li>
+      </ul>
+
+      <div class="tab-content mt-4">
+        <!-- Categories Tab -->
+        <div id="categories" class="tab-pane fade show active">
+          <div class="d-flex justify-content-end mb-2">
+            <a href="{% url 'add_category' %}" class="btn btn-primary">Add Category</a>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for category in categories %}
+              <tr>
+                <td>{{ category.id }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.description }}</td>
+                <td>
+                  <a href="{% url 'edit_category' category.id %}" class="btn btn-warning btn-sm">Edit</a>
+                  <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCategory{{ category.id }}">Delete</button>
+
+                  <!-- Delete Modal -->
+                  <div class="modal fade" id="deleteCategory{{ category.id }}">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Confirm Delete</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                          Are you sure you want to delete "{{ category.name }}"?
+                        </div>
+                        <div class="modal-footer">
+                          <a href="{% url 'delete_category' category.id %}" class="btn btn-danger">Delete</a>
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Subcategories Tab -->
+        <div id="subcategories" class="tab-pane fade">
+          <div class="d-flex justify-content-end mb-2">
+            <a href="{% url 'add_subcategory' %}" class="btn btn-primary">Add subcategory</a>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for subcategory in subcategories %}
+              <tr>
+                <td>{{ subcategory.id }}</td>
+                <td>{{ subcategory.name }}</td>
+                <td>{{ subcategory.category.name }}</td>
+                <td>{{ subcategory.description }}</td>
+                <td>
+                  <a href="{% url 'edit_subcategory' subcategory.id %}" class="btn btn-warning btn-sm">Edit</a>
+                  <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletesubcategory{{ subcategory.id }}">Delete</button>
+
+                  <!-- Delete Modal -->
+                  <div class="modal fade" id="deletesubcategory{{ subcategory.id }}">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Confirm Delete</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                          Are you sure you want to delete "{{ subcategory.name }}"?
+                        </div>
+                        <div class="modal-footer">
+                          <a href="{% url 'delete_subcategory' subcategory.id %}" class="btn btn-danger">Delete</a>
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="products" class="tab-pane fade">
+          <div class="d-flex justify-content-end mb-2">
+            <a href="{% url 'add_product' %}" class="btn btn-primary">Add Product</a>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>subcategory</th>
+                <th>Active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in products %}
+              <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category.name }}</td>
+                <td>{{ product.subcategory.name }}</td>
+                <td>{{ product.is_active|yesno:"Yes,No" }}</td>
+                <td>
+                  <a href="{% url 'edit_product' product.id %}" class="btn btn-warning btn-sm">Edit</a>
+                  <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteProduct{{ product.id }}">Delete</button>
+
+                  <!-- Delete Modal -->
+                  <div class="modal fade" id="deleteProduct{{ product.id }}">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Confirm Delete</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                          Are you sure you want to delete "{{ product.name }}"?
+                        </div>
+                        <div class="modal-footer">
+                          <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

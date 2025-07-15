@@ -1,0 +1,183 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+<section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_1.jpg' %});" data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row no-gutters slider-text align-items-end">
+        <div class="col-md-9 ftco-animate pb-5">
+          <p class="breadcrumbs mb-2"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="fa fa-chevron-right"></i></a></span> <span>Products <i class="fa fa-chevron-right"></i></span></p>
+          <h1 class="mb-0 bread" style="color:grey!important;">Products</h1>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="card">
+    <div class="card-body">
+
+    <!-- Filter & Search Form -->
+    <form method="GET" action="{% url 'product_grid_view' %}" class="mb-3">
+      <div class="row mt-5">
+          <div class="searchform mb-2 col-md-4">
+              <input type="text" name="search" class="form-control" placeholder="Search product..." value="{{ query }}">
+          </div>
+
+          <div class="searchform mb-2 col-md-3">
+              <select name="category" class="form-control" onchange="this.form.submit()">
+                  <option value="">Filter by Category</option>
+                  {% for category in categories %}
+                  <option value="{{ category.id }}" {% if category.id|stringformat:"s" == selected_category %}selected{% endif %}>
+                      {{ category.name }}
+                  </option>
+                  {% endfor %}
+              </select>
+          </div>
+
+          <div class="searchform mb-2 col-md-3">
+              <select name="subcategory" class="form-control" onchange="this.form.submit()">
+                  <option value="">Filter by Subcategory</option>
+                  {% for subcategory in subcategories %}
+                  <option value="{{ subcategory.id }}" {% if subcategory.id|stringformat:"s" == selected_subcategory %}selected{% endif %}>
+                      {{ subcategory.name }}
+                  </option>
+                  {% endfor %}
+              </select>
+          </div>
+
+          <div class="col-md-2">
+              <button type="submit" class="btn btn-primary w-100">Search</button>
+          </div>
+      </div>
+    </form>
+      <!-- Product Grid -->
+      <section class="custom-product-section">
+        <div class="container-fluid">
+          <div class="row justify-content-center pt-5">
+            <div class="col-md-7 heading-section text-center">
+              <h2>Check our Designs here</h2>
+            </div>
+          </div>
+
+        <!-- Product Grid -->
+        <div class="product-grid">
+          {% for product in products %}
+          <div class="blog-entry d-flex flex-column">
+            <a href="{% url 'product_detail' product.sku %}" class="block-20">
+              <img src="{{ product.images.url|default:'/static/images/placeholder.jpg' }}" 2222
+                alt="{{ product.name }}" class="product-image">
+            </a>
+            <div class="text d-flex flex-column flex-grow-1 justify-content-between p-3">
+              <h3 class="heading text-center">
+                <a href="{% url 'product_detail' product.sku %}">{{ product.name }}</a>
+              </h3>
+              {% comment %} <p class="text-muted text-center flex-grow-1">{{ product.description|truncatewords:8 }}</p> {% endcomment %}
+              <p class="text-center font-weight-bold mt-auto"  style="margin-top:-25px!important"><strong>Price:</strong> ₹{{ product.price }}</p>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-center">No products available.</p>
+          {% endfor %}
+        </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+
+<style>
+  .custom-product-section .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  @media (min-width: 992px) { 
+    .custom-product-section .product-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (max-width: 991px) {
+    .custom-product-section .product-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 576px) {
+    .custom-product-section .product-grid {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  }
+
+  .custom-product-section .blog-entry {
+    {% comment %} max-width: 280px; {% endcomment %}
+    background: #fff;
+    text-align: center;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+  }
+
+  .custom-product-section .product-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+  }
+
+  .custom-product-section .text {
+    padding: 15px;
+    min-height: 120px;
+  }
+  .blog-entry {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .blog-entry:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .blog-entry .text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px;
+  }
+  
+  .blog-entry .heading a {
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
+    text-transform: uppercase;
+    text-align: center;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .blog-entry .heading a:hover {
+    color: var(--primary-red);
+  }
+  
+  .blog-entry p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .blog-entry p strong {
+    color: var(--primary-red);
+    font-weight: bold;
+  }
+</style>
+
+{% endblock %}

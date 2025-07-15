@@ -1,0 +1,44 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-bold py-3 mb-4">Monitor / QR Tokens</h4>
+  <div class="card">
+    <div class="card-body">
+
+      <!-- Button to generate new QR token -->
+      <div class="mb-3 text-end">
+        <a href="{% url 'qr_token_create' %}" class="btn btn-primary">
+          <i class="bx bx-qr"></i> Generate QR Token
+        </a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Schedule</th>
+              <th>Token</th>
+              <th>Generated</th>
+            </tr>
+          </thead>
+          <tbody class="table-border-bottom-0">
+            {% for token in qr_tokens %}
+            <tr>
+              <td>{{ token.schedule.name }}</td>
+              <td>{{ token.token }}</td>
+              <td>{{ token.generated_at|date:"d M Y, H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center">No QR tokens found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include 'partials/pagination.html' with page_obj=page_obj %}
+    </div>
+  </div>
+</div>
+{% endblock %}
