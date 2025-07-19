@@ -87,7 +87,7 @@ def start():
 
     # Add self-ping to the scheduler, for example, every 15 seconds
     # scheduler.add_job(self_ping, IntervalTrigger(seconds=15))  # Self-ping every 15 seconds
-    scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(seconds=5))  # Self-ping every 15 seconds
+    # scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(seconds=5))  # Self-ping every 15 seconds
     
     # Start the scheduler
     scheduler.start()

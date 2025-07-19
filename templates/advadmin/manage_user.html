@@ -57,11 +57,11 @@
             <thead>
               <tr>
                 <th>
-                  <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}sort={% if request.GET.sort == 'employee_id' %}-employee_id{% else %}employee_id{% endif %}">
+                  <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}sort={% if request.GET.sort == 'member_id' %}-member_id{% else %}member_id{% endif %}">
                     ID
-                    {% if request.GET.sort == 'employee_id' %}
+                    {% if request.GET.sort == 'member_id' %}
                       <i class="bx bx-up-arrow-alt"></i>
-                    {% elif request.GET.sort == '-employee_id' %}
+                    {% elif request.GET.sort == '-member_id' %}
                       <i class="bx bx-down-arrow-alt"></i>
                     {% endif %}
                   </a>
@@ -87,7 +87,7 @@
             <tbody class="table-border-bottom-0">
               {% for user in users %}
               <tr>
-                <td><strong>{{ user.employee_id }}</strong></td>
+                <td><strong>{{ user.member_id }}</strong></td>
                 <td>{{ user.username }}</td>
                 <td>{{ user.first_name }} {{ user.last_name }}</td>
                 <td>{{ user.phone_number }}</td>

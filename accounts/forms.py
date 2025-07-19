@@ -67,13 +67,13 @@ class CustomUserForm(UserCreationForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
 
-        # Auto-generate employee_id
-        if not instance.employee_id:
-            max_employee_id = CustomUser.objects.aggregate(Max('employee_id'))['employee_id__max'] or 0
-            instance.employee_id = max_employee_id + 1  
+        # Auto-generate member_id
+        if not instance.member_id:
+            max_member_id = CustomUser.objects.aggregate(Max('member_id'))['member_id__max'] or 0
+            instance.member_id = max_member_id + 1  
 
         # Auto-generate username
-        instance.username = f"MEMBER{str(instance.employee_id).zfill(5)}"
+        instance.username = f"MEMBER{str(instance.member_id).zfill(5)}"
 
         # Set password only if provided
         if self.cleaned_data.get('password1'):
@@ -344,3 +344,22 @@ class CustomerRegistrationForm(forms.ModelForm):
             customer_username = f"{base_username}{random_string}"
             if not Customer.objects.filter(customer_username=customer_username).exists():
                 return customer_username
+            
+
+
+class MemberRegistrationForm(CustomUserForm):
+    class Meta(CustomUserForm.Meta):
+        base_fields = CustomUserForm.Meta.fields + ['package']
+        fields = [f for f in base_fields if f not in ['is_active', 'is_staff', 'on_subscription']]
+
+        widgets = CustomUserForm.Meta.widgets.copy()
+        widgets['package'] = forms.Select(attrs={'class': 'form-control'})
+        widgets['staff_role'] = forms.HiddenInput()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['staff_role'].initial = 'Member'
+        self.fields['staff_role'].required = False
+        self.fields['staff_role'].label = ""  # <<< hides the label text
+        self.fields['package'].required = True

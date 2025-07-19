@@ -31,10 +31,7 @@ ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',   # If running locally
     'http://127.0.0.1:8000',    # If running locally
-    'https://8472-2401-4900-6276-83ae-ce01-365-888a-b943.ngrok-free.app',
-    'https://ade12e15640e.ngrok-free.app',
-    'https://c85bf75aaf0a.ngrok-free.app',
-    'https://0a2d942459d1.ngrok-free.app'
+    'https://iron-suite.onrender.com',
 ]
 
 AUTH_USER_MODEL ='accounts.CustomUser'
@@ -48,6 +45,7 @@ INSTALLED_APPS = [
     'orders',
     'payments',
     'attendance',
+    'subscriptions',
     'markdownx',
     'cloudinary',
     'django_extensions',

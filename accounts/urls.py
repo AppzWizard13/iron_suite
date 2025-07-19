@@ -8,7 +8,7 @@ from .views import (
     BannerListView, BannerCreateView, BannerDetailView, BannerUpdateView, BannerDeleteView,
     DownloadAllMediaView, PasswordResetRequestView, PasswordResetVerifyView, AccountSettingsView,
     ProfileUpdateView, SocialMediaListView, SocialMediaCreateView,CustomerCreateView,
-    SocialMediaDetailView, SocialMediaUpdateView, VerifyOTPView, toggle_user_active,BlockedUserListView, UnblockUserView,
+    SocialMediaDetailView, SocialMediaUpdateView, VerifyOTPView, toggle_user_active,BlockedUserListView, UnblockUserView,MemberRegisterView,
     SocialMediaDeleteView, get_company_data, login_redirect, GoogleSSOCallbackView
 )
 
@@ -38,6 +38,8 @@ urlpatterns = [
     path('users/edit/<str:username>/', UserUpdateView.as_view(), name='user_edit'),
     path('users/delete/<str:username>/', UserDeleteView.as_view(), name='user_delete'),
     path('customer/registration/', CustomerCreateView.as_view(), name='customer_registration'),
+
+    path('member/registration/', MemberRegisterView.as_view(), name='member_registration'),
     path('toggle-active/', toggle_user_active, name='toggle_user_active'),
     path('blocked-users/', BlockedUserListView.as_view(), name='blocked_users'),
     path('unblock-user/<str:username>/', UnblockUserView.as_view(), name='unblock_user'),

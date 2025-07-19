@@ -199,7 +199,7 @@
             </li>
             
             <li class="menu-item">
-              <a href="{% url 'user_registration' %}" class="menu-link">
+              <a href="{% url 'member_registration' %}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user-plus"></i>
                 <div data-i18n="All Members">New Registrations</div>
               </a>
@@ -306,6 +306,12 @@
             <!-- Finance -->
             <li class="menu-header small text-uppercase">
               <span class="menu-header-text">Finance</span>
+            </li>
+            <li class="menu-item">
+              <a href="{% url 'package_list' %}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="Payments">Packages</div>
+              </a>
             </li>
             <li class="menu-item">
               <a href="#" class="menu-link">
@@ -1047,13 +1053,12 @@
                                 <i class="bx bx-dots-vertical-rounded"></i>
                               </button>
                               <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
-                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+                                <a class="dropdown-item" href="{% url 'user_list' %}">View More</a>
                               </div>
                             </div>
                           </div>
                           <span class="fw-semibold d-block mb-1"> Total Members</span>
-                          <h5 class="card-title mb-2">₹ {{ profit|floatformat:2 }}</h5>
+                          <h5 class="card-title mb-2">{{active_users_count}}</h5>
                           <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Net Growth</small>
                         </div>
                       </div>
@@ -1174,6 +1179,57 @@
                               </div>
                             </div>
                           </div>
+                          <span class="fw-semibold d-block mb-1">Active Members</span>
+                          <h5 class="card-title text-nowrap mb-2">₹ {{ total_completed_amount|floatformat:2 }}</h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Completed</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Total Transactions -->
+                    <div class="col-6 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img src="{% static 'advadmin/assets/img/icons/unicons/cc-primary.png' %}" alt="Transactions" class="rounded" />
+                            </div>
+                            <div class="dropdown">
+                              <button class="btn p-0" type="button" id="cardOpt1" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="cardOpt1">
+                                <a class="dropdown-item" href="{% url 'attendance_report' %}">View More</a>
+                              </div>
+                            </div>
+                          </div>
+                          <span class="fw-semibold d-block mb-1">Attendance-D</span>
+                          <h5 class="card-title mb-2">₹ {{ total_transaction_amount|floatformat:2 }}</h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Transactions</small>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                    <div class="col-12 mb-4">
+                    <div class="row">
+                    <!-- Completed Payments -->
+                    <div class="col-6 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img src="{% static 'advadmin/assets/img/icons/unicons/paypal.png' %}" alt="Completed Payments" class="rounded" />
+                            </div>
+                            <div class="dropdown">
+                              <button class="btn p-0" type="button" id="cardOpt4" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
+                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
+                                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+                              </div>
+                            </div>
+                          </div>
                           <span class="fw-semibold d-block mb-1">Pending Dues</span>
                           <h5 class="card-title text-nowrap mb-2">₹ {{ total_completed_amount|floatformat:2 }}</h5>
                           <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Completed</small>
@@ -1206,8 +1262,8 @@
                       </div>
                     </div>
 
-                    <div class="col-12 mb-4">
-                      <div class="card">
+                    
+                      {% comment %} <div class="card">
                         <div class="card-body">
                           <div class="d-flex justify-content-between flex-sm-row flex-column gap-3">
                             <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
@@ -1225,7 +1281,7 @@
                             <div id="profileReportChart"></div>
                           </div>
                         </div>
-                      </div>
+                      </div> {% endcomment %}
                     </div>
                   </div>
                 </div>

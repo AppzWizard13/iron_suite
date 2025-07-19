@@ -64,7 +64,7 @@
                 <td>{{ package.id }}</td>
                 <td>{{ package.name }}</td>
                 <td>{{ package.type|title }}</td>
-                <td>{{ package.duration }} days</td>
+                <td>{{ package.duration_days }} days</td>
                 <td>₹{{ package.price }}</td>
                 <td>
                   {% if package.discount_type == 'percentage' %}
@@ -72,7 +72,7 @@
                   {% elif package.discount_type == 'fixed' %}
                     ₹{{ package.discount_value }}
                   {% else %}
-                    -
+                    ₹{{ package.discount_value }}
                   {% endif %}
                 </td>
                 <td>

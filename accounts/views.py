@@ -16,7 +16,7 @@ from core.models import BusinessDetails, Configuration
 from products.models import Product, Category, subcategory
 from enquiry.models import Enquiry
 from .models import CustomUser, Banner, Review
-from .forms import CustomUserForm, CustomerRegistrationForm, ReviewForm, BannerForm, ProfileUpdateForm
+from .forms import CustomUserForm, CustomerRegistrationForm, MemberRegistrationForm, ReviewForm, BannerForm, ProfileUpdateForm
 from django.contrib.auth import logout, login
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
@@ -29,6 +29,7 @@ from .forms import UserLoginForm
 logger = logging.getLogger(__name__)
 CustomUser = get_user_model()
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = CustomUser
     form_class = CustomUserForm
@@ -55,9 +56,9 @@ class UserCreateView(LoginRequiredMixin, CreateView):
             if 'password1' in form.cleaned_data:
                 user.set_password(form.cleaned_data['password1'])
 
-            max_employee_id = CustomUser.objects.aggregate(Max('employee_id'))['employee_id__max'] or 0
-            user.employee_id = max_employee_id + 1
-            user.username = self.generate_username(user.employee_id)
+            max_member_id = CustomUser.objects.aggregate(Max('member_id'))['member_id__max'] or 0
+            user.member_id = max_member_id + 1
+            user.username = self.generate_username(user.member_id)
 
             user.save()
             messages.success(self.request, "User added successfully.")
@@ -66,8 +67,8 @@ class UserCreateView(LoginRequiredMixin, CreateView):
             messages.error(self.request, f"An error occurred: {str(e)}")
             return self.form_invalid(form)
 
-    def generate_username(self, employee_id):
-        return f"MEMBER{str(employee_id).zfill(5)}"
+    def generate_username(self, member_id):
+        return f"MEMBER{str(member_id).zfill(5)}"
 
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
@@ -157,7 +158,7 @@ class UserListView(ListView):
                 Q(username__icontains=search_query) |
                 Q(first_name__icontains=search_query) |
                 Q(last_name__icontains=search_query) |
-                Q(employee_id__icontains=search_query) |
+                Q(member_id__icontains=search_query) |
                 Q(phone_number__icontains=search_query) |
                 Q(email__icontains=search_query)
             )
@@ -167,10 +168,10 @@ class UserListView(ListView):
             queryset = queryset.order_by('first_name', 'last_name')
         elif sort_param == '-name':
             queryset = queryset.order_by('-first_name', '-last_name')
-        elif sort_param == 'employee_id':
-            queryset = queryset.order_by('employee_id')
-        elif sort_param == '-employee_id':
-            queryset = queryset.order_by('-employee_id')
+        elif sort_param == 'member_id':
+            queryset = queryset.order_by('member_id')
+        elif sort_param == '-member_id':
+            queryset = queryset.order_by('-member_id')
         else:
             queryset = queryset.order_by('-date_joined')  # default sort
 
@@ -211,7 +212,7 @@ class UserStaffRoleListView(ListView):
                 Q(username__icontains=search_query) |
                 Q(first_name__icontains=search_query) |
                 Q(last_name__icontains=search_query) |
-                Q(employee_id__icontains=search_query) |
+                Q(member_id__icontains=search_query) |
                 Q(phone_number__icontains=search_query) |
                 Q(email__icontains=search_query)
             )
@@ -220,10 +221,10 @@ class UserStaffRoleListView(ListView):
             queryset = queryset.order_by('first_name', 'last_name')
         elif sort_param == '-name':
             queryset = queryset.order_by('-first_name', '-last_name')
-        elif sort_param == 'employee_id':
-            queryset = queryset.order_by('employee_id')
-        elif sort_param == '-employee_id':
-            queryset = queryset.order_by('-employee_id')
+        elif sort_param == 'member_id':
+            queryset = queryset.order_by('member_id')
+        elif sort_param == '-member_id':
+            queryset = queryset.order_by('-member_id')
         else:
             queryset = queryset.order_by('-date_joined')
 
@@ -462,6 +463,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         profit = total_income - total_expense
 
         # Orders related counts
+        active_users_count = CustomUser.objects.filter(staff_role='Member', is_active = True).count()
         orders = Order.objects.values('status').annotate(count=Count('id'))
 
         # Initialize all as 0
@@ -498,6 +500,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         print("config_dictconfig_dict", config_dict)
         base_context = {
             **config_dict,
+            'active_users_count': active_users_count,
             'total_sales_amount': total_sales_amount,
             'total_completed_amount': total_completed_amount,
             'total_transaction_amount': total_transaction_amount,
@@ -1236,6 +1239,46 @@ class CustomerCreateView(View):
             print("Form errors:", form.errors)  # Print form errors for debugging
         return render(request, self.template_name, {'form': form, 'users': User.objects.all()})
     
+
+from django.urls import reverse
+from django.views.generic.edit import CreateView
+from django.contrib import messages
+
+class MemberRegisterView(CreateView):
+    model = CustomUser
+    form_class = MemberRegistrationForm
+    success_url = reverse_lazy('user_list')  # Fallback, but you won't use it now
+
+    def get_template_names(self):
+        return ['advadmin/member_registration.html']
+
+    def form_valid(self, form):
+        try:
+            user = form.save(commit=False)
+            user.staff_role = 'Member'
+            if form.cleaned_data.get('password1'):
+                user.set_password(form.cleaned_data['password1'])
+            user.save()
+
+            # Fetch the selected package
+            package = form.cleaned_data['package']
+
+            # Store the new user ID and package ID in session (so payment view can access it)
+            self.request.session['pending_member_member_id'] = user.member_id
+            self.request.session['pending_package_id'] = package.id
+
+            # Message for the user
+            messages.success(
+                self.request,
+                "Please complete package payment to activate membership."
+            )
+
+            # Redirect to payment initiation view
+            return redirect('initiate_subscription_payment')
+
+        except Exception as e:
+            messages.error(self.request, f"Error: {str(e)}")
+            return self.form_invalid(form)
 
 
 import random

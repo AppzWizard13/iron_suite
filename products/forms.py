@@ -72,5 +72,17 @@ class PackageForm(forms.ModelForm):
         model = Package
         fields = '__all__'
         widgets = {
-            'features': forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g. {"trainer": true, "diet_plan": false}'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'type': forms.Select(attrs={'class': 'form-control'}),
+            'duration_days': forms.NumberInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'discount_type': forms.Select(attrs={'class': 'form-control'}),
+            'discount_value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'features': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'e.g. {"personal_trainer": true, "diet_plan": false}'
+            }),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

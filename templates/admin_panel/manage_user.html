@@ -76,7 +76,7 @@
           <tbody>
             {% for user in users %}
             <tr>
-              <td>{{ user.employee_id }}</td>
+              <td>{{ user.member_id }}</td>
               <td>{{ user.username }}</td>
               <td>{{ user.first_name }}</td>
               <td>{{ user.last_name }}</td>
@@ -111,7 +111,7 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="10" class="text-center text-muted">No Members found.</td>
+              <td colspan="10" class="text-center text-muted">No users found.</td>
             </tr>
             {% endfor %}
           </tbody>

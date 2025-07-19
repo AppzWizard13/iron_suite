@@ -1,10 +1,12 @@
 from django import forms
-from .models import Schedule
+from .models import Schedule, ClassEnrollment
+from accounts.models import CustomUser
+
 
 class ScheduleForm(forms.ModelForm):
     class Meta:
         model = Schedule
-        fields = ['name', 'trainer', 'start_time', 'end_time', 'capacity', 'status']  # ❌ Removed 'weekday'
+        fields = ['name', 'trainer', 'start_time', 'end_time', 'capacity', 'status']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'trainer': forms.Select(attrs={'class': 'form-control'}),
@@ -14,9 +16,14 @@ class ScheduleForm(forms.ModelForm):
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
 
-# forms.py
-from django import forms
-from .models import ClassEnrollment
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['trainer'].queryset = self.get_active_trainers()
+
+    @staticmethod
+    def get_active_trainers():
+        return CustomUser.objects.filter(staff_role='Trainer', is_active=True)
+
 
 class ClassEnrollmentForm(forms.ModelForm):
     class Meta:
@@ -26,3 +33,11 @@ class ClassEnrollmentForm(forms.ModelForm):
             'user': forms.Select(attrs={'class': 'form-select'}),
             'schedule': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['user'].queryset = self.get_active_members()
+
+    @staticmethod
+    def get_active_members():
+        return CustomUser.objects.filter(staff_role='Member', is_active=True, on_subscription=False)

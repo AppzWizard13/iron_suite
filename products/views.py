@@ -376,6 +376,7 @@ from .forms import PackageForm  # You need to create this form
 
 class PackageListView(ListView):
     model = Package
+    form_class = PackageForm
     context_object_name = 'packages'
 
     def get_queryset(self):

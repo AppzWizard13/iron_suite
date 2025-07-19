@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.db import models
-from django.utils.timezone import now  # Fix the NameError issue
+from django.utils.timezone import now
+
+from products.models import Package  # Fix the NameError issue
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
@@ -33,7 +35,7 @@ from django.core.validators import FileExtensionValidator
 class CustomUser(AbstractUser):
     username = models.CharField(max_length=20, unique=True, blank=True, null=True)  
     phone_number = models.CharField(max_length=15, unique=True)
-    employee_id = models.BigAutoField(primary_key=True)  
+    member_id = models.BigAutoField(primary_key=True)  
     join_date = models.DateField(auto_now_add=True)
 
     STAFF_ROLES = [
@@ -66,8 +68,9 @@ class CustomUser(AbstractUser):
         null=True,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
     )
-
+    package = models.ForeignKey(Package, null=True, blank=True, on_delete=models.SET_NULL)
     is_active = models.BooleanField(default=True)
+    on_subscription = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
     groups = models.ManyToManyField(Group, related_name="customuser_set", blank=True)
@@ -80,7 +83,7 @@ class CustomUser(AbstractUser):
 
     def save(self, *args, **kwargs):
         if not self.username:
-            self.username = f"MEMBER{str(self.employee_id).zfill(5)}"
+            self.username = f"MEMBER{str(self.member_id).zfill(5)}"
         super().save(*args, **kwargs)
 
     def __str__(self):
