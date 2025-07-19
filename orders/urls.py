@@ -1,7 +1,7 @@
 # orders/urls.py
 from django.urls import path
 from . import views
-from .views import AddToCartView, CartDetailView, CodOrderSuccessView, PaymentOrderSuccessView, OrderDeleteView, OrderDetailView, OrderEditView, OrderListView, ProcessPaymentView, TransactionDetailView, TransactionListView, UpdateCartItemView, RemoveCartItemView, GetCartCountView, CheckoutView, OrderConfirmationView, PaymentInitiateProcess, PaymentOrderFailView
+from .views import AddToCartView, CartDetailView, CodOrderSuccessView, PaymentOrderSuccessView, OrderDeleteView, OrderDetailView, OrderEditView, OrderListView, ProcessPaymentView, SubscriptionOrderSuccessView, TransactionDetailView, TransactionListView, UpdateCartItemView, RemoveCartItemView, GetCartCountView, CheckoutView, OrderConfirmationView, PaymentInitiateProcess, PaymentOrderFailView
 
 urlpatterns = [
     path('cart/view/', AddToCartView.as_view(), name='cart_view'),
@@ -20,6 +20,8 @@ urlpatterns = [
 
     path('cod-order-success/<int:pk>/', CodOrderSuccessView.as_view(), name='cod_order_success'),
     path('payment-order-success/<int:pk>/', PaymentOrderSuccessView.as_view(), name='payment_order_success'),
+    path('subscription/success/<int:pk>/',SubscriptionOrderSuccessView.as_view(),name='payment_subscription_success'
+    ),
     path('payment-order-decline/<int:pk>/', PaymentOrderFailView.as_view(), name='payment_order_decline'),
 
 
