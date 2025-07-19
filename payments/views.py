@@ -39,6 +39,9 @@ def initiate_cashfree_payment(request, obj):
     return_url = request.build_absolute_uri(reverse('cashfree_return')) + f"?order_id={obj.order_number}"
     webhook_url = request.build_absolute_uri(reverse('cashfree_webhook'))
 
+    print("return_urlreturn_urlreturn_urlreturn_url", return_url)
+    print("webhook_urlwebhook_urlwebhook_urlwebhook_urlwebhook_url", webhook_url)
+
     customer = obj.customer
     customer_email = customer.email
     customer_name = customer.get_full_name() or customer.username
@@ -65,6 +68,8 @@ def initiate_cashfree_payment(request, obj):
         "link_purpose": f"Payment for {obj.__class__.__name__} #{obj.order_number}"
     }
 
+    print("payloadpayloadpayloadpayloadpayload", payload)
+
     headers = {
         "x-api-version": "2022-09-01",
         "x-client-id": settings.CASHFREE_APP_ID,
@@ -79,6 +84,7 @@ def initiate_cashfree_payment(request, obj):
             headers=headers
         )
         res_data = response.json()
+        print("res_datares_datares_datares_datares_datares_datares_data", res_data)
         PaymentAPILog.objects.create(
             content_type=ContentType.objects.get_for_model(obj),
             object_id=obj.id,
@@ -142,7 +148,7 @@ def initiate_subscription_payment(request):
 
     del request.session['pending_member_member_id']
     del request.session['pending_package_id']
-
+    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
     return initiate_cashfree_payment(request, subscription_order)
 
 @csrf_exempt

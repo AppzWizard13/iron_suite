@@ -1282,7 +1282,7 @@ class MemberRegisterView(CreateView):
 
 
 import random
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect 
 from django.views import View
 from django.contrib.auth import login
 from django.contrib import messages
