@@ -257,30 +257,73 @@ def cashfree_webhook(request):
         return HttpResponse(status=200)
 
 def cashfree_return(request):
-    print("cashfree_returncashfree_return>>>>>>>>>>>>>", cashfree_return)
-    """Handle return from Cashfree (success/failure)."""
+    print("\n\n=== cashfree_return START ===")
+    print(f"Request.GET: {request.GET}")
+    print(f"Request path: {request.path}")
+    print(f"Request method: {request.method}")
+
     order_id = request.GET.get('order_id')
+    print(f"order_id from GET: {order_id}")
+
     if not order_id:
+        print("ERROR: order_id is missing!")
         return render(request, 'advadmin/payment_failed.html', {'message': 'Missing order ID'})
 
+    print(f"Searching for Payment with transaction_id={order_id}")
     payment = Payment.objects.filter(transaction_id=order_id).first()
-    print("payment>>>>>>>>>>>>>>>>", payment)
+    print(f"Found payment: {payment}")
+
     if not payment:
+        print("ERROR: Payment not found!")
         return render(request, 'advadmin/payment_failed.html', {'message': 'Payment not found'})
 
+    print(f"Payment status: {payment.status}")
+    print(f"Payment content_type: {payment.content_type}")
+    print(f"Payment object_id: {payment.object_id}")
+    print(f"Payment content_object: {payment.content_object}")
+    print(f"Payment gateway_response (type): {type(payment.gateway_response)}")
+    print(f"Payment gateway_response (data): {payment.gateway_response}")
+
     if payment.status == Payment.Status.COMPLETED:
-        print("----------------------------------ss", Payment.Status.COMPLETED)
+        print("\n--- Payment is COMPLETED ---")
         order = payment.content_object
+        print(f"content_object type: {type(order)}")
+        print(f"content_object: {order}")
+
+        if not order:
+            print("ERROR: content_object is None!")
+            return render(request, 'advadmin/payment_failed.html', {'message': 'Order not found'})
+
+        print(f"Setting session: order_{order_id}_completed = True")
         request.session[f'order_{order_id}_completed'] = True
+
         if hasattr(order, 'customer'):
+            print(f"order has customer: {order.customer}")
+            print(f"order.__class__.__name__: {order.__class__.__name__}")
+
             if isinstance(order, Order):
+                print("--- This is an Order (e-commerce/product) ---")
+                print(f"Updating TempOrder for user {order.customer}")
                 TempOrder.objects.filter(user=order.customer, processed=False).update(processed=True)
+                print(f"Redirecting to payment_order_success, pk={order.id}")
                 return redirect('payment_order_success', pk=order.id)
             elif isinstance(order, SubscriptionOrder):
+                print("--- This is a SubscriptionOrder (gym membership) ---")
+                print(f"Redirecting to payment_subscription_success, pk={order.id}")
                 return redirect('payment_subscription_success', pk=order.id)
+            else:
+                print(f"WARNING: Unknown order type: {order.__class__.__name__}")
+                return render(request, 'advadmin/payment_failed.html', {'message': 'Unknown order type'})
+        else:
+            print("WARNING: Order has no customer attribute!")
+            return render(request, 'advadmin/payment_failed.html', {'message': 'Invalid order data'})
     else:
-        print("----------------------------------")
+        print("\n--- Payment is NOT completed ---")
+        print(f"Payment status: {payment.status}")
         return render(request, 'advadmin/payment_failed.html', {'message': 'Payment was not successful'})
 
 def payment_failed(request):
+    print("\n--- payment_failed ---")
+    print(f"Rendering payment_failed template")
     return render(request, 'advadmin/payment_failed.html', {'message': 'Payment Failed'})
+
