@@ -3,7 +3,7 @@ version: '3.9'
 services:
   web:
     build: .
-    container_name: codespikestudop_web
+    container_name: iron_suite_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
@@ -22,7 +22,7 @@ services:
 
   db:
     image: postgres:14
-    container_name: codespikestudop_db
+    container_name: iron_suite_db
     environment:
       POSTGRES_DB: codespikedb
       POSTGRES_USER: postgres
