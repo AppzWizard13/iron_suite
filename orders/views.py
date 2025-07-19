@@ -516,19 +516,14 @@ class PaymentOrderSuccessView(LoginRequiredMixin, DetailView):
         context['query'] = self.request.GET.get('q', '')
         context['order_items'] = context['order'].items.all()
         return context
-    
+
 class SubscriptionOrderSuccessView(LoginRequiredMixin, DetailView):
-    """
-    Shows a success page after gym membership subscription payment.
-    Only the member who placed the subscription can see this page.
-    """
     model = SubscriptionOrder
-    template_name = 'payments/payment_subscription_success.html'  # <-- Using your new template
+    template_name = 'payments/payment_subscription_success.html'
     context_object_name = 'subscription_order'
     pk_url_kwarg = 'pk'
 
     def get_queryset(self):
-        # Ensure only the logged-in user can view their own subscription
         queryset = super().get_queryset()
         if not self.request.user.is_superuser:
             queryset = queryset.filter(customer=self.request.user)
@@ -536,7 +531,7 @@ class SubscriptionOrderSuccessView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['site_name'] = "Iron Suite"  # <-- Change to your gym name
+        context['site_name'] = "Your Gym Name" 
         return context
 
 class PaymentOrderFailView(LoginRequiredMixin, DetailView):
