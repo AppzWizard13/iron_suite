@@ -519,7 +519,7 @@ class PaymentOrderSuccessView(LoginRequiredMixin, DetailView):
 
 class SubscriptionOrderSuccessView(LoginRequiredMixin, DetailView):
     model = SubscriptionOrder
-    template_name = 'payments/payment_subscription_success.html'
+    template_name = 'advadmin/payment_subscription_success.html'
     context_object_name = 'subscription_order'
     pk_url_kwarg = 'pk'
 
