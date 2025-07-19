@@ -7,6 +7,8 @@ from django.contrib.contenttypes.models import ContentType
 
 from accounts.models import Customer
 from products.models import Package, Product
+from django.conf import settings
+
 
 User = get_user_model()
 
@@ -137,13 +139,15 @@ class SubscriptionOrder(models.Model):
         if not self.order_number:
             from datetime import datetime
             today = datetime.now().strftime('%Y%m%d')
-            last_order = SubscriptionOrder.objects.filter(order_number__contains=f'SUB-{today}').order_by('order_number').last()
+            last_order = SubscriptionOrder.objects.filter(
+                order_number__contains=f'{settings.SUBSCRIPTION_ORDER_PREFIX}{today}'
+            ).order_by('order_number').last()
             if last_order:
-                last_num = int(last_order.order_number.split('-')[-1])
+                last_num = int(last_order.order_number.rsplit('-', 1)[-1])
                 new_num = last_num + 1
             else:
                 new_num = 1
-            self.order_number = f'SUB-{today}-{new_num:04d}'
+            self.order_number = f'{settings.SUBSCRIPTION_ORDER_PREFIX}{today}-{new_num:04d}'
         if not self.end_date and self.package:
             self.end_date = self.start_date + timedelta(days=self.package.duration_days)
         super().save(*args, **kwargs)
@@ -151,31 +155,6 @@ class SubscriptionOrder(models.Model):
     def __str__(self):
         return f"SubscriptionOrder #{self.order_number} - {self.get_status_display()}"
 
-# --- PAYMENT (GENERIC) ---
-
-class Payment(models.Model):
-    class Status(models.TextChoices):
-        PENDING = 'pending', 'Pending'
-        COMPLETED = 'completed', 'Completed'
-        FAILED = 'failed', 'Failed'
-        REFUNDED = 'refunded', 'Refunded'
-
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-
-    payment_method = models.CharField(max_length=50, default='google_pay')
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
-    transaction_id = models.CharField(max_length=100, blank=True)
-    gateway_response = models.JSONField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Payment #{self.id} - {self.get_status_display()} ({self.content_object})"
-
-# --- TEMPORARY ORDERS, GOOGLE PAY CREDENTIALS, etc. ---
 
 class TempOrder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -188,73 +167,4 @@ class TempOrder(models.Model):
 
     def __str__(self):
         return f"TempOrder {self.id} - User: {self.user}, Product: {self.product}"
-
-class GooglePayCredentials(models.Model):
-    merchant_id = models.CharField(max_length=100)
-    merchant_name = models.CharField(max_length=100)
-    environment = models.CharField(max_length=20, choices=[('TEST', 'Test'), ('PRODUCTION', 'Production')])
-    api_key = models.CharField(max_length=200)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Google Pay Credentials for {self.merchant_name} ({self.environment})"
-
-# --- TRANSACTION (GENERIC SUPPORT) ---
-
-class Transaction(models.Model):
-    class Type(models.TextChoices):
-        INCOME = 'income', 'Income'
-        EXPENSE = 'expense', 'Expense'
-
-    class Category(models.TextChoices):
-        SALES = 'sales', 'Sales'
-        REFUND = 'refund', 'Refund'
-        SALARY = 'salary', 'Salary'
-        RENT = 'rent', 'Rent'
-        UTILITIES = 'utilities', 'Utilities'
-        MARKETING = 'marketing', 'Marketing'
-        INVENTORY = 'inventory', 'Inventory'
-        OTHER = 'other', 'Other'
-
-    class Status(models.TextChoices):
-        INITIATED = 'initiated', 'Initiated'
-        PENDING = 'pending', 'Pending'
-        COMPLETED = 'completed', 'Completed'
-        REFUNDED = 'refunded', 'Refunded'
-
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-
-    transaction_type = models.CharField(max_length=10, choices=Type.choices)
-    category = models.CharField(max_length=20, choices=Category.choices)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.INITIATED)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField(blank=True)
-    reference = models.CharField(max_length=100, blank=True)
-    date = models.DateField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        if hasattr(self, 'content_object') and hasattr(self.content_object, 'status'):
-            payment_status = getattr(self.content_object, 'status', None)
-            if payment_status == 'completed':
-                self.transaction_type = self.Type.INCOME
-                self.category = self.Category.SALES
-                self.status = self.Status.COMPLETED
-            elif payment_status == 'refunded':
-                self.transaction_type = self.Type.EXPENSE
-                self.category = self.Category.REFUND
-                self.status = self.Status.REFUNDED
-            elif payment_status == 'pending':
-                self.status = self.Status.PENDING
-            elif payment_status == 'initiated':
-                self.status = self.Status.INITIATED
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.get_transaction_type_display()} - {self.get_category_display()} - ${self.amount}"
+    

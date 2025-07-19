@@ -1,26 +1,39 @@
 import json
+from datetime import timedelta
+
 import requests
 from django.conf import settings
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from datetime import timedelta
 from django.db.models import Q
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import ListView
 
-from accounts.models import CustomUser
-from orders.models import Order, Payment, SubscriptionOrder, TempOrder
-from payments.models import PaymentAPILog
+from accounts.models import User
+from orders.models import Order, SubscriptionOrder, TempOrder
+from payments.models import Payment, PaymentAPILog
 from products.models import Package
 
-CustomUser = get_user_model()
+
+User = get_user_model()
+
 
 def initiate_cashfree_payment(request, obj):
-    """Sends a payment link request to Cashfree for any order/subscription_order."""
+    """
+    Initiates a Cashfree payment link for an order or subscription order.
+
+    Args:
+        request (HttpRequest): Django HttpRequest object.
+        obj (Order or SubscriptionOrder): The order/subscription instance.
+
+    Returns:
+        HttpResponseRedirect: Redirects to the Cashfree payment link or error page.
+    """
     payment, created = Payment.objects.get_or_create(
         content_type=ContentType.objects.get_for_model(obj),
         object_id=obj.id,
@@ -30,6 +43,7 @@ def initiate_cashfree_payment(request, obj):
             'status': Payment.Status.PENDING,
         }
     )
+
     if not created:
         payment.payment_method = 'cashfree'
         payment.amount = obj.total
@@ -38,9 +52,6 @@ def initiate_cashfree_payment(request, obj):
 
     return_url = request.build_absolute_uri(reverse('cashfree_return')) + f"?order_id={obj.order_number}"
     webhook_url = request.build_absolute_uri(reverse('cashfree_webhook'))
-
-    print("return_urlreturn_urlreturn_urlreturn_url", return_url)
-    print("webhook_urlwebhook_urlwebhook_urlwebhook_urlwebhook_url", webhook_url)
 
     customer = obj.customer
     customer_email = customer.email
@@ -68,8 +79,6 @@ def initiate_cashfree_payment(request, obj):
         "link_purpose": f"Payment for {obj.__class__.__name__} #{obj.order_number}"
     }
 
-    print("payloadpayloadpayloadpayloadpayload", payload)
-
     headers = {
         "x-api-version": "2022-09-01",
         "x-client-id": settings.CASHFREE_APP_ID,
@@ -84,7 +93,7 @@ def initiate_cashfree_payment(request, obj):
             headers=headers
         )
         res_data = response.json()
-        print("res_datares_datares_datares_datares_datares_datares_data", res_data)
+
         PaymentAPILog.objects.create(
             content_type=ContentType.objects.get_for_model(obj),
             object_id=obj.id,
@@ -119,21 +128,32 @@ def initiate_cashfree_payment(request, obj):
         ).first()
         if payment_log:
             response_data = json.loads(payment_log.response_body)
-            link_id = response_data.get("link_id")
             return redirect(response_data["link_url"])
 
     return redirect('payment_failed')
 
+
 def initiate_subscription_payment(request):
-    """Handle gym membership subscription payment initiation."""
+    """
+    Handles initiation of gym membership subscription payment flow.
+
+    Args:
+        request (HttpRequest): Django HttpRequest object.
+
+    Returns:
+        HttpResponseRedirect: Redirects to the payment page or registration page if session is invalid.
+    """
     member_id = request.session.get('pending_member_member_id')
     package_id = request.session.get('pending_package_id')
 
     if not member_id or not package_id:
-        messages.error(request, "Session expired or missing package. Please register again.")
+        messages.error(
+            request,
+            "Session expired or missing package. Please register again."
+        )
         return redirect('register_member')
 
-    user = get_object_or_404(CustomUser, member_id=member_id)
+    user = get_object_or_404(User, member_id=member_id)
     package = get_object_or_404(Package, id=package_id)
 
     subscription_order = SubscriptionOrder.objects.create(
@@ -148,12 +168,21 @@ def initiate_subscription_payment(request):
 
     del request.session['pending_member_member_id']
     del request.session['pending_package_id']
-    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
     return initiate_cashfree_payment(request, subscription_order)
+
 
 @csrf_exempt
 def cashfree_webhook(request):
-    """Webhook handler for Cashfree events (payments, refunds, etc.)."""
+    """
+    Handles Cashfree webhook events for payment and refund status updates.
+
+    Args:
+        request (HttpRequest): Django HttpRequest object.
+
+    Returns:
+        JsonResponse or HttpResponse: Response based on webhook event handling.
+    """
     log_entry = PaymentAPILog.objects.create(
         action='WEBHOOK',
         request_url=request.path,
@@ -170,27 +199,24 @@ def cashfree_webhook(request):
     try:
         data = json.loads(request.body)
         event_type = data.get("type")
-        order_id = None
         link_id = None
-        payment_status = None
 
         if event_type == "PAYMENT_SUCCESS_WEBHOOK":
             order_data = data.get('data', {}).get('order', {})
             payment_data = data.get('data', {}).get('payment', {})
-            order_id = order_data.get('order_id')
             link_id = order_data.get('order_tags', {}).get('link_id')
             payment_status = payment_data.get('payment_status')
-
         elif event_type == "PAYMENT_LINK_EVENT":
             order_data = data.get('data', {}).get('order', {})
-            order_id = order_data.get('order_id')
             link_id = data.get('data', {}).get('link_id')
             payment_status = data.get('data', {}).get('link_status')
-
         elif event_type == "PAYMENT_CHARGES_WEBHOOK":
             order_data = data.get('data', {}).get('order', {})
-            order_id = order_data.get('order_id')
             link_id = order_data.get('order_tags', {}).get('link_id')
+            payment_status = None
+        else:
+            link_id = None
+            payment_status = None
 
         if not link_id:
             error_msg = 'Missing link_id'
@@ -210,7 +236,10 @@ def cashfree_webhook(request):
         order = payment.content_object
         payment.gateway_response = data
 
-        if event_type == "PAYMENT_SUCCESS_WEBHOOK" and payment_status == "SUCCESS":
+        if (
+            (event_type == "PAYMENT_SUCCESS_WEBHOOK" and payment_status == "SUCCESS") or
+            (event_type == "PAYMENT_LINK_EVENT" and payment_status == "PAID")
+        ):
             payment.status = Payment.Status.COMPLETED
             if hasattr(order, 'payment_status'):
                 order.payment_status = 'completed'
@@ -221,29 +250,18 @@ def cashfree_webhook(request):
                 order.payment_status = SubscriptionOrder.PaymentStatus.COMPLETED
             order.save()
             payment.save()
-        elif event_type == "PAYMENT_LINK_EVENT":
-            if payment_status == "PAID":
-                payment.status = Payment.Status.COMPLETED
-                if hasattr(order, 'payment_status'):
-                    order.payment_status = 'completed'
-                if isinstance(order, Order):
-                    order.status = Order.Status.PROCESSING
-                elif isinstance(order, SubscriptionOrder):
-                    order.status = SubscriptionOrder.Status.ACTIVE
-                    order.payment_status = SubscriptionOrder.PaymentStatus.COMPLETED
-                order.save()
-                payment.save()
-            elif payment_status in ['EXPIRED', 'FAILED']:
-                payment.status = Payment.Status.FAILED
-                if hasattr(order, 'payment_status'):
-                    order.payment_status = 'failed'
-                order.save()
-                payment.save()
-        elif event_type == "PAYMENT_CHARGES_WEBHOOK":
-            pass  # Handle as needed
+        elif event_type == "PAYMENT_LINK_EVENT" and payment_status in ['EXPIRED', 'FAILED']:
+            payment.status = Payment.Status.FAILED
+            if hasattr(order, 'payment_status'):
+                order.payment_status = 'failed'
+            order.save()
+            payment.save()
 
         log_entry.response_status = 200
-        log_entry.response_body = json.dumps({'status': 'success', 'event_type': event_type})
+        log_entry.response_body = json.dumps({
+            'status': 'success',
+            'event_type': event_type
+        })
         log_entry.link_id = link_id
         log_entry.save()
 
@@ -256,74 +274,158 @@ def cashfree_webhook(request):
         log_entry.save()
         return HttpResponse(status=200)
 
-def cashfree_return(request):
-    print("\n\n=== cashfree_return START ===")
-    print(f"Request.GET: {request.GET}")
-    print(f"Request path: {request.path}")
-    print(f"Request method: {request.method}")
 
+def cashfree_return(request):
+    """
+    Handles user return from Cashfree payment gateway after payment.
+
+    Args:
+        request (HttpRequest): Django HttpRequest object.
+
+    Returns:
+        HttpResponse or HttpResponseRedirect: Renders success or failure template, or redirects.
+    """
     order_id = request.GET.get('order_id')
-    print(f"order_id from GET: {order_id}")
+    payment = None
+    order = None
 
     if not order_id:
-        print("ERROR: order_id is missing!")
-        return render(request, 'advadmin/payment_failed.html', {'message': 'Missing order ID'})
+        return render(
+            request,
+            'advadmin/payment_failed.html',
+            {'message': 'Missing order ID'}
+        )
 
-    print(f"Searching for Payment with transaction_id={order_id}")
     payment = Payment.objects.filter(transaction_id=order_id).first()
-    print(f"Found payment: {payment}")
+    order = SubscriptionOrder.objects.filter(order_number=order_id).select_related('customer').first()
+
+    if order and payment:
+        user = order.customer
+        if not user.on_subscription:
+            user.on_subscription = True
+            user.save(update_fields=['on_subscription'])
+        if payment.customer != user:
+            payment.customer = user
+            payment.save(update_fields=['customer'])
 
     if not payment:
-        print("ERROR: Payment not found!")
-        return render(request, 'advadmin/payment_failed.html', {'message': 'Payment not found'})
-
-    print(f"Payment status: {payment.status}")
-    print(f"Payment content_type: {payment.content_type}")
-    print(f"Payment object_id: {payment.object_id}")
-    print(f"Payment content_object: {payment.content_object}")
-    print(f"Payment gateway_response (type): {type(payment.gateway_response)}")
-    print(f"Payment gateway_response (data): {payment.gateway_response}")
+        return render(
+            request,
+            'advadmin/payment_failed.html',
+            {'message': 'Payment not found'}
+        )
 
     if payment.status == Payment.Status.COMPLETED:
-        print("\n--- Payment is COMPLETED ---")
         order = payment.content_object
-        print(f"content_object type: {type(order)}")
-        print(f"content_object: {order}")
-
         if not order:
-            print("ERROR: content_object is None!")
-            return render(request, 'advadmin/payment_failed.html', {'message': 'Order not found'})
+            return render(
+                request,
+                'advadmin/payment_failed.html',
+                {'message': 'Order not found'}
+            )
 
-        print(f"Setting session: order_{order_id}_completed = True")
         request.session[f'order_{order_id}_completed'] = True
 
         if hasattr(order, 'customer'):
-            print(f"order has customer: {order.customer}")
-            print(f"order.__class__.__name__: {order.__class__.__name__}")
-
             if isinstance(order, Order):
-                print("--- This is an Order (e-commerce/product) ---")
-                print(f"Updating TempOrder for user {order.customer}")
-                TempOrder.objects.filter(user=order.customer, processed=False).update(processed=True)
-                print(f"Redirecting to payment_order_success, pk={order.id}")
+                TempOrder.objects.filter(user=order.customer, processed=False).update(
+                    processed=True
+                )
                 return redirect('payment_order_success', pk=order.id)
             elif isinstance(order, SubscriptionOrder):
-                print("--- This is a SubscriptionOrder (gym membership) ---")
-                print(f"Redirecting to payment_subscription_success, pk={order.id}")
                 return redirect('payment_subscription_success', pk=order.id)
             else:
-                print(f"WARNING: Unknown order type: {order.__class__.__name__}")
-                return render(request, 'advadmin/payment_failed.html', {'message': 'Unknown order type'})
+                return render(
+                    request,
+                    'advadmin/payment_failed.html',
+                    {'message': 'Unknown order type'}
+                )
         else:
-            print("WARNING: Order has no customer attribute!")
-            return render(request, 'advadmin/payment_failed.html', {'message': 'Invalid order data'})
+            return render(
+                request,
+                'advadmin/payment_failed.html',
+                {'message': 'Invalid order data'}
+            )
     else:
-        print("\n--- Payment is NOT completed ---")
-        print(f"Payment status: {payment.status}")
-        return render(request, 'advadmin/payment_failed.html', {'message': 'Payment was not successful'})
+        return render(
+            request,
+            'advadmin/payment_failed.html',
+            {'message': 'Payment was not successful'}
+        )
+
 
 def payment_failed(request):
-    print("\n--- payment_failed ---")
-    print(f"Rendering payment_failed template")
-    return render(request, 'advadmin/payment_failed.html', {'message': 'Payment Failed'})
+    """
+    Render payment failed page.
 
+    Args:
+        request (HttpRequest): Django HttpRequest object.
+
+    Returns:
+        HttpResponse: Rendered payment failed template.
+    """
+    return render(
+        request,
+        'advadmin/payment_failed.html',
+        {'message': 'Payment Failed'}
+    )
+
+
+class PaymentListView(ListView):
+    """
+    Displays a paginated list of payments with filtering by user and date, and sortable columns.
+
+    GET parameters:
+        user_id: (int) Filter payments by user/customer.
+        date_from: (YYYY-MM-DD) Filter payments with created_at >= date_from.
+        date_to: (YYYY-MM-DD) Filter payments with created_at <= date_to.
+        sort: (str) Field to sort by (id, customer__username, amount, etc.).
+        order: (str) 'asc' or 'desc' for sort order.
+
+    Context:
+        payments: filtered/sorted/paginated queryset.
+        users: all users for dropdown.
+        current_sort: current sort field.
+        current_order: current order (asc/desc).
+    """
+    model = Payment
+    template_name = 'advadmin/payments/payment_list.html'
+    context_object_name = 'payments'
+    paginate_by = 25
+
+    def get_queryset(self):
+        """
+        Filter payments by user and date, and apply sorting from GET parameters.
+        """
+        queryset = Payment.objects.select_related('customer')
+        user_id = self.request.GET.get('user_id')
+        if user_id:
+            queryset = queryset.filter(customer_id=user_id)
+        date_from = self.request.GET.get('date_from')
+        date_to = self.request.GET.get('date_to')
+        if date_from and date_to:
+            queryset = queryset.filter(created_at__date__range=[date_from, date_to])
+        elif date_from:
+            queryset = queryset.filter(created_at__date__gte=date_from)
+        elif date_to:
+            queryset = queryset.filter(created_at__date__lte=date_to)
+        
+        sort_by = self.request.GET.get('sort', 'created_at')
+        order = '' if self.request.GET.get('order', 'desc') == 'asc' else '-'
+        # Allow simple whitelisting of sortable fields
+        allowed = {
+            'id', 'customer__username', 'amount', 'payment_method',
+            'status', 'transaction_id', 'created_at', 'updated_at'
+        }
+        sort_field = sort_by if sort_by in allowed else 'created_at'
+        return queryset.order_by(f'{order}{sort_field}')
+
+    def get_context_data(self, **kwargs):
+        """
+        Add users list and sort context to template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['users'] = User.objects.all()
+        context['current_sort'] = self.request.GET.get('sort', 'created_at')
+        context['current_order'] = 'asc' if self.request.GET.get('order', 'desc') == 'asc' else 'desc'
+        return context

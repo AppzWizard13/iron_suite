@@ -9,4 +9,6 @@ urlpatterns = [
     path('payment/failed/', views.payment_failed, name='payment_failed'),
     path('members/payment/', views.initiate_subscription_payment, name='initiate_subscription_payment'),
 
+    path('payments/', views.PaymentListView.as_view(), name='payment_list'),
+
 ]

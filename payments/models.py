@@ -2,6 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class PaymentAPILog(models.Model):
     PAYMENT_ACTIONS = [
@@ -71,3 +73,90 @@ class PaymentAPILog(models.Model):
             f"{self.get_action_display()} | (No linked order) | "
             f"{self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
         )
+
+class Payment(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        COMPLETED = 'completed', 'Completed'
+        FAILED = 'failed', 'Failed'
+        REFUNDED = 'refunded', 'Refunded'
+
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        related_name='payments_payment_content_types',  # <--- ADDED
+    )
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    payment_method = models.CharField(max_length=50, default='google_pay')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    transaction_id = models.CharField(max_length=100, blank=True)
+    gateway_response = models.JSONField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='payments')
+
+    def __str__(self):
+        return f"Payment #{self.id} - {self.get_status_display()} ({self.content_object})"
+
+
+class Transaction(models.Model):
+    class Type(models.TextChoices):
+        INCOME = 'income', 'Income'
+        EXPENSE = 'expense', 'Expense'
+
+    class Category(models.TextChoices):
+        SALES = 'sales', 'Sales'
+        REFUND = 'refund', 'Refund'
+        SALARY = 'salary', 'Salary'
+        RENT = 'rent', 'Rent'
+        UTILITIES = 'utilities', 'Utilities'
+        MARKETING = 'marketing', 'Marketing'
+        INVENTORY = 'inventory', 'Inventory'
+        OTHER = 'other', 'Other'
+
+    class Status(models.TextChoices):
+        INITIATED = 'initiated', 'Initiated'
+        PENDING = 'pending', 'Pending'
+        COMPLETED = 'completed', 'Completed'
+        REFUNDED = 'refunded', 'Refunded'
+
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        related_name='payments_transaction_content_types',  # <--- ADDED
+    )
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    transaction_type = models.CharField(max_length=10, choices=Type.choices)
+    category = models.CharField(max_length=20, choices=Category.choices)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.INITIATED)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True)
+    reference = models.CharField(max_length=100, blank=True)
+    date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if hasattr(self, 'content_object') and hasattr(self.content_object, 'status'):
+            payment_status = getattr(self.content_object, 'status', None)
+            if payment_status == 'completed':
+                self.transaction_type = self.Type.INCOME
+                self.category = self.Category.SALES
+                self.status = self.Status.COMPLETED
+            elif payment_status == 'refunded':
+                self.transaction_type = self.Type.EXPENSE
+                self.category = self.Category.REFUND
+                self.status = self.Status.REFUNDED
+            elif payment_status == 'pending':
+                self.status = self.Status.PENDING
+            elif payment_status == 'initiated':
+                self.status = self.Status.INITIATED
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} - {self.get_category_display()} - ${self.amount}"

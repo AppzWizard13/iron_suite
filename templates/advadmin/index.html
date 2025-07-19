@@ -314,7 +314,13 @@
               </a>
             </li>
             <li class="menu-item">
-              <a href="#" class="menu-link">
+              <a href="{% url 'subscription_orders' %}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-bookmark"></i>
+                <div data-i18n="Payments">Subscription Orders</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="{% url 'payment_list' %}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-credit-card"></i>
                 <div data-i18n="Payments">Payments</div>
               </a>
@@ -332,6 +338,22 @@
               </a>
             </li>
 
+            <li class="menu-header small text-uppercase">
+              <span class="menu-header-text">ACCOUNTS MANAGEMENT</span>
+            </li>
+            <!-- Layouts -->
+            <li class="menu-item">
+              <a href="{% url 'transaction_list' 'income' %}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-trending-up"></i>
+                <div data-i18n="Manage Banners">Income Transactions</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="{% url 'transaction_list' 'expense' %}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-trending-down"></i>
+                <div data-i18n="Manage Reviews">Expense Transactions</div>
+              </a>
+            </li>
             <!-- Communication -->
             <li class="menu-header small text-uppercase">
               <span class="menu-header-text">Communication</span>
@@ -430,27 +452,6 @@
                 <div data-i18n="Manage Products">Manage Packages</div>
               </a>
             </li>
-            
-
-
-            <li class="menu-header small text-uppercase">
-              <span class="menu-header-text">ACCOUNTS MANAGEMENT</span>
-            </li>
-            <!-- Layouts -->
-            <li class="menu-item">
-              <a href="{% url 'transaction_list' 'income' %}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-trending-up"></i>
-                <div data-i18n="Manage Banners">Income Transactions</div>
-              </a>
-            </li>
-            <li class="menu-item">
-              <a href="{% url 'transaction_list' 'expense' %}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-trending-down"></i>
-                <div data-i18n="Manage Reviews">Expense Transactions</div>
-              </a>
-            </li>
-
-            
             <li class="menu-header small text-uppercase">
               <span class="menu-header-text">ACCOUNTS SETTINGS</span>
             </li>
@@ -1007,7 +1008,7 @@
                         <div class="card-body">
                           <h5 class="card-title text-primary">Welcome back, {{request.user.first_name}}  {{request.user.last_name}}! 🎉</h5>
                           <p class="mb-4">
-                            12 new signups today,  <span class="fw-bold">72%</span> attendance rate, 2 expiring memberships.
+                            {{new_signups_today}} new signups today,  <span class="fw-bold">{{attendance_rate}}%</span> attendance rate,</br> 2 expiring memberships.
                           </p>
 
                           <a href="javascript:;" class="btn btn-sm btn-outline-primary">View Badges</a>
@@ -1057,9 +1058,9 @@
                               </div>
                             </div>
                           </div>
-                          <span class="fw-semibold d-block mb-1"> Total Members</span>
+                          <span class="fw-semibold d-block mb-1"> Active Members</span>
                           <h5 class="card-title mb-2">{{active_users_count}}</h5>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Net Growth</small>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Subscriptions</small>
                         </div>
                       </div>
                     </div>
@@ -1093,9 +1094,9 @@
                               </div>
                             </div>
                           </div>
-                          <span class="fw-semibold d-block mb-1">Total Revenue</span>
-                          <h5 class="card-title text-nowrap mb-1">₹ {{ total_sales_amount|floatformat:2 }}</h5>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +28.42%</small>
+                          <span class="fw-semibold d-block mb-1">Month Revenue</span>
+                          <h5 class="card-title text-nowrap mb-1">₹ {{ current_month_income|floatformat:2 }}</h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> {{current_month}}</small>
                         </div>
                       </div>
                     </div>
@@ -1122,18 +1123,20 @@
                                 aria-haspopup="true"
                                 aria-expanded="false"
                               >
-                                2022
+                                {{ current_year }}
                               </button>
                               <div class="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
-                                <a class="dropdown-item" href="javascript:void(0);">2021</a>
-                                <a class="dropdown-item" href="javascript:void(0);">2020</a>
-                                <a class="dropdown-item" href="javascript:void(0);">2019</a>
+                                {% for year in years %}
+                                  <a class="dropdown-item year-select" data-year="{{ year }}" href="javascript:void(0);">{{ year }}</a>
+                                {% endfor %}
                               </div>
                             </div>
                           </div>
                         </div>
                         <div id="growthChart"></div>
-                        <div class="text-center fw-semibold pt-3 mb-2">62% Monthly Attendance Trend</div>
+                        <div class="text-center fw-semibold pt-3 mb-2">
+                          {{ attendance_rate }}% Monthly Attendance Trend
+                        </div>
 
                         <div class="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
                           <div class="d-flex">
@@ -1141,8 +1144,8 @@
                               <span class="badge bg-label-primary p-2"><i class="bx bx-dollar text-primary"></i></span>
                             </div>
                             <div class="d-flex flex-column">
-                              <small>2022</small>
-                              <h6 class="mb-0">$32.5k</h6>
+                              <small id="thisYearLabel">{{ current_year }}</small>
+                              <h6 class="mb-0" id="thisYearEarning">₹{{ this_year_earning|default:0|floatformat:2 }}</h6>
                             </div>
                           </div>
                           <div class="d-flex">
@@ -1150,11 +1153,17 @@
                               <span class="badge bg-label-info p-2"><i class="bx bx-wallet text-info"></i></span>
                             </div>
                             <div class="d-flex flex-column">
-                              <small>2021</small>
-                              <h6 class="mb-0">$41.2k</h6>
+                              <small id="lastYearLabel">{{ current_year|add:"-1" }}</small>
+                              <h6 class="mb-0" id="lastYearEarning">₹{{ last_year_earning|default:0|floatformat:2 }}</h6>
                             </div>
                           </div>
                         </div>
+
+                        <script>
+                            window.yearlyEarnings = {{ yearly_earnings_json|safe }};
+                            // JS: update .innerText for .thisYearEarning and .lastYearEarning on year switch
+                        </script>
+
                       </div>
                     </div>
                   </div>
@@ -1179,8 +1188,8 @@
                               </div>
                             </div>
                           </div>
-                          <span class="fw-semibold d-block mb-1">Active Members</span>
-                          <h5 class="card-title text-nowrap mb-2">₹ {{ total_completed_amount|floatformat:2 }}</h5>
+                          <span class="fw-semibold d-block mb-1">Total Members</span>
+                          <h5 class="card-title text-nowrap mb-2">{{ total_members}}</h5>
                           <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Completed</small>
                         </div>
                       </div>
@@ -1203,9 +1212,9 @@
                               </div>
                             </div>
                           </div>
-                          <span class="fw-semibold d-block mb-1">Attendance-D</span>
-                          <h5 class="card-title mb-2">₹ {{ total_transaction_amount|floatformat:2 }}</h5>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Transactions</small>
+                          <span class="fw-semibold d-block mb-1">Upcoming Dues</span>
+                          <h5 class="card-title mb-2">₹ {{upcoming_renewals_amount|floatformat:2}} / {{ upcoming_renewals_count }}</h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Renewals</small>
                         </div>
                       </div>
                     </div>
@@ -1231,8 +1240,8 @@
                             </div>
                           </div>
                           <span class="fw-semibold d-block mb-1">Pending Dues</span>
-                          <h5 class="card-title text-nowrap mb-2">₹ {{ total_completed_amount|floatformat:2 }}</h5>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Completed</small>
+                          <h5 class="card-title text-nowrap mb-2">₹ {{ pending_dues_amount|floatformat:2 }} / {{pending_dues_count}}</h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Follow Up</small>
                         </div>
                       </div>
                     </div>
@@ -1706,7 +1715,44 @@
           });
       });
     </script>
-    
+    <script>
+        window.membershipTrends = {{ membership_trends_json|safe }};
+        window.yearlyEarnings = {{ yearly_earnings_json|safe }};
+        window.allYears = {{ years|safe }};
+        window.currentYear = {{ current_year }};
+        document.querySelectorAll('.year-select').forEach(item => {
+          item.addEventListener('click', function() {
+            var selectedYear = parseInt(this.getAttribute('data-year'));
+            var lastYear = selectedYear - 1;
+            var trends = window.membershipTrends;
+            var earnings = window.yearlyEarnings;
+
+            // Update chart series
+            var newSeries = [
+              {
+                name: String(selectedYear),
+                data: trends[selectedYear] || Array(12).fill(0)
+              },
+              {
+                name: String(lastYear),
+                data: trends[lastYear] || Array(12).fill(0)
+              }
+            ];
+            window.totalRevenueChart.updateSeries(newSeries);
+
+            // Update labels/amounts
+            document.getElementById('thisYearLabel').innerText = selectedYear;
+            document.getElementById('lastYearLabel').innerText = lastYear;
+            document.getElementById('thisYearEarning').innerText = "₹" + (earnings[selectedYear] || 0).toLocaleString();
+            document.getElementById('lastYearEarning').innerText = "₹" + (earnings[lastYear] || 0).toLocaleString();
+
+            // (Optional) Update the button label as well
+            document.getElementById('growthReportId').innerText = selectedYear;
+          });
+        });
+
+    </script>
+      
     <script src="{% static 'advadmin/assets/vendor/libs/jquery/jquery.js' %}"></script>
     <script src="{% static 'advadmin/assets/vendor/libs/popper/popper.js' %}"></script>
     <script src="{% static 'advadmin/assets/vendor/js/bootstrap.js' %}"></script>

@@ -1,0 +1,88 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage / Member /</span>
+      {% if object %}Edit{% else %}Add{% endif %} Member
+    </h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <h5 class="card-header">Member Details</h5>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row">
+            <!-- Generic field loop, as per your design -->
+            {% for field in form %}
+              {% if field.name not in 'password1,password2' %}
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">{{ field.label }}:</label>
+                  {{ field }}
+                  {% if field.errors %}
+                    <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <!-- Password Change Section (for update only, with help text) -->
+          {% if object %}
+            <hr class="m-4">
+            <h6 class="mb-3">Change Password (leave blank to keep current password)</h6>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">{{ form.password1.label }}:</label>
+              {{ form.password1 }}
+              <small class="form-text text-muted">Set a new password if you want to update it.</small>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">{{ form.password2.label }}:</label>
+              {{ form.password2 }}
+              <small class="form-text text-muted">Re-enter the new password for verification.</small>
+            </div>
+          {% endif %}
+
+          <div class="text-center my-4">
+            <button type="submit" class="btn btn-primary">{% if object %}Update Member{% else %}Create Member{% endif %}</button>
+            <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Optional: Add this if you want to auto-dismiss toast messages after 5 seconds -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,284 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage /</span> Subscription Orders
+    </h4>
+
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">{{ message }}</div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Subscription Orders</h5>
+        <div class="d-flex gap-3">
+          <form method="get" action="{% url 'subscription_orders' %}" class="d-flex">
+            <div class="input-group input-group-merge">
+              <span class="input-group-text"><i class="bx bx-search"></i></span>
+              <input 
+                type="text" 
+                name="q" 
+                class="form-control" 
+                placeholder="Search by name or member ID" 
+                value="{{ active_filters.q }}"
+              >
+              {% if active_filters.q %}
+              <a href="{% url 'subscription_orders' %}{% if active_filters.status or active_filters.date or active_filters.sort %}?{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}{% if active_filters.sort %}sort={{ active_filters.sort }}{% endif %}{% endif %}" 
+                 class="btn btn-outline-secondary">
+                <i class="bx bx-x"></i>
+              </a>
+              {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary ms-2">Search</button>
+          </form>
+          <div class="d-flex gap-2">
+            <select name="status" class="form-select" onchange="location = this.value;">
+              <option value="{% url 'subscription_orders' %}{% if active_filters.q %}?q={{ active_filters.q }}{% if active_filters.date %}&date={{ active_filters.date }}{% endif %}{% if active_filters.sort %}&sort={{ active_filters.sort }}{% endif %}{% elif active_filters.date or active_filters.sort %}?{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}{% if active_filters.sort %}sort={{ active_filters.sort }}{% endif %}{% endif %}">
+                All Status
+              </option>
+              {% for status in status_choices %}
+              <option value="{% url 'subscription_orders' %}?q={{ active_filters.q }}&status={{ status }}{% if active_filters.date %}&date={{ active_filters.date }}{% endif %}{% if active_filters.sort %}&sort={{ active_filters.sort }}{% endif %}"
+                {% if active_filters.status == status %}selected{% endif %}>
+                {{ status|title }}
+              </option>
+              {% endfor %}
+            </select>
+            <select name="date" class="form-select" onchange="location = this.value;">
+              <option value="{% url 'subscription_orders' %}{% if active_filters.q %}?q={{ active_filters.q }}{% if active_filters.status %}&status={{ active_filters.status }}{% endif %}{% if active_filters.sort %}&sort={{ active_filters.sort }}{% endif %}{% elif active_filters.status or active_filters.sort %}?{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.sort %}sort={{ active_filters.sort }}{% endif %}{% endif %}">
+                All Dates
+              </option>
+              <option value="{% url 'subscription_orders' %}?q={{ active_filters.q }}&date={{ active_filters.date }}{% if active_filters.status %}&status={{ active_filters.status }}{% endif %}{% if active_filters.sort %}&sort={{ active_filters.sort }}{% endif %}"
+                {% if active_filters.date %}selected{% endif %}>
+                {{ active_filters.date|default:"Select date" }}
+              </option>
+            </select>
+          </div>
+          <select name="sort" class="form-select" onchange="location = this.value;">
+            <option value="{% url 'subscription_orders' %}{% if active_filters.q %}?q={{ active_filters.q }}{% if active_filters.status %}&status={{ active_filters.status }}{% endif %}{% if active_filters.date %}&date={{ active_filters.date }}{% endif %}{% elif active_filters.status or active_filters.date %}?{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}{% endif %}{% endif %}">
+              Sort...
+            </option>
+            <option value="{% url 'subscription_orders' %}?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort=start_date_desc"
+              {% if active_filters.sort == 'start_date_desc' %}selected{% endif %}>
+              Newest First
+            </option>
+            <option value="{% url 'subscription_orders' %}?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort=start_date"
+              {% if active_filters.sort == 'start_date' %}selected{% endif %}>
+              Oldest First
+            </option>
+            <option value="{% url 'subscription_orders' %}?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort=created_at_desc"
+              {% if active_filters.sort == 'created_at_desc' %}selected{% endif %}>
+              Recently Created
+            </option>
+            <option value="{% url 'subscription_orders' %}?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort=created_at"
+              {% if active_filters.sort == 'created_at' %}selected{% endif %}>
+              Oldest Created
+            </option>
+            <option value="{% url 'subscription_orders' %}?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort=status"
+              {% if active_filters.sort == 'status' %}selected{% endif %}>
+              Status (A-Z)
+            </option>
+            <option value="{% url 'subscription_orders' %}?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort=status_desc"
+              {% if active_filters.sort == 'status_desc' %}selected{% endif %}>
+              Status (Z-A)
+            </option>
+          </select>
+          <!-- Optional: Add New Order Button -->
+          <!--
+          {% comment %} <a href="{% url 'subscription_order_add' %}" class="btn btn-primary">
+            <i class="bx bx-plus me-1"></i> Add Order
+          </a> {% endcomment %}
+          -->
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>
+                  <a href="?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort={% if active_filters.sort == 'order_number' %}-order_number{% else %}order_number{% endif %}">
+                    Order #
+                    {% if active_filters.sort == 'order_number' %}
+                      <i class="bx bx-up-arrow-alt"></i>
+                    {% elif active_filters.sort == '-order_number' %}
+                      <i class="bx bx-down-arrow-alt"></i>
+                    {% endif %}
+                  </a>
+                </th>
+                <th>Customer</th>
+                <th>Package</th>
+                <th>
+                  <a href="?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort={% if active_filters.sort == 'start_date' %}-start_date{% else %}start_date{% endif %}">
+                    Start
+                    {% if active_filters.sort == 'start_date' %}
+                      <i class="bx bx-up-arrow-alt"></i>
+                    {% elif active_filters.sort == '-start_date' %}
+                      <i class="bx bx-down-arrow-alt"></i>
+                    {% endif %}
+                  </a>
+                </th>
+                <th>End</th>
+                <th>Total</th>
+                <th>
+                  <a href="?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort={% if active_filters.sort == 'status' %}-status{% else %}status{% endif %}">
+                    Status
+                    {% if active_filters.sort == 'status' %}
+                      <i class="bx bx-up-arrow-alt"></i>
+                    {% elif active_filters.sort == '-status' %}
+                      <i class="bx bx-down-arrow-alt"></i>
+                    {% endif %}
+                  </a>
+                </th>
+                <th>Payment</th>
+                <th>
+                  <a href="?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}sort={% if active_filters.sort == 'created_at' %}-created_at{% else %}created_at{% endif %}">
+                    Created At
+                    {% if active_filters.sort == 'created_at' %}
+                      <i class="bx bx-up-arrow-alt"></i>
+                    {% elif active_filters.sort == '-created_at' %}
+                      <i class="bx bx-down-arrow-alt"></i>
+                    {% endif %}
+                  </a>
+                </th>
+                {% comment %} <th style="width: 110px;" class="text-center">Actions</th> {% endcomment %}
+              </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              {% for order in orders %}
+              <tr>
+                <td><strong>{{ order.order_number }}</strong></td>
+                <td>
+                  {% if order.customer %}
+                    {{ order.customer.get_full_name|default:order.customer.username }}
+                    <br><small class="text-muted">ID: {{ order.customer.member_id|default:"" }}</small>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td>
+                  {% if order.package %}
+                    {{ order.package.name|default:"—" }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td>{{ order.start_date|date:"d M Y" }}</td>
+                <td>{{ order.end_date|date:"d M Y" }}</td>
+                <td>₹{{ order.total }}</td>
+                <td>
+                  <span class="badge bg-{% if order.status == 'active' %}success{% elif order.status == 'expired' or order.status == 'cancelled' %}danger{% else %}warning{% endif %}">
+                    {{ order.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge bg-{% if order.payment_status == 'completed' %}success{% elif order.payment_status == 'refunded' %}info{% elif order.payment_status == 'failed' %}danger{% else %}warning{% endif %}">
+                    {{ order.get_payment_status_display }}
+                  </span>
+                </td>
+                <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
+                {% comment %} <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <!-- Edit Button (optional; remove if not needed) -->
+                    {# <a href="{% url 'subscription_order_edit' order.pk %}" class="btn btn-icon btn-secondary btn-sm">
+                      <i class="bx bx-edit"></i>
+                    </a> #}
+                    <!-- Cancel/Delete/Other actions as needed -->
+                  </div>
+                </td> {% endcomment %}
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="10" class="text-center py-4">
+                  <div class="text-muted">No subscription orders found</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="mt-4">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+              <li class="page-item prev">
+                <a class="page-link" href="?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}{% if active_filters.sort %}sort={{ active_filters.sort }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                  <i class="tf-icon bx bx-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <a class="page-link" href="#">{{ num }}</a>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}{% if active_filters.sort %}sort={{ active_filters.sort }}&{% endif %}page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+              {% endfor %}
+              {% if page_obj.has_next %}
+              <li class="page-item next">
+                <a class="page-link" href="?{% if active_filters.q %}q={{ active_filters.q }}&{% endif %}{% if active_filters.status %}status={{ active_filters.status }}&{% endif %}{% if active_filters.date %}date={{ active_filters.date }}&{% endif %}{% if active_filters.sort %}sort={{ active_filters.sort }}&{% endif %}page={{ page_obj.next_page_number }}">
+                  <i class="tf-icon bx bx-chevron-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Toast auto-dismiss (5 seconds)
+  const toastElements = document.querySelectorAll('.toast');
+  toastElements.forEach(toastEl => {
+    setTimeout(() => {
+      const toast = bootstrap.Toast.getInstance(toastEl);
+      toast?.hide();
+    }, 5000);
+  });
+
+  // Additional JS (modals, custom actions) can go here
+  // ...
+
+  // Date selector for the date filter
+  const dateSelect = document.querySelector('select[name="date"]');
+  if (dateSelect) {
+    dateSelect.addEventListener('focus', function(e) {
+      const input = document.createElement('input');
+      input.type = 'date';
+      input.onchange = function(e) {
+        const date = e.target.value;
+        dateSelect.value = '?q={{ active_filters.q }}&date=' + date +
+          '{% if active_filters.status %}&status={{ active_filters.status }}{% endif %}' +
+          '{% if active_filters.sort %}&sort={{ active_filters.sort }}{% endif %}';
+        dateSelect.dispatchEvent(new Event('change'));
+      };
+      input.click();
+    });
+  }
+});
+</script>
+
+{% endblock %}

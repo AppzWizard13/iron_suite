@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from accounts.models import CustomUser
-from orders.models import Payment
+from payments.models import Payment
 from products.models import Package
 
 class Subscription(models.Model):

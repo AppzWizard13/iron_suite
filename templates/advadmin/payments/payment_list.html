@@ -1,0 +1,148 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+      <span class="text-muted fw-light">Manage /</span> Payments
+    </h4>
+
+    {% if messages %}
+      <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+        {% for message in messages %}
+          <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert">
+            <div class="d-flex">
+              <div class="toast-body">{{ message }}</div>
+              <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="mb-0">All Payments</h5>
+        <!-- Improved Filter Form Start -->
+        <form method="get" class="row g-2 align-items-center mb-0">
+          <div class="col-auto">
+            <select name="user_id" class="form-select" style="min-width: 160px;">
+              <option value="">All Users</option>
+              {% for user in users %}
+                <option value="{{ user.id }}" {% if request.GET.user_id == user.id|stringformat:'s' %}selected{% endif %}>
+                  {{ user.username }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-auto">
+            <input type="date" class="form-control" style="min-width: 140px;" name="date_from" value="{{ request.GET.date_from }}" placeholder="Date From">
+          </div>
+          <div class="col-auto">
+            <input type="date" class="form-control" style="min-width: 140px;" name="date_to" value="{{ request.GET.date_to }}" placeholder="Date To">
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+          </div>
+          {% if request.GET.user_id or request.GET.date_from or request.GET.date_to or request.GET.sort or request.GET.order %}
+            <div class="col-auto">
+              <a href="{% url 'payment-list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+          {% endif %}
+        </form>
+        <!-- Improved Filter Form End -->
+      </div>
+      <div class="card-body">
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
+            <tr>
+                {% for colspec in colspecs %}
+                <th{% if colspec.2 %} style="width:{{ colspec.2 }}px"{% endif %}>
+                    <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort={{ colspec.0 }}&order={% if current_sort == colspec.0 and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                    {{ colspec.1 }}
+                    {% if current_sort == colspec.0 %}
+                        <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                    {% endif %}
+                    </a>
+                </th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              {% for payment in payments %}
+                <tr>
+                  <td><strong>{{ payment.id }}</strong></td>
+                  <td>
+                    {% if payment.customer %}
+                      {{ payment.customer.get_full_name|default:payment.customer.username }}
+                      {% if payment.customer.member_id %}
+                        <br><small class="text-muted">ID: {{ payment.customer.member_id }}</small>
+                      {% endif %}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td>₹{{ payment.amount }}</td>
+                  <td>{{ payment.payment_method|capfirst }}</td>
+                  <td>
+                    <span class="badge bg-{% if payment.status == 'completed' %}success{% elif payment.status == 'failed' %}danger{% elif payment.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                      {{ payment.get_status_display }}
+                    </span>
+                  </td>
+                  <td>{{ payment.transaction_id|default:"—" }}</td>
+                  <td>{{ payment.created_at|date:"d M Y, H:i" }}</td>
+                  <td>{{ payment.updated_at|date:"d M Y, H:i" }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-4"><div class="text-muted">No payments found</div></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if payments.paginator.num_pages > 1 %}
+          <div class="mt-4">
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                {% if payments.has_previous %}
+                  <li class="page-item prev">
+                    <a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ payments.previous_page_number }}"><i class="tf-icon bx bx-chevron-left"></i></a>
+                  </li>
+                {% endif %}
+                {% for num in payments.paginator.page_range %}
+                  {% if payments.number == num %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                  {% elif num > payments.number|add:'-3' and num < payments.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a></li>
+                  {% endif %}
+                {% endfor %}
+                {% if payments.has_next %}
+                  <li class="page-item next">
+                    <a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ payments.next_page_number }}"><i class="tf-icon bx bx-chevron-right"></i></a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var toastElements = document.querySelectorAll('.toast');
+  toastElements.forEach(function(toastEl) {
+    setTimeout(function() {
+      var toast = bootstrap.Toast.getOrCreateInstance(toastEl);
+      toast?.hide();
+    }, 5000);
+  });
+});
+</script>
+
+{% endblock %}

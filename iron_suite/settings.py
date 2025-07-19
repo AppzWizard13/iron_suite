@@ -211,6 +211,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 USERNAME_PREFIX = "MEMBER"
+SUBSCRIPTION_ORDER_PREFIX= "SUB-ORD-TEST"
+
 
 STATICFILES_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 

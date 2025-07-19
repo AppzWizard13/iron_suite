@@ -1,29 +1,40 @@
 from datetime import datetime
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.timezone import make_aware
-from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, TemplateView
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
+from django.views.generic import (
+    ListView, CreateView, TemplateView
+)
 
-from .models import Attendance, Schedule, ClassEnrollment, QRToken, CheckInLog
-from django.views.generic import ListView, CreateView
-from django.urls import reverse_lazy
-from .models import Schedule, ClassEnrollment, QRToken, CheckInLog
-from .forms import ScheduleForm
-from django.views.generic import CreateView
-from .models import ClassEnrollment
+from .forms import ScheduleForm, ClassEnrollmentForm
+from .models import (
+    Attendance, Schedule, ClassEnrollment, QRToken, CheckInLog
+)
 
 CustomUser = get_user_model()
 
 
 class AttendanceAdminView(ListView):
+    """
+    Admin view for listing attendance with filters.
+    """
     model = Attendance
     template_name = 'attendance/view_attendance.html'
     context_object_name = 'attendance_list'
     paginate_by = 20
 
     def get_queryset(self):
+        """
+        Optionally filter attendance by user, date, or status.
+        """
         queryset = super().get_queryset().select_related('user', 'schedule')
         q = self.request.GET.get('q')
         date = self.request.GET.get('date')
@@ -40,18 +51,22 @@ class AttendanceAdminView(ListView):
             queryset = queryset.filter(check_in_time__date=date)
         if status:
             queryset = queryset.filter(status=status)
-
         return queryset.order_by('-check_in_time')
 
 
-
 class AttendanceReportView(ListView):
+    """
+    View for generating filtered attendance reports.
+    """
     model = Attendance
     template_name = 'attendance/attendance_report.html'
     context_object_name = 'attendance_list'
     paginate_by = 20
 
     def get_queryset(self):
+        """
+        Optionally filter attendance by user, date, or status.
+        """
         queryset = super().get_queryset().select_related('user', 'schedule')
         q = self.request.GET.get('q')
         date = self.request.GET.get('date')
@@ -78,46 +93,62 @@ class AttendanceReportView(ListView):
         return queryset
 
 
-
-
 class ScheduleListView(ListView):
+    """
+    ListView for all schedules.
+    """
     model = Schedule
     template_name = 'attendance/schedule_list.html'
     context_object_name = 'schedules'
     paginate_by = 20
 
     def get_context_data(self, **kwargs):
+        """
+        Add pagination to context.
+        """
         context = super().get_context_data(**kwargs)
-        context['page_obj'] = context.get('page_obj')  # Ensures pagination works if included
+        context['page_obj'] = context.get('page_obj')
         return context
 
 
-
 class ScheduleCreateView(CreateView):
+    """
+    CreateView for schedules.
+    """
     model = Schedule
     form_class = ScheduleForm
     template_name = 'attendance/schedule_form.html'
     success_url = reverse_lazy('schedule_list')
-    
+
 
 class EnrollmentListView(ListView):
+    """
+    ListView for class enrollments.
+    """
     model = ClassEnrollment
     template_name = 'attendance/enrollment_list.html'
     context_object_name = 'enrollments'
     paginate_by = 20
 
     def get_queryset(self):
+        """
+        Prefetch user and schedule.
+        """
         return super().get_queryset().select_related('user', 'schedule')
 
     def get_context_data(self, **kwargs):
+        """
+        Add pagination to context.
+        """
         context = super().get_context_data(**kwargs)
         context['page_obj'] = context.get('page_obj')
         return context
-    
 
-from .forms import ClassEnrollmentForm
 
 class EnrollmentCreateView(CreateView):
+    """
+    CreateView for class enrollments.
+    """
     model = ClassEnrollment
     form_class = ClassEnrollmentForm
     template_name = 'attendance/enrollment_form.html'
@@ -125,24 +156,33 @@ class EnrollmentCreateView(CreateView):
 
 
 class QRTokenListView(ListView):
+    """
+    ListView for QR tokens.
+    """
     model = QRToken
     template_name = 'attendance/qr_token_list.html'
     context_object_name = 'qr_tokens'
     paginate_by = 20
 
     def get_queryset(self):
+        """
+        Prefetch schedule.
+        """
         return super().get_queryset().select_related('schedule')
 
     def get_context_data(self, **kwargs):
+        """
+        Add pagination to context.
+        """
         context = super().get_context_data(**kwargs)
         context['page_obj'] = context.get('page_obj')
         return context
-    
-from django.views.generic import CreateView
-from .models import QRToken
-from django.urls import reverse_lazy
+
 
 class QRTokenCreateView(CreateView):
+    """
+    CreateView for QR tokens.
+    """
     model = QRToken
     fields = ['schedule']
     template_name = 'attendance/qr_token_form.html'
@@ -150,26 +190,34 @@ class QRTokenCreateView(CreateView):
 
 
 class CheckInLogListView(ListView):
+    """
+    ListView for check-in logs.
+    """
     model = CheckInLog
     template_name = 'attendance/checkin_log_list.html'
     context_object_name = 'checkin_logs'
     paginate_by = 20
 
     def get_queryset(self):
+        """
+        Prefetch related user and token.
+        """
         return super().get_queryset().select_related('user', 'token')
 
-from django.views.generic import TemplateView
-from django.utils import timezone
-from .models import Schedule, QRToken
 
 class LiveQRView(TemplateView):
+    """
+    Shows currently live schedules and associated QR tokens.
+    """
     template_name = 'attendance/live_qr.html'
 
     def get_context_data(self, **kwargs):
+        """
+        Collect live schedules and their latest valid QR tokens.
+        """
         context = super().get_context_data(**kwargs)
         now = timezone.localtime()
         current_time = now.time()
-        print("Current Time:", current_time)
 
         # Get all currently live schedules
         live_schedules = Schedule.objects.filter(
@@ -178,10 +226,7 @@ class LiveQRView(TemplateView):
             end_time__gte=current_time
         ).order_by('start_time')
 
-        print("Live Schedules:", live_schedules)
-
         schedule_tokens = []
-
         for schedule in live_schedules:
             token = QRToken.objects.filter(
                 schedule=schedule,
@@ -198,17 +243,18 @@ class LiveQRView(TemplateView):
         return context
 
 
-from django.views.generic import TemplateView
-
 class QRScanView(TemplateView):
+    """
+    View for QR scan display.
+    """
     template_name = 'attendance/scan_qr.html'
-from django.shortcuts import render
-from django.utils import timezone
-from .models import QRToken, Attendance
-from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def qr_checkin_view(request):
+    """
+    Handles user check-in via QR code.
+    """
     token_value = request.GET.get('token')
 
     if not token_value:
@@ -272,21 +318,18 @@ def qr_checkin_view(request):
     })
 
 
-from django.http import JsonResponse
-from .models import QRToken, Schedule
-from django.utils import timezone
-from django.views.decorators.http import require_GET
-
 @require_GET
 @login_required
 def check_qr_status(request, schedule_id):
+    """
+    Returns the QR token and info for a live schedule as JSON.
+    """
     now = timezone.localtime()
     try:
         schedule = Schedule.objects.get(id=schedule_id, status='live')
     except Schedule.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Schedule not found.'}, status=404)
 
-    # Get latest valid token
     token = QRToken.objects.filter(
         schedule=schedule,
         expires_at__gte=now,
@@ -298,7 +341,8 @@ def check_qr_status(request, schedule_id):
             'status': 'ok',
             'token': token.token,
             'expires_at': token.expires_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'qr_url': f"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={request.build_absolute_uri('/checkin/')}?token={token.token}"
+            'qr_url': f"https://api.qrserver.com/v1/create-qr-code/"
+                      f"?size=200x200&data={request.build_absolute_uri('/checkin/')}?token={token.token}"
         })
     else:
         return JsonResponse({'status': 'waiting'})

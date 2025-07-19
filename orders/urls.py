@@ -38,6 +38,7 @@ urlpatterns = [
     path('transactions-details/<int:pk>/', TransactionDetailView.as_view(), name='transaction_detail'),
 
     path('clear-order-session/', views.clear_order_session, name='clear_order_session'),
+    path('subscription-orders/', views.SubscriptionOrderListView.as_view(), name='subscription_orders'),
 
 
 

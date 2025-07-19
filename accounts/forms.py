@@ -13,6 +13,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Max
 from .models import CustomUser, SocialMedia
 
+from django.core.exceptions import ValidationError
+
 class CustomUserForm(UserCreationForm):
     password1 = forms.CharField(
         required=False,  # Make password optional

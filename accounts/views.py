@@ -1,34 +1,66 @@
-from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DetailView, View, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
-from django.contrib import messages
-from django.shortcuts import redirect
-from django.urls import reverse_lazy
-from django.http import HttpResponse, JsonResponse, FileResponse
-from django.conf import settings
-from django.db.models import Max
 import os
 import zipfile
-from io import BytesIO
+import random
+import string
 import logging
+from io import BytesIO
+from datetime import timedelta
 
+import requests
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+from django.conf import settings
+from django.urls import reverse, reverse_lazy
+from django.db.models import Max
+from django.db import models
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import (
+    TemplateView, ListView, CreateView, UpdateView, DetailView, DeleteView
+)
+from django.views.generic.edit import CreateView
+from django.http import (
+    HttpResponse, JsonResponse, FileResponse
+)
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import (
+    logout, login, authenticate, get_user_model
+)
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+
+from payments.models import Payment, Transaction
+from twilio.rest import Client
+
+# Import your app models and forms
 from core.models import BusinessDetails, Configuration
 from products.models import Product, Category, subcategory
 from enquiry.models import Enquiry
-from .models import CustomUser, Banner, Review
-from .forms import CustomUserForm, CustomerRegistrationForm, MemberRegistrationForm, ReviewForm, BannerForm, ProfileUpdateForm
-from django.contrib.auth import logout, login
-from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model
+from orders.models import Order, SubscriptionOrder
 
-from orders.models import Transaction, Order
-from django.utils import timezone
-from datetime import timedelta
-from django.db import models 
-from .forms import UserLoginForm
+from .models import (
+    CustomUser, Banner, Review, SocialMedia, PasswordResetOTP
+)
+from .forms import (
+    CustomUserForm, CustomerRegistrationForm, MemberRegistrationForm,
+    ReviewForm, BannerForm, ProfileUpdateForm, SocialMediaForm, UserLoginForm,
+    PasswordResetRequestForm, PasswordResetOTPForm
+)
+from accounts.models import Customer
+
+# Setup logger
 logger = logging.getLogger(__name__)
-CustomUser = get_user_model()
-from django.contrib.auth.mixins import LoginRequiredMixin
+
+# User model
+User = get_user_model()
+CustomUser = User
 
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = CustomUser
@@ -70,23 +102,127 @@ class UserCreateView(LoginRequiredMixin, CreateView):
     def generate_username(self, member_id):
         return f"MEMBER{str(member_id).zfill(5)}"
 
+from django import forms
+class UserEditForm(forms.ModelForm):
+    password1 = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter New Password (leave blank if not changing)'
+        }),
+        label="New Password"
+    )
+    password2 = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm New Password'
+        }),
+        label="Confirm New Password"
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'first_name', 'last_name', 'phone_number', 'email', 'staff_role',
+            'address', 'city', 'state', 'pincode', 'date_of_birth', 'gender',
+            'is_active', 'is_staff', 'password1', 'password2',
+        ]
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter First Name'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Last Name'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Phone Number'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Email'
+            }),
+            'address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Address',
+                'rows': 2
+            }),
+            'city': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter City'
+            }),
+            'state': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter State'
+            }),
+            'pincode': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Pincode'
+            }),
+            'date_of_birth': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+            'gender': forms.Select(attrs={
+                'class': 'form-control'
+            }, choices=[
+                ('Male', 'Male'),
+                ('Female', 'Female'),
+                ('Other', 'Other')
+            ]),
+            'staff_role': forms.Select(attrs={
+                'class': 'form-control'
+            }, choices=[
+                ('Admin', 'Admin'),
+                ('Manager', 'Manager'),
+                ('Employee', 'Employee')
+            ]),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'is_staff': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+
+        if password1 and not password2:
+            raise forms.ValidationError("Please confirm your new password.")
+        if password2 and not password1:
+            raise forms.ValidationError("Please enter a new password first.")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords do not match.")
+        return password2
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get('password1')
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
     model = get_user_model()
-    form_class = CustomUserForm
-    template_name = 'admin_panel/manage_user.html'
+    form_class = UserEditForm  # <-- Use UserEditForm here
+    template_name = 'advadmin/user_edit.html'
     success_url = reverse_lazy('user_list')
     slug_field = "username"
     slug_url_kwarg = "username"
 
+    # Your view logic here (debug prints, etc.)
     def form_valid(self, form):
         user = form.save(commit=False)
-
-        # Get password only if provided
-        password = form.cleaned_data.get("password1")  # Use 'password1' instead of 'password'
+        password = form.cleaned_data.get('password1')
         if password:
-            user.set_password(password)  # Only set password if it's provided
-
+            user.set_password(password)
         user.save()
         messages.success(self.request, "User updated successfully.")
         return super().form_valid(form)
@@ -407,66 +543,89 @@ class LogoutView(LoginRequiredMixin, View):
         return redirect('login')
 
 
-from core.models import Configuration
-class DashboardView(LoginRequiredMixin, TemplateView):
-    
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum, Count, Q, Min
 
-    """
-    Dashboard view that changes based on ADMIN_PANEL_MODE setting
-    """
-    # Default template (will be overridden based on mode)
-    template_name = 'admin_panel/index.html'  
-    
+import calendar
+
+from accounts.models import CustomUser
+from attendance.models import Attendance
+from orders.models import Order, SubscriptionOrder
+from payments.models import Transaction, Payment
+from core.models import Configuration
+from enquiry.models import Enquiry  # adjust import as needed
+import json
+from collections import defaultdict
+
+class DashboardView(TemplateView):
+    template_name = 'admin_panel/index.html'
+
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/index.html']
         elif admin_mode == 'standard':
-            return ['admin_panel/standard.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/index.html']
-        
+            return ['admin_panel/standard.html']
+        return [self.template_name]
+
     def get_context_data(self, **kwargs):
-        from django.db.models import Sum, Q, Count
         context = super().get_context_data(**kwargs)
 
-        configs = Configuration.objects.all()
-        # Convert to dictionary with safe variable names for templates
-        config_dict = {
-            conf.config.replace("-", "_"): conf.value for conf in configs
-        }
-        transactions = Transaction.objects.all()
+        today = timezone.now().date()
+        first_day = today.replace(day=1)
+        last_day = today.replace(day=calendar.monthrange(today.year, today.month)[1])
+        current_month_name = calendar.month_name[today.month]
 
+        # Site Configurations
+        configs = Configuration.objects.all()
+        config_dict = {conf.config.replace("-", "_"): conf.value for conf in configs}
+
+        # Users/Members
+        active_users_count = CustomUser.objects.filter(
+            staff_role='Member', is_active=True, on_subscription=True).count()
+        new_signups_today = CustomUser.objects.filter(
+            staff_role='Member', join_date=today).count()
+        total_members = CustomUser.objects.filter(
+            staff_role='Member', is_active=True).count()
+
+        # Attendance
+        attended_today = Attendance.objects.filter(
+            date=today).values('user').distinct().count()
+        attendance_rate = round((attended_today / total_members * 100), 1) if total_members else 0
+
+        # Expiring memberships (implement if needed)
+        expiring_memberships = 0
+
+        # Revenue for current month
+        current_month_income = Payment.objects.filter(
+            status=Payment.Status.COMPLETED,
+            created_at__date__gte=first_day,
+            created_at__date__lte=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        # Transactions and financials (across all time for now)
+        transactions = Transaction.objects.all()
         total_sales_amount = transactions.filter(
             category=Transaction.Category.SALES,
             transaction_type=Transaction.Type.INCOME,
         ).aggregate(total=Sum('amount'))['total'] or 0
-
         total_completed_amount = transactions.filter(
             status=Transaction.Status.COMPLETED
         ).aggregate(total=Sum('amount'))['total'] or 0
-
         total_transaction_amount = transactions.aggregate(total=Sum('amount'))['total'] or 0
-
         total_income = transactions.filter(
             transaction_type=Transaction.Type.INCOME
         ).aggregate(total=Sum('amount'))['total'] or 0
-
         total_expense = transactions.filter(
             transaction_type=Transaction.Type.EXPENSE
         ).aggregate(total=Sum('amount'))['total'] or 0
-
         profit = total_income - total_expense
 
-        # Orders related counts
-        active_users_count = CustomUser.objects.filter(staff_role='Member', is_active = True).count()
-        orders = Order.objects.values('status').annotate(count=Count('id'))
-
-        # Initialize all as 0
+        # Subscription Orders/Status breakdown
+        orders = SubscriptionOrder.objects.values('status').annotate(count=Count('id'))
         order_status_counts = {
             'pending_orders': 0,
             'processing_orders': 0,
@@ -475,51 +634,128 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'cancelled_orders': 0,
             'returned_orders': 0,
         }
-
         total_orders = 0
-
+        status_map = {
+            'pending': 'pending_orders',
+            'processing': 'processing_orders',
+            'shipped': 'shipped_orders',
+            'delivered': 'delivered_orders',
+            'cancelled': 'cancelled_orders',
+            'return': 'returned_orders',
+        }
         for order in orders:
-            status = order['status']
+            order_status = order['status']
             count = order['count']
             total_orders += count
+            if order_status in status_map:
+                order_status_counts[status_map[order_status]] = count
 
-            if status == Order.Status.PENDING:
-                order_status_counts['pending_orders'] = count
-            elif status == Order.Status.PROCESSING:
-                order_status_counts['processing_orders'] = count
-            elif status == Order.Status.SHIPPED:
-                order_status_counts['shipped_orders'] = count
-            elif status == Order.Status.DELIVERED:
-                order_status_counts['delivered_orders'] = count
-            elif status == Order.Status.CANCELLED:
-                order_status_counts['cancelled_orders'] = count
-            elif status == Order.Status.RETURN:
-                order_status_counts['returned_orders'] = count
+        # SubscriptionOrder "Upcoming Renewals" (today to last day of month, not yet due)
+        upcoming_renewals_qs = SubscriptionOrder.objects.filter(
+            end_date__gte=today,
+            end_date__lte=last_day,
+            status__in=[SubscriptionOrder.Status.ACTIVE, SubscriptionOrder.Status.PENDING],
+        )
+        upcoming_renewals_result = upcoming_renewals_qs.aggregate(
+            renewals_count=Count('id'),
+            renewals_amount=Sum('total')
+        )
+        upcoming_renewals_count = upcoming_renewals_result['renewals_count'] or 0
+        upcoming_renewals_amount = upcoming_renewals_result['renewals_amount'] or 0
 
-        # --- Final base context ---
-        print("config_dictconfig_dict", config_dict)
-        base_context = {
-            **config_dict,
+        # Pending Dues: expired this month & not paid
+        pending_dues_qs = SubscriptionOrder.objects.filter(
+            end_date__lt=today,
+            end_date__gte=first_day,
+            end_date__lte=last_day,
+            payment_status=SubscriptionOrder.PaymentStatus.PENDING,
+        )
+        pending_dues_result = pending_dues_qs.aggregate(
+            pending_dues_count=Count('id'),
+            pending_dues_amount=Sum('total')
+        )
+        pending_dues_count = pending_dues_result['pending_dues_count'] or 0
+        pending_dues_amount = pending_dues_result['pending_dues_amount'] or 0
+
+        # Enquiries
+        try:
+            total_enquiries = Enquiry.objects.count()
+        except Exception:
+            total_enquiries = 0
+
+        # Recent Transactions
+        recent_transactions = transactions.order_by('-created_at')[:6]
+
+        # --- CHART DATA: Monthly Active Members & Yearly Earnings ---
+        earliest_year_qs = CustomUser.objects.filter(staff_role='Member', is_active=True)
+        earliest_year = earliest_year_qs.aggregate(earliest=Min('join_date'))['earliest']
+        base_year = (earliest_year.year if earliest_year else today.year - 2)
+        years = list(range(base_year, today.year + 1))
+
+        membership_trends = defaultdict(lambda: [0]*12)
+        for year in years:
+            for month in range(1, 13):
+                # Set 0 for future months
+                if year > today.year or (year == today.year and month > today.month):
+                    membership_trends[year][month-1] = 0
+                else:
+                    start = today.replace(year=year, month=month, day=1)
+                    last_day_num = calendar.monthrange(year, month)[1]
+                    end = today.replace(year=year, month=month, day=last_day_num)
+                    count = CustomUser.objects.filter(
+                        staff_role='Member', is_active=True,on_subscription=True,
+                        join_date__lte=end
+                    ).count()
+                    membership_trends[year][month-1] = count
+
+        # Earnings code remains unchanged
+        yearly_earnings = {}
+        for year in years:
+            year_start = today.replace(year=year, month=1, day=1)
+            year_end = today.replace(year=year, month=12, day=31)
+            amount = Payment.objects.filter(
+                status=Payment.Status.COMPLETED,
+                created_at__date__gte=year_start,
+                created_at__date__lte=year_end
+            ).aggregate(total=Sum('amount'))['total'] or 0
+            yearly_earnings[year] = float(amount)
+
+        print("membership_trends", membership_trends)
+        # For embedding as JSON in template JS
+        context['membership_trends_json'] = json.dumps(membership_trends)
+        context['yearly_earnings_json'] = json.dumps(yearly_earnings)
+        context['years'] = years
+        context['current_year'] = today.year
+
+        # --- END CHART DATA ---
+
+        # Compose and return context
+        context.update(config_dict)
+        context.update({
+            'current_month': current_month_name,
+            'total_members': total_members,
+            'upcoming_renewals_count': upcoming_renewals_count,
+            'upcoming_renewals_amount': upcoming_renewals_amount,
+            'pending_dues_count': pending_dues_count,
+            'pending_dues_amount': pending_dues_amount,
+            'current_month_income': current_month_income,
             'active_users_count': active_users_count,
+            'new_signups_today': new_signups_today,
+            'attendance_rate': attendance_rate,
+            'expiring_memberships': expiring_memberships,
             'total_sales_amount': total_sales_amount,
             'total_completed_amount': total_completed_amount,
             'total_transaction_amount': total_transaction_amount,
             'profit': profit,
-            'total_products': Product.objects.all(),
-            'total_products_count': Product.objects.count(),
-            'total_categories': Category.objects.all(),
-            'total_subcategories': subcategory.objects.all(),
-            'total_enquiries': Enquiry.objects.count(),
-            'total_cat_count': Category.objects.count(),
-            'total_subcat_count': subcategory.objects.count(),
+            'total_enquiries': total_enquiries,
             'total_orders': total_orders,
+            'recent_transactions': recent_transactions,
             'admin_mode': getattr(settings, 'ADMIN_PANEL_MODE', 'basic'),
-        }
-
-        base_context.update(order_status_counts)
-
-        context.update(base_context)
+        })
+        context.update(order_status_counts)
         return context
+
+
 
 
 
@@ -823,22 +1059,7 @@ class DownloadAllMediaView(LoginRequiredMixin, View):
                 memory_buffer.close()
             return HttpResponse(f"Error creating archive: {str(e)}", status=500, content_type='text/plain')
         
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-from django.views import View
-from .models import PasswordResetOTP
-from .forms import PasswordResetRequestForm, PasswordResetOTPForm
-from django.conf import settings
-from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
-import random
-import string
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import logging
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -1042,16 +1263,8 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
         return context
-    
-from django.urls import reverse_lazy
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import (
-    ListView, CreateView, UpdateView, DetailView, DeleteView
-)
-from django.conf import settings
-from .models import SocialMedia
-from .forms import SocialMediaForm
+  
+
 
 class SocialMediaListView(LoginRequiredMixin, ListView):
     model = SocialMedia
@@ -1063,7 +1276,6 @@ class SocialMediaListView(LoginRequiredMixin, ListView):
 
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/socialmedia_list.html']
         elif admin_mode == 'standard':
@@ -1071,7 +1283,7 @@ class SocialMediaListView(LoginRequiredMixin, ListView):
         else:
             return ['admin_panel/socialmedia_list.html']
 
-    
+
 class SocialMediaCreateView(LoginRequiredMixin, CreateView):
     model = SocialMedia
     form_class = SocialMediaForm
@@ -1082,17 +1294,15 @@ class SocialMediaCreateView(LoginRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
-    
+
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/socialmedia_form.html']
         elif admin_mode == 'standard':
             return ['admin_panel/socialmedia_form.html']
         else:
             return ['admin_panel/socialmedia_form.html']
-        
 
     def form_valid(self, form):
         if not self.request.user.is_superuser:
@@ -1108,7 +1318,6 @@ class SocialMediaDetailView(LoginRequiredMixin, DetailView):
 
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/socialmedia_detail.html']
         elif admin_mode == 'standard':
@@ -1116,7 +1325,6 @@ class SocialMediaDetailView(LoginRequiredMixin, DetailView):
         else:
             return ['admin_panel/socialmedia_detail.html']
 
-    
 
 class SocialMediaUpdateView(LoginRequiredMixin, UpdateView):
     model = SocialMedia
@@ -1128,16 +1336,16 @@ class SocialMediaUpdateView(LoginRequiredMixin, UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
-    
+
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/socialmedia_form.html']
         elif admin_mode == 'standard':
             return ['admin_panel/socialmedia_form.html']
         else:
             return ['admin_panel/socialmedia_form.html']
+
     def form_valid(self, form):
         messages.success(self.request, "Social media link updated successfully!")
         return super().form_valid(form)
@@ -1150,34 +1358,35 @@ class SocialMediaDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Social media link deleted successfully!")
         return super().delete(request, *args, **kwargs)
-    
-import logging
-from django.http import JsonResponse
-from django.core.exceptions import ObjectDoesNotExist
 
-# Create a logger for your app
-logger = logging.getLogger(__name__)
 
 def get_company_data(request):
     try:
-        # Fetch the first available BusinessDetails entry
         company = BusinessDetails.objects.first()
         category_names = list(Category.objects.values_list('name', flat=True))
-
 
         if not company:
             return JsonResponse({'error': 'No company data found'}, status=404)
 
-        # Prepare data safely
         data = {
             'company_name': company.company_name,
             'gstn': company.gstn,
-            'breadcrumb_image_url': company.breadcrumb_image.url if company.breadcrumb_image else None,
-            'about_page_image_url': company.about_page_image.url if company.about_page_image else None,
+            'breadcrumb_image_url': (
+                company.breadcrumb_image.url if company.breadcrumb_image else None
+            ),
+            'about_page_image_url': (
+                company.about_page_image.url if company.about_page_image else None
+            ),
             'company_tagline': company.company_tagline,
-            'company_logo_svg_url': company.company_logo_svg.url if company.company_logo_svg else None,
-            'company_logo_url': company.company_logo.url if company.company_logo else None,
-            'company_favicon_url': company.company_favicon.url if company.company_favicon else None,
+            'company_logo_svg_url': (
+                company.company_logo_svg.url if company.company_logo_svg else None
+            ),
+            'company_logo_url': (
+                company.company_logo.url if company.company_logo else None
+            ),
+            'company_favicon_url': (
+                company.company_favicon.url if company.company_favicon else None
+            ),
             'company_address': company.offline_address,
             'company_map_location': company.map_location,
             'info_mobile': company.info_mobile,
@@ -1189,36 +1398,37 @@ def get_company_data(request):
             'company_instagram': company.company_instagram,
             'company_facebook': company.company_facebook,
             'company_email_ceo': company.company_email_ceo,
-            'opening_time': company.opening_time.strftime('%H:%M:%S') if company.opening_time else None,
-            'closing_time': company.closing_time.strftime('%H:%M:%S') if company.closing_time else None,
-            'closed_days': company.closed_days.split(',') if company.closed_days else [],
+            'opening_time': (
+                company.opening_time.strftime('%H:%M:%S')
+                if company.opening_time else None
+            ),
+            'closing_time': (
+                company.closing_time.strftime('%H:%M:%S')
+                if company.closing_time else None
+            ),
+            'closed_days': (
+                company.closed_days.split(',') if company.closed_days else []
+            ),
             'category_names': category_names
-
         }
 
         return JsonResponse(data)
 
     except ObjectDoesNotExist as e:
-        # Log the error if the object is not found or some data is missing
-        logger.error(f"ObjectDoesNotExist Error: {str(e)} - Failed to fetch company data.")
-        return JsonResponse({'error': 'Company data not found or missing fields'}, status=500)
+        logger.error(
+            f"ObjectDoesNotExist Error: {str(e)} - Failed to fetch company data."
+        )
+        return JsonResponse(
+            {'error': 'Company data not found or missing fields'}, status=500
+        )
 
     except Exception as e:
-        # Catch any other exceptions and log the error
         logger.error(f"Error while processing company data: {str(e)}")
-        return JsonResponse({'error': 'An unexpected error occurred while processing company data'}, status=500)
+        return JsonResponse(
+            {'error': 'An unexpected error occurred while processing company data'},
+            status=500
+        )
 
-
-
-from django.contrib import messages
-from django.contrib.auth import get_user_model
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.views import View
-from .forms import CustomerRegistrationForm
-from accounts.models import Customer
-
-User = get_user_model()
 
 class CustomerCreateView(View):
     template_name = 'advadmin/customer_registration.html'
@@ -1233,21 +1443,20 @@ class CustomerCreateView(View):
         if form.is_valid():
             form.save()
             messages.success(request, "Customer created successfully!")
-            return redirect('customer_registration')  # Redirect to the same page or another page
+            return redirect('customer_registration')
         else:
             messages.error(request, "Error creating customer.")
-            print("Form errors:", form.errors)  # Print form errors for debugging
-        return render(request, self.template_name, {'form': form, 'users': User.objects.all()})
-    
+            print("Form errors:", form.errors)
+        return render(
+            request, self.template_name,
+            {'form': form, 'users': User.objects.all()}
+        )
 
-from django.urls import reverse
-from django.views.generic.edit import CreateView
-from django.contrib import messages
 
 class MemberRegisterView(CreateView):
     model = CustomUser
     form_class = MemberRegistrationForm
-    success_url = reverse_lazy('user_list')  # Fallback, but you won't use it now
+    success_url = reverse_lazy('user_list')
 
     def get_template_names(self):
         return ['advadmin/member_registration.html']
@@ -1260,20 +1469,16 @@ class MemberRegisterView(CreateView):
                 user.set_password(form.cleaned_data['password1'])
             user.save()
 
-            # Fetch the selected package
             package = form.cleaned_data['package']
 
-            # Store the new user ID and package ID in session (so payment view can access it)
             self.request.session['pending_member_member_id'] = user.member_id
             self.request.session['pending_package_id'] = package.id
 
-            # Message for the user
             messages.success(
                 self.request,
                 "Please complete package payment to activate membership."
             )
 
-            # Redirect to payment initiation view
             return redirect('initiate_subscription_payment')
 
         except Exception as e:
@@ -1281,87 +1486,66 @@ class MemberRegisterView(CreateView):
             return self.form_invalid(form)
 
 
-import random
-from django.shortcuts import render, redirect 
-from django.views import View
-from django.contrib.auth import login
-from django.contrib import messages
-from django.utils import timezone
-from datetime import timedelta
-from twilio.rest import Client
-from django.conf import settings
-from django.core.mail import send_mail
-
 class LoginWithOTPView(View):
     template_name = 'advadmin/login_with_otp.html'
-    
+
     def get(self, request):
         return render(request, self.template_name)
-    
+
     def post(self, request):
         phone_number = request.POST.get('phone_number')
-        
+
         if not phone_number:
             messages.error(request, "Phone number is required")
             return render(request, self.template_name)
-        
-        # Check if user exists
         try:
             user = User.objects.get(phone_number=phone_number)
         except User.DoesNotExist:
             messages.error(request, "No user found with the corresponding phone number.")
             return render(request, self.template_name)
-        
+
         email = user.email
-        
-        # Generate a 6-digit OTP
         otp = str(random.randint(100000, 999999))
         valid_until = timezone.now() + timedelta(minutes=5)
-        
-        # Store OTP in session
+
         request.session['otp'] = otp
         request.session['otp_valid_until'] = valid_until.isoformat()
         request.session['phone_number'] = phone_number
-        
-        # Retrieve both configurations in a single query
-        configs = Configuration.objects.filter(config__in=["enable-emailotp", "enable-smsotp"])
 
-        # Initialize a dictionary to store the configuration values
+        configs = Configuration.objects.filter(
+            config__in=["enable-emailotp", "enable-smsotp"]
+        )
         config_values = {config.config: config.value for config in configs}
 
-        # Helper function to convert string to boolean
         def str_to_bool(value):
             return value.lower() in ("true", "1", "yes", "on")
 
-        # Check the configuration values and send OTP accordingly
         if str_to_bool(config_values.get("enable-emailotp", "False")):
             self.send_otp_via_email(email, otp)
 
         if str_to_bool(config_values.get("enable-smsotp", "False")):
             self.send_otp_via_twilio(phone_number, otp)
-        
+
         return redirect('verify_otp')
-    
+
     def send_otp_via_email(self, email, otp):
         subject = f"OTP for {settings.SITE_NAME}"
-        body = f"""
-        Dear User,
-        
-        Your OTP for logging in to {settings.SITE_NAME} is:
-        
-        OTP: {otp}
-        
-        This OTP is valid for 5 minutes.
-        
-        If you didn't request this, please ignore this email.
-        
-        Best regards,
-        {settings.SITE_NAME} Team
-        """
-        
+        body = (
+            f"Dear User,\n\n"
+            f"Your OTP for logging in to {settings.SITE_NAME} is:\n\n"
+            f"OTP: {otp}\n\n"
+            f"This OTP is valid for 5 minutes.\n\n"
+            f"If you didn't request this, please ignore this email.\n\n"
+            f"Best regards,\n{settings.SITE_NAME} Team"
+        )
         try:
-            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
-            messages.success(self.request, "OTP has been sent to your email. Please check your inbox.")
+            send_mail(
+                subject, body, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False
+            )
+            messages.success(
+                self.request,
+                "OTP has been sent to your email. Please check your inbox."
+            )
         except Exception as e:
             messages.error(self.request, "Failed to send OTP via email. Please try again.")
             print(f"Error sending email: {e}")
@@ -1369,7 +1553,6 @@ class LoginWithOTPView(View):
     def send_otp_via_twilio(self, phone_number, otp):
         try:
             client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-            
             message = client.messages.create(
                 body=f"Your OTP for login is: {otp}. Valid for 5 minutes.",
                 from_=settings.TWILIO_PHONE_NUMBER,
@@ -1384,7 +1567,7 @@ class LoginWithOTPView(View):
 
 class VerifyOTPView(View):
     template_name = 'advadmin/verify_otp.html'
-    
+
     def get(self, request):
         stored_otp = request.session.get('otp')
         print("stored_otpstored_otpstored_otpstored_otp", stored_otp)
@@ -1392,65 +1575,52 @@ class VerifyOTPView(View):
             messages.error(request, "Session expired. Please request OTP again.")
             return redirect('login_with_otp')
         return render(request, self.template_name)
-    
+
     def post(self, request):
         user_otp = request.POST.get('otp')
         phone_number = request.session.get('phone_number')
         stored_otp = request.session.get('otp')
         print("stored_otpstored_otpstored_otpstored_otp", stored_otp)
         otp_valid_until = request.session.get('otp_valid_until')
-        
+
         if not all([user_otp, stored_otp, otp_valid_until]):
             messages.error(request, "Session expired. Please request OTP again.")
             return redirect('login_with_otp')
-        
-        # Check if OTP is expired
+
         if timezone.now() > timezone.datetime.fromisoformat(otp_valid_until):
             messages.error(request, "OTP has expired. Please request a new one.")
             return redirect('login_with_otp')
-        
-        # Verify OTP
+
         if user_otp == stored_otp:
-            # OTP is valid - get or create user
             try:
                 user = User.objects.get(phone_number=phone_number)
             except User.DoesNotExist:
                 messages.error(request, "No user found with the corresponding phone number.")
                 return render(request, self.template_name)
-            
-            # Log the user in
+
             login(request, user)
-            
-            # Clear session data
             request.session.pop('otp', None)
             request.session.pop('otp_valid_until', None)
             request.session.pop('phone_number', None)
-            
+
             return redirect('otp_login_success')
         else:
             messages.error(request, "Invalid OTP. Please try again.")
             return render(request, self.template_name)
 
+
 class OTPLoginSuccessView(View):
     template_name = 'advadmin/otp_login_success.html'
-    
+
     def get(self, request):
         if not request.user.is_authenticated:
             return redirect('login_with_otp')
         return redirect('dashboard')
 
+
 def login_redirect(request):
     return redirect('/accounts/google/login/?process=login')
 
-
-import requests
-from django.conf import settings
-from django.shortcuts import redirect
-from django.contrib.auth import login
-from django.contrib import messages
-from django.views import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 
 @method_decorator(csrf_exempt, name='dispatch')
 class GoogleSSOCallbackView(View):
@@ -1480,9 +1650,11 @@ class GoogleSSOCallbackView(View):
 
         # Step 2: Fetch user info
         user_info_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
-        user_info_response = requests.get(user_info_url, params={'alt': 'json'}, headers={
-            'Authorization': f'Bearer {access_token}'
-        })
+        user_info_response = requests.get(
+            user_info_url,
+            params={'alt': 'json'},
+            headers={'Authorization': f'Bearer {access_token}'}
+        )
         user_info = user_info_response.json()
 
         email = user_info.get('email')
@@ -1498,13 +1670,11 @@ class GoogleSSOCallbackView(View):
             messages.error(request, "User not registered. Please sign up first.")
             return redirect('/login/')
 
-        # Optional update name
         if user.first_name != name:
             user.first_name = name
             user.save()
 
-        # Important: set backend
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
 
-        return redirect('/dashboard/')
+        return redirect('/dashboard')

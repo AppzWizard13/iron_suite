@@ -4,7 +4,7 @@
 
 'use strict';
 
-(function() {
+(function () {
     let cardColor, headingColor, axisColor, shadeColor, borderColor;
 
     cardColor = config.colors.white;
@@ -12,19 +12,31 @@
     axisColor = config.colors.axisColor;
     borderColor = config.colors.borderColor;
 
+    // Membership trends & earnings from Django (ensure these vars are available in a <script> on your page)
+    // window.membershipTrends: {2025: [...12], 2024: [...12], ...}
+    // window.yearlyEarnings: {2025: 12000, 2024: 11000, ...}
+    // window.allYears: [2025, 2024, ...]
+    // window.currentYear: 2025
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var trends = window.membershipTrends || {};
+    var years = window.allYears || [window.currentYear, window.currentYear - 1];
+    var selectedYear = window.currentYear || new Date().getFullYear();
+
+    function getTrendSeries(year) {
+        return [
+            {
+                name: String(year),
+                data: trends[year] || new Array(12).fill(0)
+            }
+        ];
+    }
+
     // Total Revenue Report Chart - Bar Chart
     // --------------------------------------------------------------------
     const totalRevenueChartEl = document.querySelector('#totalRevenueChart'),
         totalRevenueChartOptions = {
-            series: [{
-                    name: '2021',
-                    data: [18, 7, 15, 29, 18, 12, 9]
-                },
-                {
-                    name: '2020',
-                    data: [-13, -18, -9, -14, -5, -17, -15]
-                }
-            ],
+            series: getTrendSeries(selectedYear),
             chart: {
                 height: 300,
                 stacked: true,
@@ -42,7 +54,7 @@
                     endingShape: 'rounded'
                 }
             },
-            colors: [config.colors.primary, config.colors.info],
+            colors: [config.colors.primary],
             dataLabels: {
                 enabled: false
             },
@@ -79,7 +91,7 @@
                 }
             },
             xaxis: {
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                categories: months,
                 labels: {
                     style: {
                         fontSize: '13px',
@@ -101,178 +113,48 @@
                     }
                 }
             },
-            responsive: [{
-                    breakpoint: 1700,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '32%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 1580,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '35%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 1440,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '42%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 1300,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '48%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 1200,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '40%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 1040,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 11,
-                                columnWidth: '48%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 991,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '30%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 840,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '35%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 768,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '28%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 640,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '32%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 576,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '37%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 480,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '45%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 420,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '52%'
-                            }
-                        }
-                    }
-                },
-                {
-                    breakpoint: 380,
-                    options: {
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 10,
-                                columnWidth: '60%'
-                            }
-                        }
-                    }
-                }
+            responsive: [
+                { breakpoint: 1700, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '32%' }}} }, 
+                { breakpoint: 1580, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '35%' }}} }, 
+                { breakpoint: 1440, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '42%' }}} }, 
+                { breakpoint: 1300, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '48%' }}} }, 
+                { breakpoint: 1200, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '40%' }}} }, 
+                { breakpoint: 1040, options: { plotOptions: { bar: { borderRadius: 11, columnWidth: '48%' }}} }, 
+                { breakpoint: 991, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '30%' }}} }, 
+                { breakpoint: 840, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '35%' }}} }, 
+                { breakpoint: 768, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '28%' }}} }, 
+                { breakpoint: 640, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '32%' }}} }, 
+                { breakpoint: 576, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '37%' }}} }, 
+                { breakpoint: 480, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '45%' }}} }, 
+                { breakpoint: 420, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '52%' }}} }, 
+                { breakpoint: 380, options: { plotOptions: { bar: { borderRadius: 10, columnWidth: '60%' }}} }
             ],
             states: {
-                hover: {
-                    filter: {
-                        type: 'none'
-                    }
-                },
-                active: {
-                    filter: {
-                        type: 'none'
-                    }
-                }
+                hover: { filter: { type: 'none' }},
+                active: { filter: { type: 'none' }}
             }
         };
     if (typeof totalRevenueChartEl !== undefined && totalRevenueChartEl !== null) {
-        const totalRevenueChart = new ApexCharts(totalRevenueChartEl, totalRevenueChartOptions);
-        totalRevenueChart.render();
+        window.totalRevenueChart = new ApexCharts(totalRevenueChartEl, totalRevenueChartOptions);
+        window.totalRevenueChart.render();
     }
+
+    // Year selection for bar chart update (dropdown must use .year-select and data-year)
+    document.querySelectorAll('.year-select').forEach(function (item) {
+        item.addEventListener('click', function () {
+            let year = parseInt(this.getAttribute('data-year'), 10);
+            let newSeries = getTrendSeries(year);
+            if (window.totalRevenueChart)
+                window.totalRevenueChart.updateSeries(newSeries);
+
+            // Optionally update year label and earnings if required
+            if (document.getElementById('growthReportId')) document.getElementById('growthReportId').innerText = year;
+            if (document.getElementById('thisYearLabel')) document.getElementById('thisYearLabel').innerText = year;
+            if (document.getElementById('thisYearEarning') && window.yearlyEarnings)
+                document.getElementById('thisYearEarning').innerText = "₹" + (window.yearlyEarnings[year] || 0).toLocaleString();
+        });
+    });
+
 
     // Growth Chart - Radial Bar Chart
     // --------------------------------------------------------------------
@@ -416,28 +298,32 @@
         profileReportChart.render();
     }
 
+
     // Order Statistics Chart
     // --------------------------------------------------------------------
     console.log(' orderStatsData.labels orderStatsData.labels', orderStatsData.series)
     const chartOrderStatistics = document.querySelector('#orderStatisticsChart'),
-
         orderChartConfig = {
             chart: {
                 height: 165,
                 width: 130,
                 type: 'donut'
             },
-
             labels: orderStatsData.labels,
             series: orderStatsData.series,
-            colors: [config.colors.primary, config.colors.secondary, config.colors.info, config.colors.success],
+            colors: [
+                config.colors.primary,
+                config.colors.secondary,
+                config.colors.info,
+                config.colors.success
+            ],
             stroke: {
                 width: 5,
                 colors: cardColor
             },
             dataLabels: {
                 enabled: false,
-                formatter: function(val, opt) {
+                formatter: function (val, opt) {
                     return parseInt(val) + '%';
                 }
             },
@@ -462,7 +348,7 @@
                                 fontFamily: 'Public Sans',
                                 color: headingColor,
                                 offsetY: -15,
-                                formatter: function(val) {
+                                formatter: function (val) {
                                     return parseInt(val) + '%';
                                 }
                             },
@@ -475,7 +361,7 @@
                                 fontSize: '0.8125rem',
                                 color: axisColor,
                                 label: 'Weekly',
-                                formatter: function(w) {
+                                formatter: function (w) {
                                     return '38%';
                                 }
                             }
@@ -488,6 +374,7 @@
         const statisticsChart = new ApexCharts(chartOrderStatistics, orderChartConfig);
         statisticsChart.render();
     }
+
 
     // Income Chart - Area chart
     // --------------------------------------------------------------------
@@ -584,6 +471,7 @@
         incomeChart.render();
     }
 
+
     // Expenses Mini Chart - Radial Chart
     // --------------------------------------------------------------------
     const weeklyExpensesEl = document.querySelector('#expensesOfWeek'),
@@ -613,7 +501,7 @@
                             show: false
                         },
                         value: {
-                            formatter: function(val) {
+                            formatter: function (val) {
                                 return '$' + parseInt(val);
                             },
                             offsetY: 5,
