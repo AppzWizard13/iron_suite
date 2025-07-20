@@ -3,13 +3,8 @@ from .base import *
 DEBUG = False
 
 # Specify your production host(s)
-ALLOWED_HOSTS = ['https://iron-suite.onrender.com','*']
+ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'https://iron-suite.onrender.com',
-]
 
 # Make sure to override SECRET_KEY in environment or .env for security
 ENABLE_QR_SCHEDULER = True  # Set to False to disable
