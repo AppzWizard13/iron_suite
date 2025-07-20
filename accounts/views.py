@@ -728,10 +728,12 @@ class DashboardView(TemplateView):
         context['current_year'] = today.year
 
         # --- END CHART DATA ---
+        PAGES_GROUP = ['about-us', 'class-timetable', 'bmi-calculator', 'team', 'gallery', 'blog', '404']
 
         # Compose and return context
         context.update(config_dict)
         context.update({
+            'pages_group': PAGES_GROUP,
             'current_month': current_month_name,
             'total_members': total_members,
             'upcoming_renewals_count': upcoming_renewals_count,
@@ -1678,10 +1680,6 @@ class GoogleSSOCallbackView(View):
         login(request, user)
 
         return redirect('/dashboard')
-
-
-
-from django.views.generic import TemplateView
 
 
 class BlogDetailsView(TemplateView):

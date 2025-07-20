@@ -33,7 +33,7 @@ urlpatterns = [
 
     # Static pages
     path('services/', ServicesView.as_view(), name='services'),
-    path('about/', AboutView.as_view(), name='about'),
+    path('about-us/', AboutView.as_view(), name='about-us'),
     path('download-db/', DownloadDatabaseView.as_view(), name='download_database'),
 
     # User management
