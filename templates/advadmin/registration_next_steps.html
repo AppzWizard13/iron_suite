@@ -1,0 +1,32 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-bold py-3 mb-4">Registration Complete</h4>
+  <div class="card">
+    <div class="card-body text-center">
+      <span class="thankyou-icon mb-3" style="font-size: 3rem; color: #28a745;">
+        <i class="fas fa-check-circle"></i>
+      </span>
+      <h3 class="py-2 mb-2">Thank you for registering!</h3>
+      <p class="mb-4 text-muted">Your account is almost ready. Please choose how you would like to continue:</p>
+      <div class="row justify-content-center g-3">
+        <div class="col-12 col-md-6 mb-2 mb-md-0">
+          <a href="{% url 'initiate_subscription_payment' %}" class="btn btn-primary w-100 py-3">
+            <i class="fas fa-credit-card me-2"></i>
+            Purchase Package &amp; Continue
+            <div class="small text-white-50 mt-1">Complete activation now</div>
+          </a>
+        </div>
+        <div class="col-12 col-md-6">
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary w-100 py-3">
+            <i class="fas fa-clock me-2"></i>
+            Do It Later
+            <div class="small text-muted mt-1">Come back anytime</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

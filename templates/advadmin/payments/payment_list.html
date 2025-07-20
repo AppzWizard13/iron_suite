@@ -47,7 +47,7 @@
           </div>
           {% if request.GET.user_id or request.GET.date_from or request.GET.date_to or request.GET.sort or request.GET.order %}
             <div class="col-auto">
-              <a href="{% url 'payment-list' %}" class="btn btn-outline-secondary">Clear</a>
+              <a href="{% url 'payment_list' %}" class="btn btn-outline-secondary">Clear</a>
             </div>
           {% endif %}
         </form>
@@ -56,20 +56,75 @@
       <div class="card-body">
         <div class="table-responsive text-nowrap">
           <table class="table table-hover">
-            <thead>
+          <thead>
             <tr>
-                {% for colspec in colspecs %}
-                <th{% if colspec.2 %} style="width:{{ colspec.2 }}px"{% endif %}>
-                    <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort={{ colspec.0 }}&order={% if current_sort == colspec.0 and current_order == 'asc' %}desc{% else %}asc{% endif %}">
-                    {{ colspec.1 }}
-                    {% if current_sort == colspec.0 %}
-                        <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
-                    {% endif %}
-                    </a>
-                </th>
-                {% endfor %}
+              <th style="width:40px">
+                <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort=id&order={% if current_sort == 'id' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                  ID
+                  {% if current_sort == 'id' %}
+                    <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                  {% endif %}
+                </a>
+              </th>
+              <th style="width:180px">
+                <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort=customer&order={% if current_sort == 'customer' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                  Customer
+                  {% if current_sort == 'customer' %}
+                    <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                  {% endif %}
+                </a>
+              </th>
+              <th style="width:80px">
+                <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort=amount&order={% if current_sort == 'amount' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                  Amount (₹)
+                  {% if current_sort == 'amount' %}
+                    <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                  {% endif %}
+                </a>
+              </th>
+              <th style="width:80px">
+                <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort=payment_method&order={% if current_sort == 'payment_method' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                  Method
+                  {% if current_sort == 'payment_method' %}
+                    <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                  {% endif %}
+                </a>
+              </th>
+              <th style="width:80px">
+                <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort=status&order={% if current_sort == 'status' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                  Status
+                  {% if current_sort == 'status' %}
+                    <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                  {% endif %}
+                </a>
+              </th>
+              <th style="width:120px">
+                <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort=transaction_id&order={% if current_sort == 'transaction_id' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                  Txn ID
+                  {% if current_sort == 'transaction_id' %}
+                    <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                  {% endif %}
+                </a>
+              </th>
+              <th style="width:140px">
+                <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort=created_at&order={% if current_sort == 'created_at' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                  Created
+                  {% if current_sort == 'created_at' %}
+                    <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                  {% endif %}
+                </a>
+              </th>
+              <th style="width:140px">
+                <a href="?{% for pair in request.GET.items %}{% if pair.0 != 'sort' and pair.0 != 'order' %}{{ pair.0 }}={{ pair.1|urlencode }}&{% endif %}{% endfor %}sort=updated_at&order={% if current_sort == 'updated_at' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                  Updated
+                  {% if current_sort == 'updated_at' %}
+                    <i class="bx {% if current_order == 'asc' %}bx-up-arrow-alt{% else %}bx-down-arrow-alt{% endif %}"></i>
+                  {% endif %}
+                </a>
+              </th>
             </tr>
-            </thead>
+          </thead>
+
             <tbody class="table-border-bottom-0">
               {% for payment in payments %}
                 <tr>

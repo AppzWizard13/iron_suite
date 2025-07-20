@@ -145,6 +145,10 @@ def initiate_subscription_payment(request):
     """
     member_id = request.session.get('pending_member_member_id')
     package_id = request.session.get('pending_package_id')
+    
+
+    print("member_id", member_id)
+    print("package_id", package_id)
 
     if not member_id or not package_id:
         messages.error(
@@ -171,6 +175,31 @@ def initiate_subscription_payment(request):
 
     return initiate_cashfree_payment(request, subscription_order)
 
+
+def buy_subscription_package(request):
+    member_id = request.GET.get('member_id')
+    package_id = request.GET.get('package_id')
+    if not member_id or not package_id:
+        messages.error(
+            request,
+            "Session expired or missing package. Please register again."
+        )
+        return redirect('register_member')
+
+    user = get_object_or_404(User, member_id=member_id)
+    package = get_object_or_404(Package, id=package_id)
+
+    subscription_order = SubscriptionOrder.objects.create(
+        customer=user,
+        package=package,
+        total=package.final_price,
+        status=SubscriptionOrder.Status.PENDING,
+        payment_status=SubscriptionOrder.PaymentStatus.PENDING,
+        start_date=timezone.now().date(),
+        end_date=timezone.now().date() + timedelta(days=package.duration_days),
+    )
+    # For example, dummy render:
+    return initiate_cashfree_payment(request, subscription_order)
 
 @csrf_exempt
 def cashfree_webhook(request):
@@ -429,3 +458,14 @@ class PaymentListView(ListView):
         context['current_sort'] = self.request.GET.get('sort', 'created_at')
         context['current_order'] = 'asc' if self.request.GET.get('order', 'desc') == 'asc' else 'desc'
         return context
+
+
+# views.py
+def choose_package(request, member_id):
+    packages = Package.objects.all()
+    # Optionally check member exists
+    # member = get_object_or_404(Member, id=member_id)
+    return render(request, 'advadmin/choose_package.html', {
+        'packages': packages,
+        'member_id': member_id,
+    })

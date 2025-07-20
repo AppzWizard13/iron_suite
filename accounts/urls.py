@@ -8,7 +8,7 @@ from .views import (
     BannerListView, BannerCreateView, BannerDetailView, BannerUpdateView, BannerDeleteView,
     DownloadAllMediaView, PasswordResetRequestView, PasswordResetVerifyView, AccountSettingsView,
     ProfileUpdateView, SocialMediaListView, SocialMediaCreateView,CustomerCreateView,
-    SocialMediaDetailView, SocialMediaUpdateView, VerifyOTPView, toggle_user_active,BlockedUserListView, UnblockUserView,MemberRegisterView,
+    SocialMediaDetailView, SocialMediaUpdateView, VerifyOTPView, toggle_user_active,BlockedUserListView, UnblockUserView,MemberRegisterView,RegistrationNextStepsView,
     SocialMediaDeleteView, get_company_data, login_redirect, GoogleSSOCallbackView
 )
 from .views import (
@@ -80,6 +80,8 @@ urlpatterns = [
     
     path('accounts/login/', login_redirect, name='account_login'),
     path('google_sso/callback/', GoogleSSOCallbackView.as_view(), name='google_callback'),
+
+    path('register/next/', RegistrationNextStepsView.as_view(), name='registration_next_steps'),
 
 
 

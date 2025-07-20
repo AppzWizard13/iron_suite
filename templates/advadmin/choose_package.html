@@ -1,0 +1,63 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-bold py-3 mb-4 text-center">Choose a Package</h4>
+  
+  <div class="row justify-content-center g-4">
+    {% for package in packages %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm package-card">
+        <div class="card-body text-center d-flex flex-column">
+          <span class="mb-2" style="font-size:2.2rem; color: #2b98dc;">
+            <i class="fas fa-box-open"></i>
+          </span>
+          <h5 class="card-title fw-semibold mb-1">{{ package.name }}</h5>
+          <div class="text-muted mb-1 small">
+            {{ package.get_type_display }} | {{ package.duration_days }} Days
+          </div>
+          {% if package.description %}
+            <div class="mb-2 small">{{ package.description }}</div>
+          {% endif %}
+          <div class="my-2">
+            {% if package.discount_type != 'none' and package.final_price != package.price %}
+                <span class="text-muted"><s>₹{{ package.price }}</s></span>
+                <span class="fw-semibold text-success h5 ms-2">₹{{ package.final_price }}</span>
+                {% if package.discount_type == 'flat' %}
+                    <span class="badge bg-info text-white ms-1">₹{{ package.discount_value }} off</span>
+                {% elif package.discount_type == 'percent' %}
+                    <span class="badge bg-info text-white ms-1">{{ package.discount_value }}% off</span>
+                {% endif %}
+            {% else %}
+                <span class="fw-semibold h5">₹{{ package.price }}</span>
+            {% endif %}
+          </div>
+          <div class="mt-auto">
+            <a href="{% url 'buy_subscription_package' %}?member_id={{ member_id }}&package_id={{ package.id }}" 
+              class="btn btn-primary w-100 py-2 mt-2">
+              <i class="fas fa-shopping-cart me-1"></i>
+              Choose &amp; Continue
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="alert alert-info text-center">
+        No packages available at this time.
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  <div class="row mt-4">
+    <div class="col-12 text-center">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Do It Later
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

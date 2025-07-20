@@ -1481,7 +1481,7 @@ class MemberRegisterView(CreateView):
                 "Please complete package payment to activate membership."
             )
 
-            return redirect('initiate_subscription_payment')
+            return redirect('registration_next_steps')
 
         except Exception as e:
             messages.error(self.request, f"Error: {str(e)}")
@@ -1714,6 +1714,20 @@ class Error404View(TemplateView):
     template_name = 'gym_ui/404.html'
 
 
+from django.views import View
+from django.shortcuts import render, redirect
+from django.urls import reverse
 
+class RegistrationNextStepsView(View):
+    def get(self, request):
+        # Make sure the user has a pending registration
+        member_id = request.session.get("pending_member_member_id")
+        package_id = request.session.get("pending_package_id")
 
+        print("package_idpackage_idpackage_idpackage_id", package_id)
+        print("member_idmember_idmember_idmember_idmember_id", member_id)
+        if not member_id or not package_id:
+            # Session expired or incomplete, send back to register
+            return redirect('register_member')
 
+        return render(request, "advadmin/registration_next_steps.html")
