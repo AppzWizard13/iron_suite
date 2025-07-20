@@ -1,6 +1,6 @@
 from .base import *
 
-DEBUG = False
+DEBUG = True
 
 # Specify your production host(s)
 ALLOWED_HOSTS = ['*']
