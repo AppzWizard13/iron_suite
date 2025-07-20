@@ -1678,3 +1678,44 @@ class GoogleSSOCallbackView(View):
         login(request, user)
 
         return redirect('/dashboard')
+
+
+
+from django.views.generic import TemplateView
+
+
+class BlogDetailsView(TemplateView):
+    template_name = 'gym_ui/blog-details.html'
+
+class BlogView(TemplateView):
+    template_name = 'gym_ui/blog.html'
+
+class BMICalculatorView(TemplateView):
+    template_name = 'gym_ui/bmi-calculator.html'
+
+class ClassDetailsView(TemplateView):
+    template_name = 'gym_ui/class-details.html'
+
+class ClassTimetableView(TemplateView):
+    template_name = 'gym_ui/class-timetable.html'
+
+class ContactView(TemplateView):
+    template_name = 'gym_ui/contact.html'
+
+class GalleryView(TemplateView):
+    template_name = 'gym_ui/gallery.html'
+
+
+class ServicesView(TemplateView):
+    template_name = 'gym_ui/services.html'
+
+class TeamView(TemplateView):
+    template_name = 'gym_ui/team.html'
+
+class Error404View(TemplateView):
+    template_name = 'gym_ui/404.html'
+
+
+
+
+

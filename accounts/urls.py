@@ -11,6 +11,11 @@ from .views import (
     SocialMediaDetailView, SocialMediaUpdateView, VerifyOTPView, toggle_user_active,BlockedUserListView, UnblockUserView,MemberRegisterView,
     SocialMediaDeleteView, get_company_data, login_redirect, GoogleSSOCallbackView
 )
+from .views import (
+    BlogDetailsView, BlogView, BMICalculatorView, ClassDetailsView,
+    ClassTimetableView, ContactView, GalleryView,
+    ServicesView, TeamView, Error404View
+)
 
 urlpatterns = [
     # Landing page
@@ -81,7 +86,16 @@ urlpatterns = [
 
 
 
-
+    path('blog-details/', BlogDetailsView.as_view(), name='blog-details'),
+    path('blog/', BlogView.as_view(), name='blog'),
+    path('bmi-calculator/', BMICalculatorView.as_view(), name='bmi-calculator'),
+    path('class-details/', ClassDetailsView.as_view(), name='class-details'),
+    path('class-timetable/', ClassTimetableView.as_view(), name='class-timetable'),
+    path('contact/', ContactView.as_view(), name='contact'),
+    path('gallery/', GalleryView.as_view(), name='gallery'),
+    path('services/', ServicesView.as_view(), name='services'),
+    path('team/', TeamView.as_view(), name='team'),
+    path('404/', Error404View.as_view(), name='404'),
 
 
 
