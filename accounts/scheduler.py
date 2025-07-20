@@ -2,6 +2,8 @@ import logging
 import atexit
 from datetime import timedelta, time
 
+from django.conf import settings
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import pytz
@@ -135,26 +137,15 @@ def remove_unwanted_qr_tokens():
 
 
 def start():
-    """
-    Configure and start the background scheduler to:
-        - Periodically generate QR tokens for active sessions.
-        - Remove unscanned QR tokens before session end.
-        - Optionally ping URLs to keep backend servers awake.
-    """
+    if not getattr(settings, 'ENABLE_QR_SCHEDULER', True):
+        logger.info("QR Scheduler is disabled by settings.")
+        return
+
     scheduler = BackgroundScheduler()
-
-    # scheduler.add_job(self_ping, IntervalTrigger(seconds=15))  # Uncomment if you want self-ping
-
+    # scheduler.add_job(self_ping, IntervalTrigger(seconds=15))
     scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(seconds=5))
     scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(seconds=30))
     scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
-
     scheduler.start()
     logger.info("Scheduler started.")
-
-    # Shut down the scheduler on exit
     atexit.register(lambda: scheduler.shutdown())
-
-
-if __name__ == "__main__":
-    start()

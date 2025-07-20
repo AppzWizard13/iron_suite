@@ -15,7 +15,7 @@ from .models import BusinessDetails, Configuration
 from .forms import BusinessDetailsForm, ConfigurationForm
 
 from orders.models import (
-    Cart, CartItem, Order, OrderItem, TempOrder
+    Cart, CartItem, Order, OrderItem, SubscriptionOrder, TempOrder
 )
 from products.models import Product
 from accounts.models import Customer, User
@@ -267,12 +267,13 @@ class SystemReset(TemplateView):
                 Payment.objects.all().delete()
                 OrderItem.objects.all().delete()
                 Order.objects.all().delete()
+                SubscriptionOrder.objects.all().delete()   # Added
                 TempOrder.objects.all().delete()
                 CartItem.objects.all().delete()
                 Cart.objects.all().delete()
                 messages.success(
                     request,
-                    "Order, Payment, TempOrder, and Cart data reset successfully."
+                    "Order, Payment, SubscriptionOrder, TempOrder, and Cart data reset successfully."
                 )
             elif reset_type == 'user':
                 Customer.objects.all().delete()
@@ -293,6 +294,7 @@ class SystemReset(TemplateView):
                 Payment.objects.all().delete()
                 OrderItem.objects.all().delete()
                 Order.objects.all().delete()
+                SubscriptionOrder.objects.all().delete()   # Added
                 TempOrder.objects.all().delete()
                 CartItem.objects.all().delete()
                 Cart.objects.all().delete()

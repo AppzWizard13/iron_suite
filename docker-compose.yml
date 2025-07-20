@@ -9,14 +9,8 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    environment:
-      - DEBUG=1
-      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
-      - DB_NAME=codespikedb
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_PORT=5432
+    env_file:
+      - .env                # <--- loads all your .env vars, including DJANGO_SETTINGS_MODULE
     depends_on:
       - db
 
