@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.views.generic import (
     CreateView, UpdateView, TemplateView, ListView, DetailView, DeleteView
 )
@@ -122,7 +123,7 @@ class ConfigurationCreateView(LoginRequiredMixin, CreateView):
         """
         Select template based on admin panel mode.
         """
-        admin_mode = getattr(self.request, 'ADMIN_PANEL_MODE', 'basic').lower()
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
         if admin_mode == 'advanced':
             return ['advadmin/configuration_form.html']
         return ['admin_panel/configuration_form.html']
@@ -151,7 +152,8 @@ class ConfigurationListView(LoginRequiredMixin, ListView):
         """
         Select template based on admin panel mode.
         """
-        admin_mode = getattr(self.request, 'ADMIN_PANEL_MODE', 'basic').lower()
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
+        print("admin_mode", admin_mode)
         if admin_mode == 'advanced':
             return ['advadmin/configuration_list.html']
         return ['admin_panel/configuration_list.html']
@@ -169,7 +171,7 @@ class ConfigurationDetailView(LoginRequiredMixin, DetailView):
         """
         Select template based on admin panel mode.
         """
-        admin_mode = getattr(self.request, 'ADMIN_PANEL_MODE', 'basic').lower()
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
         if admin_mode == 'advanced':
             return ['advadmin/configuration_detail.html']
         return ['admin_panel/configuration_detail.html']
@@ -195,7 +197,7 @@ class ConfigurationUpdateView(LoginRequiredMixin, UpdateView):
         """
         Select template based on admin panel mode.
         """
-        admin_mode = getattr(self.request, 'ADMIN_PANEL_MODE', 'basic').lower()
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
         if admin_mode == 'advanced':
             return ['advadmin/configuration_form.html']
         return ['admin_panel/configuration_form.html']
