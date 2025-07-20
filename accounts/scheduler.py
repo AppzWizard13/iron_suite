@@ -147,7 +147,7 @@ def start():
 
     scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(seconds=5))
     scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(seconds=30))
-    scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(hours=3))
+    scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
 
     scheduler.start()
     logger.info("Scheduler started.")

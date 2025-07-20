@@ -261,7 +261,7 @@ def qr_checkin_view(request):
         return render(request, "attendance/success_or_error.html", {
             "success": False,
             "message": "Invalid request. No token provided.",
-            "login_url": "/accounts/login/"
+            "login_url": "/login/"
         }, status=400)
 
     try:
@@ -270,14 +270,14 @@ def qr_checkin_view(request):
         return render(request, "attendance/success_or_error.html", {
             "success": False,
             "message": "Invalid or expired token.",
-            "login_url": "/accounts/login/"
+            "login_url": "/login/"
         }, status=404)
 
     if not qr_token.is_valid():
         return render(request, "attendance/success_or_error.html", {
             "success": False,
             "message": "Token has expired or is no longer valid.",
-            "login_url": "/accounts/login/"
+            "login_url": "/login/"
         }, status=403)
 
     user = request.user
