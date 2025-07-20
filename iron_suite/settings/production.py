@@ -9,9 +9,9 @@ ALLOWED_HOSTS = ['*']
 # Make sure to override SECRET_KEY in environment or .env for security
 ENABLE_QR_SCHEDULER = True  # Set to False to disable
 # Example: Force HTTPS
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 # Add other production-specific security settings as needed.
 
 # Optionally, configure production database here
