@@ -59,7 +59,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
-ROOT_URLCONF = 'iron_suite.urls'
+ROOT_URLCONF = 'iron_board.urls'
 
 TEMPLATES = [
     {
@@ -82,7 +82,7 @@ AUTHENTICATION_BACKENDS = (
     "allauth.account.auth_backends.AuthenticationBackend",
 )
 
-WSGI_APPLICATION = 'iron_suite.wsgi.application'
+WSGI_APPLICATION = 'iron_board.wsgi.application'
 
 DATABASES = {
     'default': {
@@ -129,7 +129,7 @@ STATICFILES_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'iron_suite'),
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'iron_board'),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY', ''),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', ''),
 }
