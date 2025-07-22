@@ -3,7 +3,7 @@ version: '3.9'
 services:
   web:
     build: .
-    container_name: iron_suite_web
+    container_name: iron_board_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
@@ -11,18 +11,18 @@ services:
       - "8000:8000"
     env_file:
       - .env                # <--- loads all your .env vars, including DJANGO_SETTINGS_MODULE
-    depends_on:
-      - db
+  #   depends_on:
+  #     - db
 
-  db:
-    image: postgres:14
-    container_name: iron_suite_db
-    environment:
-      POSTGRES_DB: codespikedb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+  # db:
+  #   image: postgres:14
+  #   container_name: iron_suite_db
+  #   environment:
+  #     POSTGRES_DB: codespikedb
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
