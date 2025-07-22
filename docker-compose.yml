@@ -16,7 +16,7 @@ services:
 
   # db:
   #   image: postgres:14
-  #   container_name: iron_suite_db
+  #   container_name: iron_board_db
   #   environment:
   #     POSTGRES_DB: codespikedb
   #     POSTGRES_USER: postgres
