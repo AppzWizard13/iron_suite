@@ -87,7 +87,11 @@ WSGI_APPLICATION = 'iron_suite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': BASE_DIR / os.getenv('DB_NAME', 'db_dev.sqlite3'),
+        'NAME': (
+            BASE_DIR / os.getenv('DB_NAME', 'db_dev.sqlite3') 
+            if 'sqlite' in os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
+            else os.getenv('DB_NAME', 'db_dev.sqlite3')
+        ),
         'USER': os.getenv('DB_USER', ''),
         'PASSWORD': os.getenv('DB_PASSWORD', ''),
         'HOST': os.getenv('DB_HOST', ''),
