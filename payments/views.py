@@ -19,7 +19,6 @@ from orders.models import Order, SubscriptionOrder, TempOrder
 from payments.models import Payment, PaymentAPILog
 from products.models import Package
 
-
 User = get_user_model()
 
 
@@ -48,6 +47,7 @@ def initiate_cashfree_payment(request, obj):
         payment.payment_method = 'cashfree'
         payment.amount = obj.total
         payment.status = Payment.Status.PENDING
+        payment.customer = obj.customer
         payment.save()
 
     return_url = request.build_absolute_uri(reverse('cashfree_return')) + f"?order_id={obj.order_number}"
@@ -133,50 +133,48 @@ def initiate_cashfree_payment(request, obj):
     return redirect('payment_failed')
 
 
-def initiate_subscription_payment(request):
+def get_active_subscription_order(user):
     """
-    Handles initiation of gym membership subscription payment flow.
+    Returns active subscription order for a user, if exists.
+    """
+    today = timezone.now().date()
+    return SubscriptionOrder.objects.filter(
+        customer=user,
+        status=SubscriptionOrder.Status.ACTIVE,
+        end_date__gte=today
+    ).order_by('-end_date').first()
+
+
+def calculate_new_expiry(user, package):
+    """
+    Returns the new expiry date for a subscription renewal.
+
+    If user currently has an active package and 'package_expiry_date' in the future,
+    new expiry = current package_expiry_date + package.duration_days.
+    Otherwise, new expiry = today + package.duration_days
+    """
+    today = timezone.now().date()
+    cur_expiry = getattr(user, "package_expiry_date", None)
+    if cur_expiry and cur_expiry >= today:
+        return cur_expiry + timedelta(days=package.duration_days)
+    return today + timedelta(days=package.duration_days)
+
+
+def buy_subscription_package(request):
+    """
+    Handles buying or renewal of a subscription package for a user.
+
+    - If user has ACTIVE subscription or a package_expiry_date >= today:
+        - new expiry = cur_expiry + package.duration_days
+    - Else:
+        - new expiry = today + package.duration_days
 
     Args:
         request (HttpRequest): Django HttpRequest object.
 
     Returns:
-        HttpResponseRedirect: Redirects to the payment page or registration page if session is invalid.
+        HttpResponseRedirect: Redirects to payment initiation.
     """
-    member_id = request.session.get('pending_member_member_id')
-    package_id = request.session.get('pending_package_id')
-    
-
-    print("member_id", member_id)
-    print("package_id", package_id)
-
-    if not member_id or not package_id:
-        messages.error(
-            request,
-            "Session expired or missing package. Please register again."
-        )
-        return redirect('register_member')
-
-    user = get_object_or_404(User, member_id=member_id)
-    package = get_object_or_404(Package, id=package_id)
-
-    subscription_order = SubscriptionOrder.objects.create(
-        customer=user,
-        package=package,
-        total=package.final_price,
-        status=SubscriptionOrder.Status.PENDING,
-        payment_status=SubscriptionOrder.PaymentStatus.PENDING,
-        start_date=timezone.now().date(),
-        end_date=timezone.now().date() + timedelta(days=package.duration_days),
-    )
-
-    del request.session['pending_member_member_id']
-    del request.session['pending_package_id']
-
-    return initiate_cashfree_payment(request, subscription_order)
-
-
-def buy_subscription_package(request):
     member_id = request.GET.get('member_id')
     package_id = request.GET.get('package_id')
     if not member_id or not package_id:
@@ -189,28 +187,36 @@ def buy_subscription_package(request):
     user = get_object_or_404(User, member_id=member_id)
     package = get_object_or_404(Package, id=package_id)
 
+    # Calculate the correct new expiry date
+    new_expiry = calculate_new_expiry(user, package)
+    today = timezone.now().date()
+
     subscription_order = SubscriptionOrder.objects.create(
         customer=user,
         package=package,
         total=package.final_price,
         status=SubscriptionOrder.Status.PENDING,
         payment_status=SubscriptionOrder.PaymentStatus.PENDING,
-        start_date=timezone.now().date(),
-        end_date=timezone.now().date() + timedelta(days=package.duration_days),
+        start_date=today,
+        end_date=new_expiry
     )
-    # For example, dummy render:
+
+    # Set these right-away for pending payment - will confirm on webhook success
+    user.package = package
+    user.on_subscription = True
+    user.package_expiry_date = new_expiry
+    user.save(update_fields=['package', 'on_subscription', 'package_expiry_date'])
+
     return initiate_cashfree_payment(request, subscription_order)
+
 
 @csrf_exempt
 def cashfree_webhook(request):
     """
     Handles Cashfree webhook events for payment and refund status updates.
 
-    Args:
-        request (HttpRequest): Django HttpRequest object.
-
-    Returns:
-        JsonResponse or HttpResponse: Response based on webhook event handling.
+    Ensures subscription renewal updates: User's `on_subscription` and `package_expiry_date`
+    are updated as per prepaid-recharge rule.
     """
     log_entry = PaymentAPILog.objects.create(
         action='WEBHOOK',
@@ -229,6 +235,7 @@ def cashfree_webhook(request):
         data = json.loads(request.body)
         event_type = data.get("type")
         link_id = None
+        payment_status = None
 
         if event_type == "PAYMENT_SUCCESS_WEBHOOK":
             order_data = data.get('data', {}).get('order', {})
@@ -242,10 +249,8 @@ def cashfree_webhook(request):
         elif event_type == "PAYMENT_CHARGES_WEBHOOK":
             order_data = data.get('data', {}).get('order', {})
             link_id = order_data.get('order_tags', {}).get('link_id')
-            payment_status = None
         else:
             link_id = None
-            payment_status = None
 
         if not link_id:
             error_msg = 'Missing link_id'
@@ -270,21 +275,43 @@ def cashfree_webhook(request):
             (event_type == "PAYMENT_LINK_EVENT" and payment_status == "PAID")
         ):
             payment.status = Payment.Status.COMPLETED
-            if hasattr(order, 'payment_status'):
-                order.payment_status = 'completed'
-            if isinstance(order, Order):
-                order.status = Order.Status.PROCESSING
-            elif isinstance(order, SubscriptionOrder):
+
+            # Correctly update user package_expiry_date and on_subscription on success!
+            if hasattr(order, 'customer') and isinstance(order, SubscriptionOrder):
+                user = order.customer
+                package = order.package
+                today = timezone.now().date()
+
+                # Smartly handle stacked subscriptions (i.e. if user renewed before expiry)
+                cur_expiry = getattr(user, "package_expiry_date", None)
+                if cur_expiry and cur_expiry >= today:
+                    user.package_expiry_date = cur_expiry + timedelta(days=package.duration_days)
+                else:
+                    user.package_expiry_date = today + timedelta(days=package.duration_days)
+                user.package = package
+                user.on_subscription = True
+                user.save(update_fields=['package_expiry_date', 'package', 'on_subscription'])
+
+                order.start_date = today
+                order.end_date = user.package_expiry_date
+
                 order.status = SubscriptionOrder.Status.ACTIVE
                 order.payment_status = SubscriptionOrder.PaymentStatus.COMPLETED
-            order.save()
-            payment.save()
+                order.save(update_fields=['start_date', 'end_date', 'status', 'payment_status'])
+
+            elif hasattr(order, 'customer') and isinstance(order, Order):
+                # For product or other orders (non-subscription)
+                order.status = Order.Status.PROCESSING
+                order.payment_status = 'completed'
+                order.save(update_fields=['status', 'payment_status'])
+            payment.save(update_fields=['status', 'gateway_response'])
+
         elif event_type == "PAYMENT_LINK_EVENT" and payment_status in ['EXPIRED', 'FAILED']:
             payment.status = Payment.Status.FAILED
             if hasattr(order, 'payment_status'):
                 order.payment_status = 'failed'
-            order.save()
-            payment.save()
+                order.save(update_fields=['payment_status'])
+            payment.save(update_fields=['status'])
 
         log_entry.response_status = 200
         log_entry.response_body = json.dumps({
@@ -330,9 +357,6 @@ def cashfree_return(request):
 
     if order and payment:
         user = order.customer
-        if not user.on_subscription:
-            user.on_subscription = True
-            user.save(update_fields=['on_subscription'])
         if payment.customer != user:
             payment.customer = user
             payment.save(update_fields=['customer'])
@@ -346,35 +370,27 @@ def cashfree_return(request):
 
     if payment.status == Payment.Status.COMPLETED:
         order = payment.content_object
-        if not order:
-            return render(
-                request,
-                'advadmin/payment_failed.html',
-                {'message': 'Order not found'}
-            )
-
         request.session[f'order_{order_id}_completed'] = True
 
         if hasattr(order, 'customer'):
             if isinstance(order, Order):
+                # Mark any related TempOrder as processed
                 TempOrder.objects.filter(user=order.customer, processed=False).update(
                     processed=True
                 )
                 return redirect('payment_order_success', pk=order.id)
-            elif isinstance(order, SubscriptionOrder):
+            if isinstance(order, SubscriptionOrder):
                 return redirect('payment_subscription_success', pk=order.id)
-            else:
-                return render(
-                    request,
-                    'advadmin/payment_failed.html',
-                    {'message': 'Unknown order type'}
-                )
-        else:
             return render(
                 request,
                 'advadmin/payment_failed.html',
-                {'message': 'Invalid order data'}
+                {'message': 'Unknown order type'}
             )
+        return render(
+            request,
+            'advadmin/payment_failed.html',
+            {'message': 'Invalid order data'}
+        )
     else:
         return render(
             request,
@@ -438,7 +454,7 @@ class PaymentListView(ListView):
             queryset = queryset.filter(created_at__date__gte=date_from)
         elif date_to:
             queryset = queryset.filter(created_at__date__lte=date_to)
-        
+
         sort_by = self.request.GET.get('sort', 'created_at')
         order = '' if self.request.GET.get('order', 'desc') == 'asc' else '-'
         # Allow simple whitelisting of sortable fields
@@ -460,11 +476,18 @@ class PaymentListView(ListView):
         return context
 
 
-# views.py
 def choose_package(request, member_id):
+    """
+    Render available subscription packages for a user to choose from.
+
+    Args:
+        request (HttpRequest): Django HttpRequest object.
+        member_id (int): The member id of the user.
+
+    Returns:
+        HttpResponse: Renders the package selection template.
+    """
     packages = Package.objects.all()
-    # Optionally check member exists
-    # member = get_object_or_404(Member, id=member_id)
     return render(request, 'advadmin/choose_package.html', {
         'packages': packages,
         'member_id': member_id,

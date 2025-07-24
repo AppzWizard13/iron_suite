@@ -37,6 +37,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=15, unique=True)
     member_id = models.BigAutoField(primary_key=True)  
     join_date = models.DateField(auto_now_add=True)
+    package_expiry_date = models.DateField(null=True)
 
     STAFF_ROLES = [
         ('Admin', 'Admin'),

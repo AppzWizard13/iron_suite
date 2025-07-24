@@ -3,6 +3,7 @@ import atexit
 from datetime import timedelta, time
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -14,7 +15,7 @@ from attendance.models import Schedule, QRToken
 # Configure global logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
+User = get_user_model()
 
 def self_ping():
     """
@@ -118,6 +119,23 @@ def remove_unscanned_qr_before_end():
                 f"🗑️ Removed {deleted} unscanned QR tokens for: {getattr(schedule, 'name', str(schedule))}"
             )
 
+def expire_user_subscriptions():
+    """
+    Find all users whose subscription has expired as of today and set their
+    `on_subscription` field to False.
+
+    This ensures that users with expired `package_expiry_date` are no longer
+    marked as active subscribers.
+    """
+    today = timezone.now().date()
+    expired_users = User.objects.filter(
+        on_subscription=True,
+        package_expiry_date__lt=today
+    )
+    count = expired_users.update(on_subscription=False)
+    logger.info(f"Expired {count} user subscriptions by setting on_subscription to False.")
+
+
 def remove_unwanted_qr_tokens():
     """
     Remove QR tokens that are expired and unused from the database to maintain cleanliness.
@@ -144,8 +162,9 @@ def start():
     scheduler = BackgroundScheduler()
     # scheduler.add_job(self_ping, IntervalTrigger(seconds=15))
     scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(seconds=5))
-    scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(seconds=30))
+    scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(seconds=5))
     scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
+    scheduler.add_job(expire_user_subscriptions, IntervalTrigger(hours=1))
     scheduler.start()
     logger.info("Scheduler started.")
     atexit.register(lambda: scheduler.shutdown())

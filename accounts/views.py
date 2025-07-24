@@ -624,6 +624,13 @@ class DashboardView(TemplateView):
         ).aggregate(total=Sum('amount'))['total'] or 0
         profit = total_income - total_expense
 
+        # Get successful payment sum for the current month
+        current_month_income = Payment.objects.filter(
+            status=Payment.Status.COMPLETED,
+            created_at__date__gte=first_day,
+            created_at__date__lte=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
         # Subscription Orders/Status breakdown
         orders = SubscriptionOrder.objects.values('status').annotate(count=Count('id'))
         order_status_counts = {
@@ -735,6 +742,7 @@ class DashboardView(TemplateView):
         context.update({
             'pages_group': PAGES_GROUP,
             'current_month': current_month_name,
+            'current_month_income': current_month_income,
             'total_members': total_members,
             'upcoming_renewals_count': upcoming_renewals_count,
             'upcoming_renewals_amount': upcoming_renewals_amount,

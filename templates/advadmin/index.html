@@ -1297,130 +1297,126 @@
               </div>
               <div class="row">
 
-                
-                <!-- Order Statistics -->
-                <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
-                  <div class="card h-100">
-                    <div class="card-header d-flex align-items-center justify-content-between pb-0">
-                      <div class="card-title mb-0">
-                        <h5 class="m-0 me-2">Membership Status Overview</h5>
-                        <small class="text-muted">{{ total_orders }} Total Orders</small>
-                      </div>
-                      <div class="dropdown">
-                        <button
-                          class="btn p-0"
-                          type="button"
-                          id="orderStatisticsDropdown"
-                          data-bs-toggle="dropdown"
-                          aria-haspopup="true"
-                          aria-expanded="false"
-                        >
-                          <i class="bx bx-dots-vertical-rounded"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orderStatisticsDropdown">
-                          <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                          <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-                          <a class="dropdown-item" href="javascript:void(0);">Share</a>
-                        </div>
-                      </div>
+
+              <!-- Membership & Subscription Overview -->
+              <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
+                <div class="card h-100">
+                  <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                    <div class="card-title mb-0">
+                      <h5 class="m-0 me-2">Membership & Subscription Overview</h5>
+                      <small class="text-muted">{{ total_members }} Total Members</small>
                     </div>
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="d-flex flex-column align-items-center gap-1">
-                          <h2 class="mb-2">{{ total_orders }}</h2>
-                          <span>Total Orders</span>
-                        </div>
-                        <div id="orderStatisticsChart"></div>  <!-- If you later want a chart -->
+                    <div class="dropdown">
+                      <button
+                        class="btn p-0"
+                        type="button"
+                        id="membershipOverviewDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                      >
+                        <i class="bx bx-dots-vertical-rounded"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="membershipOverviewDropdown">
+                        <a class="dropdown-item" href="#">Refresh</a>
+                        <a class="dropdown-item" href="#">View Reports</a>
                       </div>
-                      <ul class="p-0 m-0">
-                        <li class="d-flex mb-4 pb-1">
-                          <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-loader"></i></span>
-                          </div>
-                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                              <h6 class="mb-0">Pending Orders</h6>
-                              <small class="text-muted">Waiting for Processing</small>
-                            </div>
-                            <div class="user-progress">
-                              <small class="fw-semibold">{{ pending_orders }}</small>
-                            </div>
-                          </div>
-                        </li>
-                        <li class="d-flex mb-4 pb-1">
-                          <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-info"><i class="bx bx-refresh"></i></span>
-                          </div>
-                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                              <h6 class="mb-0">Processing Orders</h6>
-                              <small class="text-muted">Being Prepared</small>
-                            </div>
-                            <div class="user-progress">
-                              <small class="fw-semibold">{{ processing_orders }}</small>
-                            </div>
-                          </div>
-                        </li>
-                        <li class="d-flex mb-4 pb-1">
-                          <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-send"></i></span>
-                          </div>
-                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                              <h6 class="mb-0">Shipped Orders</h6>
-                              <small class="text-muted">On the way</small>
-                            </div>
-                            <div class="user-progress">
-                              <small class="fw-semibold">{{ shipped_orders }}</small>
-                            </div>
-                          </div>
-                        </li>
-                        <li class="d-flex">
-                          <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-success"><i class="bx bx-check-circle"></i></span>
-                          </div>
-                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                              <h6 class="mb-0">Delivered Orders</h6>
-                              <small class="text-muted">Completed</small>
-                            </div>
-                            <div class="user-progress">
-                              <small class="fw-semibold">{{ delivered_orders }}</small>
-                            </div>
-                          </div>
-                        </li>
-                        <li class="d-flex mt-3">
-                          <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-x-circle"></i></span>
-                          </div>
-                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                              <h6 class="mb-0">Cancelled Orders</h6>
-                              <small class="text-muted">Not Processed</small>
-                            </div>
-                            <div class="user-progress">
-                              <small class="fw-semibold">{{ cancelled_orders }}</small>
-                            </div>
-                          </div>
-                        </li>
-                        <li class="d-flex mt-3">
-                          <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-undo"></i></span>
-                          </div>
-                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                              <h6 class="mb-0">Returned Orders</h6>
-                              <small class="text-muted">Refund Process</small>
-                            </div>
-                            <div class="user-progress">
-                              <small class="fw-semibold">{{ returned_orders }}</small>
-                            </div>
-                          </div>
-                        </li>
-                      </ul>
                     </div>
                   </div>
+
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <div class="d-flex flex-column align-items-center gap-1">
+                        <h2 class="mb-2">{{ total_members }}</h2>
+                        <span>Active Members</span>
+                      </div>
+                      <div class="text-end">
+                        <small class="text-muted">Revenue this month</small>
+                        <h6 class="mb-0 text-success">₹{{ current_month_income }}</h6>
+                      </div>
+                    </div>
+
+                    <ul class="p-0 m-0">
+                      <li class="d-flex mb-4 pb-1">
+                        <div class="avatar flex-shrink-0 me-3">
+                          <span class="avatar-initial rounded bg-label-success"><i class="bx bx-check-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                          <div class="me-2">
+                            <h6 class="mb-0">Active Subscriptions</h6>
+                            <small class="text-muted">Currently subscribed</small>
+                          </div>
+                          <div class="user-progress">
+                            <small class="fw-semibold">{{ active_users_count }}</small>
+                          </div>
+                        </div>
+                      </li>
+
+                      <li class="d-flex mb-4 pb-1">
+                        <div class="avatar flex-shrink-0 me-3">
+                          <span class="avatar-initial rounded bg-label-info"><i class="bx bx-user-plus"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                          <div class="me-2">
+                            <h6 class="mb-0">New Signups Today</h6>
+                            <small class="text-muted">Joined on {{ today|date:"M d" }}</small>
+                          </div>
+                          <div class="user-progress">
+                            <small class="fw-semibold">{{ new_signups_today }}</small>
+                          </div>
+                        </div>
+                      </li>
+
+                      <li class="d-flex mb-4 pb-1">
+                        <div class="avatar flex-shrink-0 me-3">
+                          <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-timer"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                          <div class="me-2">
+                            <h6 class="mb-0">Upcoming Renewals</h6>
+                            <small class="text-muted">Due by month-end</small>
+                          </div>
+                          <div class="user-progress">
+                            <small class="fw-semibold">{{ upcoming_renewals_count }}</small>
+                          </div>
+                        </div>
+                      </li>
+
+                      <li class="d-flex mb-4 pb-1">
+                        <div class="avatar flex-shrink-0 me-3">
+                          <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-credit-card"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                          <div class="me-2">
+                            <h6 class="mb-0">Pending Dues</h6>
+                            <small class="text-muted">Not renewed this month</small>
+                          </div>
+                          <div class="user-progress">
+                            <small class="fw-semibold">{{ pending_dues_count }}</small>
+                          </div>
+                        </div>
+                      </li>
+
+                      <li class="d-flex">
+                        <div class="avatar flex-shrink-0 me-3">
+                          <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-user-x"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                          <div class="me-2">
+                            <h6 class="mb-0">Expired Memberships</h6>
+                            <small class="text-muted">Need follow-up</small>
+                          </div>
+                          <div class="user-progress">
+                            <small class="fw-semibold">{{ expired_members_count }}</small>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
+              </div>
+              <!--/ Membership & Subscription Overview -->
+
                 
                 <!--/ Order Statistics -->
 
