@@ -10,6 +10,8 @@ import requests
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from django.db.models.functions import TruncMonth
+
 
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
@@ -322,13 +324,16 @@ class UserListView(ListView):
             return ['admin_panel/manage_user.html']
         return ['admin_panel/manage_user.html']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "user_list"
+        # Example: 'Admin Users', 'Manager Users', etc.
+        return context
 
+from django.conf import settings
 from django.views.generic import ListView
 from django.db.models import Q
-from django.contrib.auth import get_user_model
-from django.conf import settings
-
-User = get_user_model()
+from .models import User  # Update import as per your structure
 
 class UserStaffRoleListView(ListView):
     model = User
@@ -368,12 +373,20 @@ class UserStaffRoleListView(ListView):
 
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-
         if admin_mode == 'advanced':
             return ['advadmin/manage_user.html']
         elif admin_mode == 'standard':
             return ['admin_panel/manage_user.html']
         return ['admin_panel/manage_user.html']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role = self.kwargs.get('role', '').lower()
+    
+        context['page_name'] = f"{role}_Users"
+        # Example: 'Admin Users', 'Manager Users', etc.
+        return context
+
 
 class UserDeleteView(LoginRequiredMixin, DeleteView):
     model = CustomUser
@@ -500,7 +513,28 @@ class BlockedUserListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self):
         return User.objects.filter(is_active=False).order_by('-date_joined')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "blocked_users"
+        # Example: 'Admin Users', 'Manager Users', etc.
+        return context
+    
 
+class InactiveUserListView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = 'advadmin/inactive_users.html'
+    permission_required = 'auth.change_user'
+    context_object_name = 'users'
+    
+    def get_queryset(self):
+        return User.objects.filter(on_subscription=False,staff_role="Member").order_by('-date_joined')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "inactive_users"
+        # Example: 'Admin Users', 'Manager Users', etc.
+        return context
 class UnblockUserView(LoginRequiredMixin, View):
     permission_required = 'auth.change_user'
     
@@ -727,6 +761,31 @@ class DashboardView(TemplateView):
             ).aggregate(total=Sum('amount'))['total'] or 0
             yearly_earnings[year] = float(amount)
 
+
+        # Prepare monthly revenue per year
+        monthly_revenue_by_year = {}
+        for year in years:
+            # Get all completed payments for this year, grouped by month
+            monthly_amounts = [0] * 12
+            monthly_payments = (
+                Payment.objects.filter(
+                    status=Payment.Status.COMPLETED,
+                    created_at__year=year
+                )
+                .annotate(month=TruncMonth('created_at'))
+                .values('month')
+                .annotate(total=Sum('amount'))
+                .order_by('month')
+            )
+
+            # Populate monthly_amounts
+            for month_data in monthly_payments:
+                month = month_data['month'].month
+                monthly_amounts[month - 1] = float(month_data['total'] or 0)
+
+        monthly_revenue_by_year[year] = monthly_amounts
+
+
         print("membership_trends", membership_trends)
         # For embedding as JSON in template JS
         context['membership_trends_json'] = json.dumps(membership_trends)
@@ -740,6 +799,7 @@ class DashboardView(TemplateView):
         # Compose and return context
         context.update(config_dict)
         context.update({
+            'monthly_revenue_json': json.dumps(monthly_revenue_by_year),
             'pages_group': PAGES_GROUP,
             'current_month': current_month_name,
             'current_month_income': current_month_income,
@@ -760,6 +820,7 @@ class DashboardView(TemplateView):
             'total_enquiries': total_enquiries,
             'total_orders': total_orders,
             'recent_transactions': recent_transactions,
+            'page_name': "dashboard",
             'admin_mode': getattr(settings, 'ADMIN_PANEL_MODE', 'basic'),
         })
         context.update(order_status_counts)
@@ -1494,6 +1555,13 @@ class MemberRegisterView(CreateView):
         except Exception as e:
             messages.error(self.request, f"Error: {str(e)}")
             return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role = self.kwargs.get('role', '').capitalize()
+        context['page_name'] = "member_registration"
+        # Example: 'Admin Users', 'Manager Users', etc.
+        return context
 
 
 class LoginWithOTPView(View):

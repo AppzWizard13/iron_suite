@@ -53,7 +53,10 @@ class AttendanceAdminView(ListView):
             queryset = queryset.filter(status=status)
         return queryset.order_by('-check_in_time')
 
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "view_attendance"
+        return context
 class AttendanceReportView(ListView):
     """
     View for generating filtered attendance reports.
@@ -91,6 +94,11 @@ class AttendanceReportView(ListView):
             queryset = queryset.filter(status=status)
 
         return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "attendance_report"
+        return context
 
 
 class ScheduleListView(ListView):
@@ -110,6 +118,10 @@ class ScheduleListView(ListView):
         context['page_obj'] = context.get('page_obj')
         return context
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "schedule_list"
+        return context
 
 class ScheduleCreateView(CreateView):
     """
@@ -142,6 +154,11 @@ class EnrollmentListView(ListView):
         """
         context = super().get_context_data(**kwargs)
         context['page_obj'] = context.get('page_obj')
+        return context
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "enrollment_list"
         return context
 
 
@@ -176,6 +193,7 @@ class QRTokenListView(ListView):
         """
         context = super().get_context_data(**kwargs)
         context['page_obj'] = context.get('page_obj')
+        context['page_name'] = "qr_token_list"
         return context
 
 
@@ -203,7 +221,11 @@ class CheckInLogListView(ListView):
         Prefetch related user and token.
         """
         return super().get_queryset().select_related('user', 'token')
-
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "checkin_log_list"
+        return context
 
 class LiveQRView(TemplateView):
     """
@@ -241,7 +263,11 @@ class LiveQRView(TemplateView):
 
         context['schedule_tokens'] = schedule_tokens
         return context
-
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = "live_qr"
+        return context
 
 class QRScanView(TemplateView):
     """

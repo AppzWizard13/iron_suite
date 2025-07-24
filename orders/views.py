@@ -706,6 +706,7 @@ class SubscriptionOrderListView(ListView):
             },
             'paginate_by': self.request.GET.get('paginate_by', self.paginate_by),
             'page_sizes': [10, 20, 50, 100],
-            'model_name': 'subscriptionorder'
+            'model_name': 'subscriptionorder',
+            'page_name': 'subscription_orders'
         })
         return context

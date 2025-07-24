@@ -7,7 +7,7 @@ ALLOWED_HOSTS = ['*']
 
 
 # Make sure to override SECRET_KEY in environment or .env for security
-ENABLE_QR_SCHEDULER = True  # Set to False to disable
+ENABLE_QR_SCHEDULER = False  # Set to False to disable
 # Example: Force HTTPS
 # SECURE_SSL_REDIRECT = True
 # SESSION_COOKIE_SECURE = True

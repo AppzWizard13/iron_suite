@@ -396,6 +396,7 @@ class PackageListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['query'] = self.request.GET.get('search', '')
+        context['page_name'] = "package_list"
         return context
 
 

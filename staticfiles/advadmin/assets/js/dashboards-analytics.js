@@ -12,14 +12,16 @@
     axisColor = config.colors.axisColor;
     borderColor = config.colors.borderColor;
 
-    // Membership trends & earnings from Django (ensure these vars are available in a <script> on your page)
-    // window.membershipTrends: {2025: [...12], 2024: [...12], ...}
-    // window.yearlyEarnings: {2025: 12000, 2024: 11000, ...}
-    // window.allYears: [2025, 2024, ...]
+    // Membership trends & earnings & revenue from Django (ensure these vars available):
+    // window.membershipTrends: {2025: [...12], ...}
+    // window.yearlyEarnings: {2025: ...}
+    // window.allYears: [2025, ...]
     // window.currentYear: 2025
+    // window.monthlyRevenue: {2025: [...12], 2024: [...12], ...}
 
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     var trends = window.membershipTrends || {};
+    var revenueData = window.monthlyRevenue || {};
     var years = window.allYears || [window.currentYear, window.currentYear - 1];
     var selectedYear = window.currentYear || new Date().getFullYear();
 
@@ -30,6 +32,12 @@
                 data: trends[year] || new Array(12).fill(0)
             }
         ];
+    }
+    function getRevenueSeries(year) {
+        return [{
+            name: "Revenue",
+            data: revenueData[year] || new Array(12).fill(0)
+        }];
     }
 
     // Total Revenue Report Chart - Bar Chart
@@ -139,7 +147,7 @@
         window.totalRevenueChart.render();
     }
 
-    // Year selection for bar chart update (dropdown must use .year-select and data-year)
+    // Year selection for bar chart and income chart update (dropdown must use .year-select and data-year)
     document.querySelectorAll('.year-select').forEach(function (item) {
         item.addEventListener('click', function () {
             let year = parseInt(this.getAttribute('data-year'), 10);
@@ -152,9 +160,13 @@
             if (document.getElementById('thisYearLabel')) document.getElementById('thisYearLabel').innerText = year;
             if (document.getElementById('thisYearEarning') && window.yearlyEarnings)
                 document.getElementById('thisYearEarning').innerText = "₹" + (window.yearlyEarnings[year] || 0).toLocaleString();
+
+            // Update income (monthly revenue) chart too:
+            let incomeSeries = getRevenueSeries(year);
+            if (window.incomeChart)
+                window.incomeChart.updateSeries(incomeSeries);
         });
     });
-
 
     // Growth Chart - Radial Bar Chart
     // --------------------------------------------------------------------
@@ -220,16 +232,8 @@
                 }
             },
             states: {
-                hover: {
-                    filter: {
-                        type: 'none'
-                    }
-                },
-                active: {
-                    filter: {
-                        type: 'none'
-                    }
-                }
+                hover: { filter: { type: 'none' } },
+                active: { filter: { type: 'none' } }
             }
         };
     if (typeof growthChartEl !== undefined && growthChartEl !== null) {
@@ -243,7 +247,6 @@
         profileReportChartConfig = {
             chart: {
                 height: 80,
-                // width: 175,
                 type: 'line',
                 toolbar: {
                     show: false
@@ -260,55 +263,27 @@
                     enabled: true
                 }
             },
-            grid: {
-                show: false,
-                padding: {
-                    right: 8
-                }
-            },
+            grid: { show: false, padding: { right: 8 } },
             colors: [config.colors.warning],
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                width: 5,
-                curve: 'smooth'
-            },
+            dataLabels: { enabled: false },
+            stroke: { width: 5, curve: 'smooth' },
             series: [{
                 data: [110, 270, 145, 245, 205, 285]
             }],
-            xaxis: {
-                show: false,
-                lines: {
-                    show: false
-                },
-                labels: {
-                    show: false
-                },
-                axisBorder: {
-                    show: false
-                }
-            },
-            yaxis: {
-                show: false
-            }
+            xaxis: { show: false, lines: { show: false }, labels: { show: false }, axisBorder: { show: false } },
+            yaxis: { show: false }
         };
     if (typeof profileReportChartEl !== undefined && profileReportChartEl !== null) {
         const profileReportChart = new ApexCharts(profileReportChartEl, profileReportChartConfig);
         profileReportChart.render();
     }
 
-
     // Order Statistics Chart
     // --------------------------------------------------------------------
     console.log(' orderStatsData.labels orderStatsData.labels', orderStatsData.series)
     const chartOrderStatistics = document.querySelector('#orderStatisticsChart'),
         orderChartConfig = {
-            chart: {
-                height: 165,
-                width: 130,
-                type: 'donut'
-            },
+            chart: { height: 165, width: 130, type: 'donut' },
             labels: orderStatsData.labels,
             series: orderStatsData.series,
             colors: [
@@ -317,26 +292,15 @@
                 config.colors.info,
                 config.colors.success
             ],
-            stroke: {
-                width: 5,
-                colors: cardColor
-            },
+            stroke: { width: 5, colors: cardColor },
             dataLabels: {
                 enabled: false,
                 formatter: function (val, opt) {
                     return parseInt(val) + '%';
                 }
             },
-            legend: {
-                show: false
-            },
-            grid: {
-                padding: {
-                    top: 0,
-                    bottom: 0,
-                    right: 15
-                }
-            },
+            legend: { show: false },
+            grid: { padding: { top: 0, bottom: 0, right: 15 } },
             plotOptions: {
                 pie: {
                     donut: {
@@ -352,18 +316,13 @@
                                     return parseInt(val) + '%';
                                 }
                             },
-                            name: {
-                                offsetY: 20,
-                                fontFamily: 'Public Sans'
-                            },
+                            name: { offsetY: 20, fontFamily: 'Public Sans' },
                             total: {
                                 show: true,
                                 fontSize: '0.8125rem',
                                 color: axisColor,
                                 label: 'Weekly',
-                                formatter: function (w) {
-                                    return '38%';
-                                }
+                                formatter: function () { return '38%'; }
                             }
                         }
                     }
@@ -375,50 +334,28 @@
         statisticsChart.render();
     }
 
-
-    // Income Chart - Area chart
+    // Income Chart - Area chart (monthly revenue)
     // --------------------------------------------------------------------
     const incomeChartEl = document.querySelector('#incomeChart'),
         incomeChartConfig = {
-            series: [{
-                data: [24, 21, 30, 22, 42, 26, 35, 29]
-            }],
+            series: getRevenueSeries(selectedYear),
             chart: {
                 height: 215,
                 parentHeightOffset: 0,
                 parentWidthOffset: 0,
-                toolbar: {
-                    show: false
-                },
+                toolbar: { show: false },
                 type: 'area'
             },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                width: 2,
-                curve: 'smooth'
-            },
-            legend: {
-                show: false
-            },
+            dataLabels: { enabled: false },
+            stroke: { width: 2, curve: 'smooth' },
+            legend: { show: false },
             markers: {
                 size: 6,
                 colors: 'transparent',
                 strokeColors: 'transparent',
                 strokeWidth: 4,
-                discrete: [{
-                    fillColor: config.colors.white,
-                    seriesIndex: 0,
-                    dataPointIndex: 7,
-                    strokeColor: config.colors.primary,
-                    strokeWidth: 2,
-                    size: 6,
-                    radius: 8
-                }],
-                hover: {
-                    size: 7
-                }
+                discrete: [],
+                hover: { size: 7 }
             },
             colors: [config.colors.primary],
             fill: {
@@ -434,43 +371,20 @@
             grid: {
                 borderColor: borderColor,
                 strokeDashArray: 3,
-                padding: {
-                    top: -20,
-                    bottom: -8,
-                    left: -10,
-                    right: 8
-                }
+                padding: { top: -20, bottom: -8, left: -10, right: 8 }
             },
             xaxis: {
-                categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-                axisBorder: {
-                    show: false
-                },
-                axisTicks: {
-                    show: false
-                },
-                labels: {
-                    show: true,
-                    style: {
-                        fontSize: '13px',
-                        colors: axisColor
-                    }
-                }
+                categories: months,
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+                labels: { show: true, style: { fontSize: '13px', colors: axisColor } }
             },
-            yaxis: {
-                labels: {
-                    show: false
-                },
-                min: 10,
-                max: 50,
-                tickAmount: 4
-            }
+            yaxis: { labels: { show: true, style: { fontSize: '13px', colors: axisColor } }, min: 0 }
         };
     if (typeof incomeChartEl !== undefined && incomeChartEl !== null) {
-        const incomeChart = new ApexCharts(incomeChartEl, incomeChartConfig);
-        incomeChart.render();
+        window.incomeChart = new ApexCharts(incomeChartEl, incomeChartConfig);
+        window.incomeChart.render();
     }
-
 
     // Expenses Mini Chart - Radial Chart
     // --------------------------------------------------------------------
@@ -487,23 +401,13 @@
                     startAngle: 0,
                     endAngle: 360,
                     strokeWidth: '8',
-                    hollow: {
-                        margin: 2,
-                        size: '45%'
-                    },
-                    track: {
-                        strokeWidth: '50%',
-                        background: borderColor
-                    },
+                    hollow: { margin: 2, size: '45%' },
+                    track: { strokeWidth: '50%', background: borderColor },
                     dataLabels: {
                         show: true,
-                        name: {
-                            show: false
-                        },
+                        name: { show: false },
                         value: {
-                            formatter: function (val) {
-                                return '$' + parseInt(val);
-                            },
+                            formatter: function (val) { return '$' + parseInt(val); },
                             offsetY: 5,
                             color: '#697a8d',
                             fontSize: '13px',
@@ -512,32 +416,12 @@
                     }
                 }
             },
-            fill: {
-                type: 'solid',
-                colors: config.colors.primary
-            },
-            stroke: {
-                lineCap: 'round'
-            },
-            grid: {
-                padding: {
-                    top: -10,
-                    bottom: -15,
-                    left: -10,
-                    right: -10
-                }
-            },
+            fill: { type: 'solid', colors: config.colors.primary },
+            stroke: { lineCap: 'round' },
+            grid: { padding: { top: -10, bottom: -15, left: -10, right: -10 } },
             states: {
-                hover: {
-                    filter: {
-                        type: 'none'
-                    }
-                },
-                active: {
-                    filter: {
-                        type: 'none'
-                    }
-                }
+                hover: { filter: { type: 'none' } },
+                active: { filter: { type: 'none' } }
             }
         };
     if (typeof weeklyExpensesEl !== undefined && weeklyExpensesEl !== null) {

@@ -161,8 +161,8 @@ def start():
 
     scheduler = BackgroundScheduler()
     # scheduler.add_job(self_ping, IntervalTrigger(seconds=15))
-    scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(seconds=5))
-    scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(seconds=5))
+    scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(minutes=5))
+    scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(minutes=5))
     scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
     scheduler.add_job(expire_user_subscriptions, IntervalTrigger(hours=1))
     scheduler.start()

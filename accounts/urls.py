@@ -8,7 +8,8 @@ from .views import (
     BannerListView, BannerCreateView, BannerDetailView, BannerUpdateView, BannerDeleteView,
     DownloadAllMediaView, PasswordResetRequestView, PasswordResetVerifyView, AccountSettingsView,
     ProfileUpdateView, SocialMediaListView, SocialMediaCreateView,CustomerCreateView,
-    SocialMediaDetailView, SocialMediaUpdateView, VerifyOTPView, toggle_user_active,BlockedUserListView, UnblockUserView,MemberRegisterView,RegistrationNextStepsView,
+    SocialMediaDetailView, SocialMediaUpdateView, VerifyOTPView, toggle_user_active,BlockedUserListView,
+    UnblockUserView,MemberRegisterView,RegistrationNextStepsView,InactiveUserListView,
     SocialMediaDeleteView, get_company_data, login_redirect, GoogleSSOCallbackView
 )
 from .views import (
@@ -47,6 +48,7 @@ urlpatterns = [
     path('member/registration/', MemberRegisterView.as_view(), name='member_registration'),
     path('toggle-active/', toggle_user_active, name='toggle_user_active'),
     path('blocked-users/', BlockedUserListView.as_view(), name='blocked_users'),
+    path('inactive-users/', InactiveUserListView.as_view(), name='inactive_users'),
     path('unblock-user/<str:username>/', UnblockUserView.as_view(), name='unblock_user'),
 
     # Review management

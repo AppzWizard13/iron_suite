@@ -515,6 +515,7 @@ class PaymentListView(ListView):
         """
         context = super().get_context_data(**kwargs)
         context['users'] = User.objects.all()
+        context['page_name'] = "payment_list"
         context['current_sort'] = self.request.GET.get('sort', 'created_at')
         context['current_order'] = 'asc' if self.request.GET.get('order', 'desc') == 'asc' else 'desc'
         return context
