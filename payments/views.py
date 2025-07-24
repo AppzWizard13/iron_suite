@@ -160,6 +160,50 @@ def calculate_new_expiry(user, package):
     return today + timedelta(days=package.duration_days)
 
 
+def initiate_subscription_payment(request):
+    """
+    Handles initiation of gym membership subscription payment flow.
+
+    Args:
+        request (HttpRequest): Django HttpRequest object.
+
+    Returns:
+        HttpResponseRedirect: Redirects to the payment page or registration page if session is invalid.
+    """
+    member_id = request.session.get('pending_member_member_id')
+    package_id = request.session.get('pending_package_id')
+    
+
+    print("member_id", member_id)
+    print("package_id", package_id)
+
+    if not member_id or not package_id:
+        messages.error(
+            request,
+            "Session expired or missing package. Please register again."
+        )
+        return redirect('register_member')
+
+    user = get_object_or_404(User, member_id=member_id)
+    package = get_object_or_404(Package, id=package_id)
+
+    subscription_order = SubscriptionOrder.objects.create(
+        customer=user,
+        package=package,
+        total=package.final_price,
+        status=SubscriptionOrder.Status.PENDING,
+        payment_status=SubscriptionOrder.PaymentStatus.PENDING,
+        start_date=timezone.now().date(),
+        end_date=timezone.now().date() + timedelta(days=package.duration_days),
+    )
+
+    del request.session['pending_member_member_id']
+    del request.session['pending_package_id']
+
+    return initiate_cashfree_payment(request, subscription_order)
+
+
+
 def buy_subscription_package(request):
     """
     Handles buying or renewal of a subscription package for a user.
