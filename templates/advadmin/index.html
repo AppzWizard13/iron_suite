@@ -377,6 +377,12 @@
               <div data-i18n="Roles & Permissions">Roles & Permissions</div>
             </a>
           </li>
+          <li class="menu-item {% if page_name == 'category_list' %}active{% endif %}">
+            <a href="{% url 'category_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-cog"></i>
+              <div data-i18n="Settings">Manage Features</div>
+            </a>
+          </li>
           <li class="menu-item {% if page_name == 'settings' %}active{% endif %}">
             <a href="#" class="menu-link">
               <i class="menu-icon tf-icons bx bx-cog"></i>
