@@ -1,68 +1,74 @@
 import os
+import json
 import zipfile
 import random
 import string
 import logging
+import requests
+import smtplib
+import calendar
 from io import BytesIO
 from datetime import timedelta
 
-import requests
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from django.db.models.functions import TruncMonth
-
-
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
-from django.db.models import Max
-from django.db import models
 from django.utils import timezone
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import (
-    TemplateView, ListView, CreateView, UpdateView, DetailView, DeleteView
-)
-from django.views.generic.edit import CreateView
+from django.shortcuts import render, redirect
 from django.http import (
     HttpResponse, JsonResponse, FileResponse
 )
-from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+from django.db.models import (
+    Q, Sum, Count, Min, Max
+)
+from django.db.models.functions import TruncMonth
+from django.utils.decorators import method_decorator
+
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.views.generic import (
+    TemplateView, ListView, CreateView, UpdateView,
+    DetailView, DeleteView
+)
+from django.views.generic.edit import CreateView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import (
-    logout, login, authenticate, get_user_model
+    login, logout, authenticate, get_user_model
 )
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import send_mail
 
-from payments.models import Payment, Transaction
+# Get User model
+User = get_user_model()
+CustomUser = User
+
+# Twilio
 from twilio.rest import Client
+from collections import defaultdict
 
-# Import your app models and forms
+# Models
 from core.models import BusinessDetails, Configuration
 from products.models import Product, Category, subcategory
 from enquiry.models import Enquiry
 from orders.models import Order, SubscriptionOrder
+from payments.models import Payment, Transaction
+from attendance.models import Attendance, Schedule
+from accounts.models import CustomUser, Customer, Banner, Review, SocialMedia, PasswordResetOTP
 
-from .models import (
-    CustomUser, Banner, Review, SocialMedia, PasswordResetOTP
-)
+# Forms
 from .forms import (
     CustomUserForm, CustomerRegistrationForm, MemberRegistrationForm,
     ReviewForm, BannerForm, ProfileUpdateForm, SocialMediaForm, UserLoginForm,
     PasswordResetRequestForm, PasswordResetOTPForm
 )
-from accounts.models import Customer
 
-# Setup logger
+# Logging setup
 logger = logging.getLogger(__name__)
 
-# User model
-User = get_user_model()
-CustomUser = User
 
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = CustomUser
@@ -271,12 +277,6 @@ class CustomLoginView(LoginView):
 
 
 
-from django.views.generic import ListView
-from django.db.models import Q
-from django.contrib.auth import get_user_model
-from django.conf import settings
-
-User = get_user_model()
 
 class UserListView(ListView):
     model = User
@@ -330,10 +330,6 @@ class UserListView(ListView):
         # Example: 'Admin Users', 'Manager Users', etc.
         return context
 
-from django.conf import settings
-from django.views.generic import ListView
-from django.db.models import Q
-from .models import User  # Update import as per your structure
 
 class UserStaffRoleListView(ListView):
     model = User
@@ -450,14 +446,6 @@ class HomePageView(TemplateView):
         return context
     
 
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth import get_user_model
-import json
-
-User = get_user_model()
 
 @require_POST
 @login_required
@@ -497,13 +485,7 @@ def toggle_user_active(request):
         }, status=500)
     
 
-from django.views.generic import ListView
-from django.views import View
-from django.http import JsonResponse
-from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
 
-User = get_user_model()
 
 class BlockedUserListView(LoginRequiredMixin, ListView):
     model = User
@@ -577,27 +559,20 @@ class LogoutView(LoginRequiredMixin, View):
         return redirect('login')
 
 
-from django.views.generic import TemplateView
-from django.conf import settings
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Sum, Count, Q, Min
 
-import calendar
 
-from accounts.models import CustomUser
-from attendance.models import Attendance
-from orders.models import Order, SubscriptionOrder
-from payments.models import Transaction, Payment
-from core.models import Configuration
-from enquiry.models import Enquiry  # adjust import as needed
-import json
-from collections import defaultdict
 
 class DashboardView(TemplateView):
+    """
+    Admin Dashboard View that serves summary statistics, charts, and daily status
+    of users, attendance, revenue, subscriptions, and classes.
+    """
     template_name = 'admin_panel/index.html'
 
     def get_template_names(self):
+        """
+        Dynamically return the correct dashboard template based on ADMIN_PANEL_MODE setting.
+        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
         if admin_mode == 'advanced':
             return ['advadmin/index.html']
@@ -606,6 +581,9 @@ class DashboardView(TemplateView):
         return [self.template_name]
 
     def get_context_data(self, **kwargs):
+        """
+        Collects and prepares context data for dashboard rendering.
+        """
         context = super().get_context_data(**kwargs)
 
         today = timezone.now().date()
@@ -615,58 +593,74 @@ class DashboardView(TemplateView):
 
         # Site Configurations
         configs = Configuration.objects.all()
-        config_dict = {conf.config.replace("-", "_"): conf.value for conf in configs}
+        config_dict = {
+            conf.config.replace("-", "_"): conf.value
+            for conf in configs
+        }
 
-        # Users/Members
+        # User Metrics
         active_users_count = CustomUser.objects.filter(
-            staff_role='Member', is_active=True, on_subscription=True).count()
-        new_signups_today = CustomUser.objects.filter(
-            staff_role='Member', join_date=today).count()
-        total_members = CustomUser.objects.filter(
-            staff_role='Member', is_active=True).count()
+            staff_role='Member', is_active=True, on_subscription=True
+        ).count()
 
-        # Attendance
-        attended_today = Attendance.objects.filter(
-            date=today).values('user').distinct().count()
+        new_signups_today = CustomUser.objects.filter(
+            staff_role='Member', join_date=today
+        ).count()
+
+        total_members = CustomUser.objects.filter(
+            staff_role='Member', is_active=True
+        ).count()
+
+        # Attendance Metrics
+        attended_today = Attendance.objects.filter(date=today).values('user').distinct().count()
         attendance_rate = round((attended_today / total_members * 100), 1) if total_members else 0
 
-        # Expiring memberships (implement if needed)
-        expiring_memberships = 0
+        expiring_memberships = 0  # Placeholder for expiring membership logic
 
-        # Revenue for current month
+        # Monthly Revenue
         current_month_income = Payment.objects.filter(
             status=Payment.Status.COMPLETED,
             created_at__date__gte=first_day,
             created_at__date__lte=today
         ).aggregate(total=Sum('amount'))['total'] or 0
 
-        # Transactions and financials (across all time for now)
+        # Transaction Summary
         transactions = Transaction.objects.all()
+
         total_sales_amount = transactions.filter(
             category=Transaction.Category.SALES,
             transaction_type=Transaction.Type.INCOME,
         ).aggregate(total=Sum('amount'))['total'] or 0
+
         total_completed_amount = transactions.filter(
             status=Transaction.Status.COMPLETED
         ).aggregate(total=Sum('amount'))['total'] or 0
-        total_transaction_amount = transactions.aggregate(total=Sum('amount'))['total'] or 0
+
+        total_transaction_amount = transactions.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+
         total_income = transactions.filter(
             transaction_type=Transaction.Type.INCOME
         ).aggregate(total=Sum('amount'))['total'] or 0
+
         total_expense = transactions.filter(
             transaction_type=Transaction.Type.EXPENSE
         ).aggregate(total=Sum('amount'))['total'] or 0
+
         profit = total_income - total_expense
 
-        # Get successful payment sum for the current month
-        current_month_income = Payment.objects.filter(
-            status=Payment.Status.COMPLETED,
-            created_at__date__gte=first_day,
-            created_at__date__lte=today
-        ).aggregate(total=Sum('amount'))['total'] or 0
-
-        # Subscription Orders/Status breakdown
+        # Subscription Order Status Breakdown
         orders = SubscriptionOrder.objects.values('status').annotate(count=Count('id'))
+        status_map = {
+            'pending': 'pending_orders',
+            'processing': 'processing_orders',
+            'shipped': 'shipped_orders',
+            'delivered': 'delivered_orders',
+            'cancelled': 'cancelled_orders',
+            'return': 'returned_orders',
+        }
+
         order_status_counts = {
             'pending_orders': 0,
             'processing_orders': 0,
@@ -676,14 +670,7 @@ class DashboardView(TemplateView):
             'returned_orders': 0,
         }
         total_orders = 0
-        status_map = {
-            'pending': 'pending_orders',
-            'processing': 'processing_orders',
-            'shipped': 'shipped_orders',
-            'delivered': 'delivered_orders',
-            'cancelled': 'cancelled_orders',
-            'return': 'returned_orders',
-        }
+
         for order in orders:
             order_status = order['status']
             count = order['count']
@@ -691,7 +678,7 @@ class DashboardView(TemplateView):
             if order_status in status_map:
                 order_status_counts[status_map[order_status]] = count
 
-        # SubscriptionOrder "Upcoming Renewals" (today to last day of month, not yet due)
+        # Upcoming Renewals
         upcoming_renewals_qs = SubscriptionOrder.objects.filter(
             end_date__gte=today,
             end_date__lte=last_day,
@@ -704,7 +691,7 @@ class DashboardView(TemplateView):
         upcoming_renewals_count = upcoming_renewals_result['renewals_count'] or 0
         upcoming_renewals_amount = upcoming_renewals_result['renewals_amount'] or 0
 
-        # Pending Dues: expired this month & not paid
+        # Pending Dues
         pending_dues_qs = SubscriptionOrder.objects.filter(
             end_date__lt=today,
             end_date__gte=first_day,
@@ -727,29 +714,30 @@ class DashboardView(TemplateView):
         # Recent Transactions
         recent_transactions = transactions.order_by('-created_at')[:6]
 
-        # --- CHART DATA: Monthly Active Members & Yearly Earnings ---
-        earliest_year_qs = CustomUser.objects.filter(staff_role='Member', is_active=True)
-        earliest_year = earliest_year_qs.aggregate(earliest=Min('join_date'))['earliest']
-        base_year = (earliest_year.year if earliest_year else today.year - 2)
+        # Chart Data: Membership Trends and Earnings
+        earliest_year_qs = CustomUser.objects.filter(
+            staff_role='Member', is_active=True
+        )
+        earliest_year = earliest_year_qs.aggregate(
+            earliest=Min('join_date')
+        )['earliest']
+        base_year = earliest_year.year if earliest_year else today.year - 2
         years = list(range(base_year, today.year + 1))
 
-        membership_trends = defaultdict(lambda: [0]*12)
+        membership_trends = defaultdict(lambda: [0] * 12)
         for year in years:
             for month in range(1, 13):
-                # Set 0 for future months
                 if year > today.year or (year == today.year and month > today.month):
-                    membership_trends[year][month-1] = 0
-                else:
-                    start = today.replace(year=year, month=month, day=1)
-                    last_day_num = calendar.monthrange(year, month)[1]
-                    end = today.replace(year=year, month=month, day=last_day_num)
-                    count = CustomUser.objects.filter(
-                        staff_role='Member', is_active=True,on_subscription=True,
-                        join_date__lte=end
-                    ).count()
-                    membership_trends[year][month-1] = count
+                    continue
+                start = today.replace(year=year, month=month, day=1)
+                end_day = calendar.monthrange(year, month)[1]
+                end = today.replace(year=year, month=month, day=end_day)
+                count = CustomUser.objects.filter(
+                    staff_role='Member', is_active=True, on_subscription=True,
+                    join_date__lte=end
+                ).count()
+                membership_trends[year][month - 1] = count
 
-        # Earnings code remains unchanged
         yearly_earnings = {}
         for year in years:
             year_start = today.replace(year=year, month=1, day=1)
@@ -761,11 +749,9 @@ class DashboardView(TemplateView):
             ).aggregate(total=Sum('amount'))['total'] or 0
             yearly_earnings[year] = float(amount)
 
-
-        # Prepare monthly revenue per year
+        # Monthly Revenue By Year
         monthly_revenue_by_year = {}
         for year in years:
-            # Get all completed payments for this year, grouped by month
             monthly_amounts = [0] * 12
             monthly_payments = (
                 Payment.objects.filter(
@@ -777,29 +763,54 @@ class DashboardView(TemplateView):
                 .annotate(total=Sum('amount'))
                 .order_by('month')
             )
-
-            # Populate monthly_amounts
             for month_data in monthly_payments:
                 month = month_data['month'].month
                 monthly_amounts[month - 1] = float(month_data['total'] or 0)
+            monthly_revenue_by_year[year] = monthly_amounts
 
-        monthly_revenue_by_year[year] = monthly_amounts
+        # Update today's schedule statuses
+        Schedule.objects.filter(
+            schedule_date=today
+        ).select_related('trainer').prefetch_related(
+            'enrollments', 'attendances'
+        ).update(status='upcoming')
 
+        schedules_today = Schedule.objects.filter(schedule_date=today)
+        for schedule in schedules_today:
+            schedule.update_status()
 
-        print("membership_trends", membership_trends)
-        # For embedding as JSON in template JS
-        context['membership_trends_json'] = json.dumps(membership_trends)
-        context['yearly_earnings_json'] = json.dumps(yearly_earnings)
-        context['years'] = years
-        context['current_year'] = today.year
+        # Running Classes
+        running_classes_qs = Schedule.objects.filter(
+            schedule_date=today, status='live'
+        ).select_related('trainer').prefetch_related('enrollments', 'attendances')
 
-        # --- END CHART DATA ---
-        PAGES_GROUP = ['about-us', 'class-timetable', 'bmi-calculator', 'team', 'gallery', 'blog', '404']
+        running_classes = []
+        for cls in running_classes_qs:
+            running_classes.append({
+                'class_name': cls.name,
+                'trainer_name': cls.trainer.get_full_name() if cls.trainer else "Unassigned",
+                'start_time': cls.start_time.strftime('%I:%M %p'),
+                'end_time': cls.end_time.strftime('%I:%M %p'),
+                'current_attendance': cls.attendances.filter(date=today).count(),
+                'max_capacity': cls.capacity,
+                'location': 'Main Hall',  # Optional: replace with cls.location
+            })
 
-        # Compose and return context
+        # Pages group (for optional navigation or chart purposes)
+        PAGES_GROUP = [
+            'about-us', 'class-timetable', 'bmi-calculator',
+            'team', 'gallery', 'blog', '404'
+        ]
+
+        # Final Context Update
         context.update(config_dict)
         context.update({
+            'running_classes': running_classes,
             'monthly_revenue_json': json.dumps(monthly_revenue_by_year),
+            'membership_trends_json': json.dumps(membership_trends),
+            'yearly_earnings_json': json.dumps(yearly_earnings),
+            'years': years,
+            'current_year': today.year,
             'pages_group': PAGES_GROUP,
             'current_month': current_month_name,
             'current_month_income': current_month_income,
@@ -808,7 +819,6 @@ class DashboardView(TemplateView):
             'upcoming_renewals_amount': upcoming_renewals_amount,
             'pending_dues_count': pending_dues_count,
             'pending_dues_amount': pending_dues_amount,
-            'current_month_income': current_month_income,
             'active_users_count': active_users_count,
             'new_signups_today': new_signups_today,
             'attendance_rate': attendance_rate,
@@ -824,10 +834,8 @@ class DashboardView(TemplateView):
             'admin_mode': getattr(settings, 'ADMIN_PANEL_MODE', 'basic'),
         })
         context.update(order_status_counts)
+
         return context
-
-
-
 
 
 
@@ -1132,10 +1140,7 @@ class DownloadAllMediaView(LoginRequiredMixin, View):
         
 
 
-# Set up logging
-logger = logging.getLogger(__name__)
 
-User = get_user_model()
 
 class PasswordResetRequestView(View):
     template_name = 'advadmin/auth-forgot-password-basic.html'
@@ -1303,7 +1308,7 @@ class PasswordResetVerifyView(View):
     
 
 
-User = get_user_model()
+
 
 class AccountSettingsView(LoginRequiredMixin, TemplateView):
     template_name = 'advadmin/pages-account-settings-account.html'

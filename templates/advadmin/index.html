@@ -249,12 +249,7 @@
               <div data-i18n="Attendance Report">Attendance Report</div>
             </a>
           </li>
-          <li class="menu-item {% if page_name == 'schedule_list' %}active{% endif %}">
-            <a href="{% url 'schedule_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-time-five"></i>
-              <div data-i18n="Schedules">Schedules</div>
-            </a>
-          </li>
+
           <li class="menu-item {% if page_name == 'enrollment_list' %}active{% endif %}">
             <a href="{% url 'enrollment_list' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-user-plus"></i>
@@ -297,12 +292,11 @@
             </a>
           </li>
           <li class="menu-item {% if page_name == 'class_schedules' %}active{% endif %}">
-            <a href="#" class="menu-link">
+            <a href="{% url 'schedule_list' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-time"></i>
               <div data-i18n="Class Schedules">Class Schedules</div>
             </a>
           </li>
-
           <!-- Finance -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Finance</span>
@@ -325,18 +319,19 @@
               <div data-i18n="Payments">Payments</div>
             </a>
           </li>
+          <li class="menu-item {% if page_name == 'renewals' %}active{% endif %}">
+            <a href="{% url 'upcoming_renewal_members' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-refresh"></i>
+              <div data-i18n="Renewals">Renewals</div>
+            </a>
+          </li>
           <li class="menu-item {% if page_name == 'invoices' %}active{% endif %}">
             <a href="#" class="menu-link">
               <i class="menu-icon tf-icons bx bx-file"></i>
               <div data-i18n="Invoices">Invoices</div>
             </a>
           </li>
-          <li class="menu-item {% if page_name == 'renewals' %}active{% endif %}">
-            <a href="#" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-refresh"></i>
-              <div data-i18n="Renewals">Renewals</div>
-            </a>
-          </li>
+
 
           <!-- Accounts Management -->
           <li class="menu-header small text-uppercase">
@@ -853,7 +848,7 @@
 
             <div class="container-xxl flex-grow-1 container-p-y">
               <div class="row">
-                <div class="col-lg-8 mb-4 order-0">
+                <div class="col-lg-12 mb-4 order-0">
                   <div class="card">
                     <div class="d-flex align-items-end row">
                       <div class="col-sm-7">
@@ -880,10 +875,10 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-lg-4 col-md-4 order-1">
+                <div class="col-lg-12 col-md-12 order-1">
                   <div class="row">
                     <!-- Profit Card -->
-                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                    <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
                       <div class="card">
                         <div class="card-body">
                           <div class="card-title d-flex align-items-start justify-content-between">
@@ -918,7 +913,7 @@
                     </div>
 
                     <!-- Total Sales Card -->
-                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                    <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
                       <div class="card">
                         <div class="card-body">
                           <div class="card-title d-flex align-items-start justify-content-between">
@@ -942,21 +937,132 @@
                               </button>
                               <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt6">
                                 <a class="dropdown-item" href="{% url 'transaction_list' 'income' %}">View More</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
                               </div>
                             </div>
                           </div>
-                          <span class="fw-semibold d-block mb-1">Month Revenue</span>
-                          <h5 class="card-title text-nowrap mb-1">₹ {{ current_month_income|floatformat:2 }}</h5>
+                          <span class="fw-semibold d-block mb-1">Current Month Revenue</span>
+                          <h5 class="card-title text-nowrap mb-1">{{ current_month_income|floatformat:2 }}  INR</h5>
                           <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> {{current_month}}</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Completed Payments -->
+                    <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img src="{% static 'advadmin/assets/img/icons/unicons/paypal.png' %}" alt="Completed Payments" class="rounded" />
+                            </div>
+                            <div class="dropdown">
+                              <button class="btn p-0" type="button" id="cardOpt4" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
+                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
+                              </div>
+                            </div>
+                          </div>
+                          <span class="fw-semibold d-block mb-1">Total Members</span>
+                          <h5 class="card-title text-nowrap mb-2">{{ total_members}}</h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Completed</small>
                         </div>
                       </div>
                     </div>
 
                   </div>
                 </div>
+
+                <div class="col-lg-12 col-md-12 order-1">
+                  <div class="row">
+                    <!-- Upcoming Dues -->
+                    <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img src="{% static 'advadmin/assets/img/icons/unicons/cc-primary.png' %}" alt="Transactions" class="rounded" />
+                            </div>
+                            <div class="dropdown">
+                              <button class="btn p-0" type="button" id="cardOpt1" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt1">
+                                <a class="dropdown-item" href="{% url 'upcoming_renewal_members' %}">View More</a>
+                              </div>
+                            </div>
+                          </div>
+                          <span class="fw-semibold d-block mb-1">Upcoming Renewals</span>
+                          <h5 class="card-title mb-2">₹ {{upcoming_renewals_amount|floatformat:2}} INR - {{ upcoming_renewals_count }}</h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Renewals</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Pending Dues -->
+                    <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img src="{% static 'advadmin/assets/img/icons/unicons/paypal.png' %}" alt="Completed Payments" class="rounded" />
+                            </div>
+                            <div class="dropdown">
+                              <button class="btn p-0" type="button" id="cardOpt4" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
+                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
+                              </div>
+                            </div>
+                          </div>
+                          <span class="fw-semibold d-block mb-1">Pending Renewals</span>
+                          <h5 class="card-title text-nowrap mb-2">₹ {{ pending_dues_amount|floatformat:2 }} INR - {{pending_dues_count}} </h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Follow Up</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Payment Done -->
+                    <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img src="{% static 'advadmin/assets/img/icons/unicons/cc-primary.png' %}" alt="Transactions" class="rounded" />
+                            </div>
+                            <div class="dropdown">
+                              <button class="btn p-0" type="button" id="cardOpt2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt2">
+                                <a class="dropdown-item" href="{% url 'payment_list' %}">View More</a>
+                              </div>
+                            </div>
+                          </div>
+                          <span class="fw-semibold d-block mb-1">Payment Done</span>
+                          <h5 class="card-title mb-2">₹ {{ current_month_income|floatformat:2 }} INR </h5>
+                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Transactions</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+            <div class="col-lg-12 col-md-12 order-1">
                 <!-- Active Membership Trends -->
-                <div class="col-12 col-lg-8 order-2 order-md-3 order-lg-2 mb-4">
+                <style>
+                  #totalRevenueChart,
+                  #growthChart {
+                    min-height: 150px;
+                  }
+                </style>
+                <div class="col-12 col-lg-12 order-2 order-md-3 order-lg-2 mb-4">
                   <div class="card">
                     <div class="row row-bordered g-0">
                       <div class="col-md-8">
@@ -1020,431 +1126,117 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-12 col-md-8 col-lg-4 order-3 order-md-2">
-                  <div class="row">
-                    <!-- Completed Payments -->
-                    <div class="col-6 mb-4">
-                      <div class="card">
-                        <div class="card-body">
-                          <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
-                              <img src="{% static 'advadmin/assets/img/icons/unicons/paypal.png' %}" alt="Completed Payments" class="rounded" />
-                            </div>
-                            <div class="dropdown">
-                              <button class="btn p-0" type="button" id="cardOpt4" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bx bx-dots-vertical-rounded"></i>
-                              </button>
-                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
-                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                              </div>
-                            </div>
-                          </div>
-                          <span class="fw-semibold d-block mb-1">Total Members</span>
-                          <h5 class="card-title text-nowrap mb-2">{{ total_members}}</h5>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Completed</small>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Total Transactions -->
-                    <div class="col-6 mb-4">
-                      <div class="card">
-                        <div class="card-body">
-                          <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
-                              <img src="{% static 'advadmin/assets/img/icons/unicons/cc-primary.png' %}" alt="Transactions" class="rounded" />
-                            </div>
-                            <div class="dropdown">
-                              <button class="btn p-0" type="button" id="cardOpt1" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bx bx-dots-vertical-rounded"></i>
-                              </button>
-                              <div class="dropdown-menu" aria-labelledby="cardOpt1">
-                                <a class="dropdown-item" href="{% url 'attendance_report' %}">View More</a>
-                              </div>
-                            </div>
-                          </div>
-                          <span class="fw-semibold d-block mb-1">Upcoming Dues</span>
-                          <h5 class="card-title mb-2">₹ {{upcoming_renewals_amount|floatformat:2}} - {{ upcoming_renewals_count }}</h5>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Renewals</small>
-                        </div>
-                      </div>
-                    </div>
-                    </div>
-                    <div class="col-12 mb-4">
-                    <div class="row">
-                    <!-- Completed Payments -->
-                    <div class="col-6 mb-4">
-                      <div class="card">
-                        <div class="card-body">
-                          <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
-                              <img src="{% static 'advadmin/assets/img/icons/unicons/paypal.png' %}" alt="Completed Payments" class="rounded" />
-                            </div>
-                            <div class="dropdown">
-                              <button class="btn p-0" type="button" id="cardOpt4" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bx bx-dots-vertical-rounded"></i>
-                              </button>
-                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
-                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                              </div>
-                            </div>
-                          </div>
-                          <span class="fw-semibold d-block mb-1">Pending Dues</span>
-                          <h5 class="card-title text-nowrap mb-2">₹ {{ pending_dues_amount|floatformat:2 }} - {{pending_dues_count}}</h5>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Follow Up</small>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Total Transactions -->
-                    <div class="col-6 mb-4">
-                      <div class="card">
-                        <div class="card-body">
-                          <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
-                              <img src="{% static 'advadmin/assets/img/icons/unicons/cc-primary.png' %}" alt="Transactions" class="rounded" />
-                            </div>
-                            <div class="dropdown">
-                              <button class="btn p-0" type="button" id="cardOpt1" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bx bx-dots-vertical-rounded"></i>
-                              </button>
-                              <div class="dropdown-menu" aria-labelledby="cardOpt1">
-                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                              </div>
-                            </div>
-                          </div>
-                          <span class="fw-semibold d-block mb-1">Payment Done</span>
-                          <h5 class="card-title mb-2">₹ {{ current_month_income|floatformat:2 }}</h5>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>Transactions</small>
-                        </div>
-                      </div>
-                    </div>
-
-                    
-                      {% comment %} <div class="card">
-                        <div class="card-body">
-                          <div class="d-flex justify-content-between flex-sm-row flex-column gap-3">
-                            <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
-                              <div class="card-title">
-                                <h5 class="text-nowrap mb-2">Trainer Performance</h5>
-                                <span class="badge bg-label-warning rounded-pill">Year 2021</span>
-                              </div>
-                              <div class="mt-sm-auto">
-                                <small class="text-success text-nowrap fw-semibold"
-                                  ><i class="bx bx-chevron-up"></i> 68.2%</small
-                                >
-                                <h3 class="mb-0">$84,686k</h3>
-                              </div>
-                            </div>
-                            <div id="profileReportChart"></div>
-                          </div>
-                        </div>
-                      </div> {% endcomment %}
-                    </div>
-                  </div>
-                </div>
-              </div>
               <div class="row">
-
-
-              <!-- Membership & Subscription Overview -->
-              <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
-                <div class="card h-100">
-                  <div class="card-header d-flex align-items-center justify-content-between pb-0">
-                    <div class="card-title mb-0">
-                      <h5 class="m-0 me-2">Membership & Subscription Overview</h5>
-                      <small class="text-muted">{{ total_members }} Total Members</small>
-                    </div>
-                    <div class="dropdown">
-                      <button
-                        class="btn p-0"
-                        type="button"
-                        id="membershipOverviewDropdown"
-                        data-bs-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        <i class="bx bx-dots-vertical-rounded"></i>
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="membershipOverviewDropdown">
-                        <a class="dropdown-item" href="#">Refresh</a>
-                        <a class="dropdown-item" href="#">View Reports</a>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                      <div class="d-flex flex-column align-items-center gap-1">
-                        <h2 class="mb-2">{{ active_users_count }}</h2>
-                        <span>Active Members</span>
-                      </div>
-                      <div class="text-end">
-                        <small class="text-muted">Revenue this month</small>
-                        <h6 class="mb-0 text-success">₹{{ current_month_income }}</h6>
-                      </div>
-                    </div>
-
-                    <ul class="p-0 m-0">
-                      <li class="d-flex mb-4 pb-1">
-                        <div class="avatar flex-shrink-0 me-3">
-                          <span class="avatar-initial rounded bg-label-success"><i class="bx bx-check-circle"></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <h6 class="mb-0">Active Subscriptions</h6>
-                            <small class="text-muted">Currently subscribed</small>
-                          </div>
-                          <div class="user-progress">
-                            <small class="fw-semibold">{{ active_users_count }}</small>
-                          </div>
-                        </div>
-                      </li>
-
-                      <li class="d-flex mb-4 pb-1">
-                        <div class="avatar flex-shrink-0 me-3">
-                          <span class="avatar-initial rounded bg-label-info"><i class="bx bx-user-plus"></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <h6 class="mb-0">New Signups Today</h6>
-                            <small class="text-muted">Joined on {{ today|date:"M d" }}</small>
-                          </div>
-                          <div class="user-progress">
-                            <small class="fw-semibold">{{ new_signups_today }}</small>
-                          </div>
-                        </div>
-                      </li>
-
-                      <li class="d-flex mb-4 pb-1">
-                        <div class="avatar flex-shrink-0 me-3">
-                          <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-timer"></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <h6 class="mb-0">Upcoming Renewals</h6>
-                            <small class="text-muted">Due by month-end</small>
-                          </div>
-                          <div class="user-progress">
-                            <small class="fw-semibold">{{ upcoming_renewals_count }}</small>
-                          </div>
-                        </div>
-                      </li>
-
-                      <li class="d-flex mb-4 pb-1">
-                        <div class="avatar flex-shrink-0 me-3">
-                          <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-credit-card"></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <h6 class="mb-0">Pending Dues</h6>
-                            <small class="text-muted">Not renewed this month</small>
-                          </div>
-                          <div class="user-progress">
-                            <small class="fw-semibold">{{ pending_dues_count }}</small>
-                          </div>
-                        </div>
-                      </li>
-
-                      <li class="d-flex">
-                        <div class="avatar flex-shrink-0 me-3">
-                          <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-user-x"></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <h6 class="mb-0">Expired Memberships</h6>
-                            <small class="text-muted">Need follow-up</small>
-                          </div>
-                          <div class="user-progress">
-                            <small class="fw-semibold">{{ expired_members_count }}</small>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <!--/ Membership & Subscription Overview -->
-
-                
-                <!--/ Order Statistics -->
-
-              <!-- Expense Overview -->
-              <div class="col-md-6 col-lg-4 order-1 mb-4">
-                <div class="card h-100">
-                  <div class="card-header">
-                    <ul class="nav nav-pills" role="tablist">
-                      <h5 class="m-0 me-2">Revenue - Monthly Overview</h5>
-                    </ul>
-                  </div>
-                  <div class="card-body px-0">
-                    <div class="tab-content p-0">
-                      <div class="tab-pane fade show active" id="navs-tabs-line-card-income" role="tabpanel">
-                        <div class="d-flex p-4 pt-3 align-items-center justify-content-between">
-                          <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                              <img src="{% static 'advadmin/assets/img/icons/unicons/wallet.png' %}" alt="Wallet" />
-                            </div>
-                            <div>
-                              <small class="text-muted d-block">Total Revenue (YTD)</small>
-                              <div class="d-flex align-items-center">
-                                <h6 class="mb-0 me-1" id="incomeBalanceAmount">₹0</h6>
-                                <small class="text-success fw-semibold" id="incomeBalanceChange">
-                                  <i class="bx bx-chevron-up"></i>
-                                  <span>0%</span>
-                                </small>
-                              </div>
-                              <small class="text-muted">Year: 
-                                <span id="incomeYearLabel">{{ current_year }}</span>
-                                <span class="dropdown">
-                                  <a href="#" class="text-primary dropdown-toggle year-select-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:0.9em;">
-                                    <i class="bx bx-calendar"></i>
-                                  </a>
-                                  <ul class="dropdown-menu">
-                                    {% for y in years %}
-                                      <li><a class="dropdown-item year-select" href="#" data-year="{{ y }}">{{ y }}</a></li>
-                                    {% endfor %}
-                                  </ul>
-                                </span>
-                              </small>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="px-2">
-                          <div id="incomeChart"></div>
-                        </div>
-                        <div class="d-flex justify-content-center pt-4 gap-2">
-                          <div class="flex-shrink-0">
-                            <div id="expensesOfWeek"></div>
-                          </div>
-                          <div>
-                            <p class="mb-n1 mt-1">Expenses This Week</p>
-                            <small class="text-muted" id="expensesCompare">$39 less than last week</small>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!--/ Expense Overview -->
-
-
-                <!-- Recent Activities	 -->
-                <div class="col-md-6 col-lg-4 order-2 mb-4">
+                <!-- Membership & Subscription Overview -->
+                <div class="col-md-4 col-lg-4 col-xl-4 mb-4">
                   <div class="card h-100">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                      <h5 class="card-title m-0 me-2">Recent Activities	</h5>
+                    <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                      <div class="card-title mb-0">
+                        <h5 class="m-0 me-2 pb-2">Membership & Subscription Overview</h5>
+                        <small class="text-muted">{{ total_members }} Total Members</small>
+                      </div>
                       <div class="dropdown">
                         <button
                           class="btn p-0"
                           type="button"
-                          id="transactionID"
+                          id="membershipOverviewDropdown"
                           data-bs-toggle="dropdown"
                           aria-haspopup="true"
                           aria-expanded="false"
                         >
                           <i class="bx bx-dots-vertical-rounded"></i>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="transactionID">
-                          <a class="dropdown-item" href="javascript:void(0);">Last 28 Days</a>
-                          <a class="dropdown-item" href="javascript:void(0);">Last Month</a>
-                          <a class="dropdown-item" href="javascript:void(0);">Last Year</a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="membershipOverviewDropdown">
+                          <a class="dropdown-item" href="#">Refresh</a>
+                          <a class="dropdown-item" href="#">View Reports</a>
                         </div>
                       </div>
                     </div>
+
                     <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex flex-column align-items-center gap-1">
+                          <h2 class="mb-2">{{ active_users_count }}</h2>
+                          <span>Active Members</span>
+                        </div>
+                        <div class="text-end">
+                          <small class="text-muted">Revenue this month</small>
+                          <h6 class="mb-0 text-success">₹{{ current_month_income }}</h6>
+                        </div>
+                      </div>
+
                       <ul class="p-0 m-0">
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
-                            <img src="{% static 'advadmin/assets/img/icons/unicons/paypal.png' %}" alt="User" class="rounded" />
+                            <span class="avatar-initial rounded bg-label-success"><i class="bx bx-check-circle"></i></span>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                             <div class="me-2">
-                              <small class="text-muted d-block mb-1">Paypal</small>
-                              <h6 class="mb-0">Send money</h6>
+                              <h6 class="mb-0">Active Subscriptions</h6>
+                              <small class="text-muted">Currently subscribed</small>
                             </div>
-                            <div class="user-progress d-flex align-items-center gap-1">
-                              <h6 class="mb-0">+82.6</h6>
-                              <span class="text-muted">USD</span>
+                            <div class="user-progress">
+                              <small class="fw-semibold">{{ active_users_count }}</small>
                             </div>
                           </div>
                         </li>
+
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
-                            <img src="{% static 'advadmin/assets/img/icons/unicons/wallet.png' %}" alt="User" class="rounded" />
+                            <span class="avatar-initial rounded bg-label-info"><i class="bx bx-user-plus"></i></span>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                             <div class="me-2">
-                              <small class="text-muted d-block mb-1">Wallet</small>
-                              <h6 class="mb-0">Mac'D</h6>
+                              <h6 class="mb-0">New Signups Today</h6>
+                              <small class="text-muted">Joined on {{ today|date:"M d" }}</small>
                             </div>
-                            <div class="user-progress d-flex align-items-center gap-1">
-                              <h6 class="mb-0">+270.69</h6>
-                              <span class="text-muted">USD</span>
+                            <div class="user-progress">
+                              <small class="fw-semibold">{{ new_signups_today }}</small>
                             </div>
                           </div>
                         </li>
+
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
-                            <img src="{% static 'advadmin/assets/img/icons/unicons/chart.png' %}" alt="User" class="rounded" />
+                            <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-timer"></i></span>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                             <div class="me-2">
-                              <small class="text-muted d-block mb-1">Transfer</small>
-                              <h6 class="mb-0">Refund</h6>
+                              <h6 class="mb-0">Upcoming Renewals</h6>
+                              <small class="text-muted">Due by month-end</small>
                             </div>
-                            <div class="user-progress d-flex align-items-center gap-1">
-                              <h6 class="mb-0">+637.91</h6>
-                              <span class="text-muted">USD</span>
+                            <div class="user-progress">
+                              <small class="fw-semibold">{{ upcoming_renewals_count }}</small>
                             </div>
                           </div>
                         </li>
+
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
-                            <img src="{% static 'advadmin/assets/img/icons/unicons/cc-success.png' %}" alt="User" class="rounded" />
+                            <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-credit-card"></i></span>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                             <div class="me-2">
-                              <small class="text-muted d-block mb-1">Credit Card</small>
-                              <h6 class="mb-0">Ordered Food</h6>
+                              <h6 class="mb-0">Pending Dues</h6>
+                              <small class="text-muted">Not renewed this month</small>
                             </div>
-                            <div class="user-progress d-flex align-items-center gap-1">
-                              <h6 class="mb-0">-838.71</h6>
-                              <span class="text-muted">USD</span>
-                            </div>
-                          </div>
-                        </li>
-                        <li class="d-flex mb-4 pb-1">
-                          <div class="avatar flex-shrink-0 me-3">
-                            <img src="{% static 'advadmin/assets/img/icons/unicons/wallet.png' %}" alt="User" class="rounded" />
-                          </div>
-                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                              <small class="text-muted d-block mb-1">Wallet</small>
-                              <h6 class="mb-0">Starbucks</h6>
-                            </div>
-                            <div class="user-progress d-flex align-items-center gap-1">
-                              <h6 class="mb-0">+203.33</h6>
-                              <span class="text-muted">USD</span>
+                            <div class="user-progress">
+                              <small class="fw-semibold">{{ pending_dues_count }}</small>
                             </div>
                           </div>
                         </li>
+
                         <li class="d-flex">
                           <div class="avatar flex-shrink-0 me-3">
-                            <img src="{% static 'advadmin/assets/img/icons/unicons/cc-warning.png' %}" alt="User" class="rounded" />
+                            <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-user-x"></i></span>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                             <div class="me-2">
-                              <small class="text-muted d-block mb-1">Mastercard</small>
-                              <h6 class="mb-0">Ordered Food</h6>
+                              <h6 class="mb-0">Expired Memberships</h6>
+                              <small class="text-muted">Need follow-up</small>
                             </div>
-                            <div class="user-progress d-flex align-items-center gap-1">
-                              <h6 class="mb-0">-92.45</h6>
-                              <span class="text-muted">USD</span>
+                            <div class="user-progress">
+                              <small class="fw-semibold">{{ expired_members_count }}</small>
                             </div>
                           </div>
                         </li>
@@ -1452,6 +1244,99 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Revenue - Monthly Overview -->
+                <div class="col-md-12 col-lg-8 col-xl-8 mb-4">
+                  <div class="card h-100">
+                    <div class="card-header">
+                      <ul class="nav nav-pills" role="tablist">
+                        <h5 class="m-0 me-2">Revenue - Monthly Overview</h5>
+                      </ul>
+                    </div>
+                    <div class="card-body px-0">
+                      <div class="tab-content p-0">
+                        <div class="tab-pane fade show active" id="navs-tabs-line-card-income" role="tabpanel">
+                          <div class="d-flex p-4 pt-3 align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                              <div class="avatar flex-shrink-0 me-3">
+                                <img src="{% static 'advadmin/assets/img/icons/unicons/wallet.png' %}" alt="Wallet" />
+                              </div>
+                              <div>
+                                <small class="text-muted d-block">Total Revenue (YTD)</small>
+                                <div class="d-flex align-items-center">
+                                  <h6 class="mb-0 me-1" id="incomeBalanceAmount">₹0</h6>
+                                  <small class="text-success fw-semibold" id="incomeBalanceChange">
+                                    <i class="bx bx-chevron-up"></i>
+                                    <span>0%</span>
+                                  </small>
+                                </div>
+                                <small class="text-muted">Year: 
+                                  <span id="incomeYearLabel">{{ current_year }}</span>
+                                  <span class="dropdown">
+                                    <a href="#" class="text-primary dropdown-toggle year-select-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:0.9em;">
+                                      <i class="bx bx-calendar"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                      {% for y in years %}
+                                        <li><a class="dropdown-item year-select" href="#" data-year="{{ y }}">{{ y }}</a></li>
+                                      {% endfor %}
+                                    </ul>
+                                  </span>
+                                </small>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="px-1">
+                            <div id="incomeChart"></div>
+                          </div>
+                          {% comment %} <div class="d-flex justify-content-center pt-4 gap-2">
+                            <div class="flex-shrink-0">
+                              <div id="expensesOfWeek"></div>
+                            </div>
+                            <div>
+                              <p class="mb-n1 mt-1">Expenses This Week</p>
+                              <small class="text-muted" id="expensesCompare">$39 less than last week</small>
+                            </div>
+                          </div> {% endcomment %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Running Class Activities Overview -->
+              <div class="col-md-12 col-lg-12 order-2 mb-4">
+                <div class="card h-100">
+                  <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title m-0 me-2">Running Class Activities Overview</h5>
+                  </div>
+                  <div class="card-body">
+                    <ul class="p-0 m-0">
+                      {% for class in running_classes %}
+                      <li class="d-flex mb-4 pb-1">
+                        <div class="avatar flex-shrink-0 me-3">
+                          <img src="{% static 'advadmin/assets/img/icons/unicons/chart.png' %}" alt="{{ class.class_name }}" class="rounded" />
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                          <div class="me-2">
+                            <small class="text-muted d-block mb-1">{{ class.class_name }} - {{ class.location }}</small>
+                            <h6 class="mb-0">Trainer: {{ class.trainer_name }}</h6>
+                            <small class="text-muted">{{ class.start_time|time:"h:i A" }} - {{ class.end_time|time:"h:i A" }}</small>
+                          </div>
+                          <div class="user-progress d-flex align-items-center gap-1">
+                            <h6 class="mb-0">{{ class.current_attendance }}/{{ class.max_capacity }}</h6>
+                            <span class="text-muted">Attending</span>
+                          </div>
+                        </div>
+                      </li>
+                      {% empty %}
+                      <li class="text-center text-muted">No live classes right now.</li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
                 <!--/ Transactions -->
               </div>
             </div>

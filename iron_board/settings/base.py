@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'payments',
     'attendance',
     'subscriptions',
+    'notifications',
     'markdownx',
     'cloudinary',
     'django_extensions',

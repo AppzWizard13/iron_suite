@@ -2,13 +2,19 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from datetime import timedelta, date
+import datetime
+from django.utils.timezone import now
+
 
 # ✅ Avoid lambda: use a named function for token generation
 def generate_token():
     return get_random_string(64)
 
-from django.db import models
-from django.conf import settings
+
+def default_expiry():
+    return timezone.now() + timedelta(hours=4)
+
 
 class Schedule(models.Model):
     SESSION_STATUS = [
@@ -25,37 +31,35 @@ class Schedule(models.Model):
         blank=True,
         related_name='trainer_schedules'
     )
-    start_time = models.TimeField()  # Only time, not date
+    schedule_date = models.DateField(default=now) # ✅ Added field to separate date
+    start_time = models.TimeField()
     end_time = models.TimeField()
     capacity = models.PositiveIntegerField(default=30)
     status = models.CharField(max_length=10, choices=SESSION_STATUS, default='upcoming')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} • {self.start_time.strftime('%d %b, %I:%M %p')}"
+        return f"{self.name} • {self.schedule_date.strftime('%d %b')} • {self.start_time.strftime('%I:%M %p')}"
 
     def spots_left(self):
         return max(self.capacity - self.enrollments.count(), 0)
 
     def update_status(self):
-        from django.utils import timezone
-        now = timezone.now()
-        if now < self.start_time:
+        now = timezone.localtime()
+        schedule_datetime = self.schedule_date
+
+        start_dt = timezone.make_aware(datetime.datetime.combine(schedule_datetime, self.start_time))
+        end_dt = timezone.make_aware(datetime.datetime.combine(schedule_datetime, self.end_time))
+
+        if now < start_dt:
             self.status = 'upcoming'
-        elif self.start_time <= now <= self.end_time:
+        elif start_dt <= now <= end_dt:
             self.status = 'live'
         else:
             self.status = 'ended'
+
         self.save(update_fields=['status'])
 
-
-
-from django.db import models
-from django.utils import timezone
-from datetime import timedelta
-
-def default_expiry():
-    return timezone.now() + timedelta(hours=4)  # Tokens expire in 1 hour
 
 class QRToken(models.Model):
     schedule = models.ForeignKey(
@@ -65,7 +69,7 @@ class QRToken(models.Model):
     )
     token = models.CharField(max_length=64, unique=True, default=generate_token)
     generated_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(default=default_expiry)  # ✅ Fix: default expiry
+    expires_at = models.DateTimeField(default=default_expiry)
     used = models.BooleanField(default=False)
 
     def is_valid(self):
@@ -79,7 +83,6 @@ class QRToken(models.Model):
 
     def __str__(self):
         return f"QR {self.token[:8]}… for {self.schedule.name}"
-
 
 
 class Attendance(models.Model):
@@ -100,7 +103,7 @@ class Attendance(models.Model):
         null=True,
         related_name='attendances'
     )
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=date.today)
     check_in_time = models.DateTimeField(auto_now_add=True)
     check_out_time = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='checked_in')
