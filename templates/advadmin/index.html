@@ -1091,7 +1091,10 @@
                             </div>
                           </div>
                         </div>
-                        <div id="growthChart"></div>
+
+                        <div id="growthChart" style="min-height: 260px;"></div>
+                        <div class="text-center" id="growthChartLabel" style="font-weight: 500; font-size: 16px;"></div>
+
                         <div class="text-center fw-semibold pt-3 mb-2">
                           {{ attendance_rate }}% Monthly Attendance Trend
                         </div>
@@ -1118,11 +1121,15 @@
                         </div>
 
                         <script>
-                            window.yearlyEarnings = {{ yearly_earnings_json|safe }};
-                            // JS: update .innerText for .thisYearEarning and .lastYearEarning on year switch
+                          // All required dashboard data injected by Django
+                          window.yearlyEarnings = {{ yearly_earnings_json|safe }};
+                          window.growthYearData = {{ growth_per_year_json|safe }};
+                          window.growthYears = {{ years|safe }};
+                          window.currentYear = {{ current_year }};
                         </script>
-
                       </div>
+
+
                     </div>
                   </div>
                 </div>
@@ -1486,9 +1493,17 @@
 
     </script>
     <script>
+        // For income chart etc.
         window.monthlyRevenue = {{ monthly_revenue_json|safe }};
         window.currentYear = {{ current_year }};
+        // For growth progress chart:
     </script>
+    <script>
+      window.growthYearData = {{ growth_per_year_json|safe }};
+      // For reference: {2024: {"percent":0,"count":0}, 2025: {"percent":100,"count":3} }
+      window.growthYears = {{ years|safe }};
+  </script>
+
     <script src="{% static 'advadmin/assets/vendor/libs/jquery/jquery.js' %}"></script>
     <script src="{% static 'advadmin/assets/vendor/libs/popper/popper.js' %}"></script>
     <script src="{% static 'advadmin/assets/vendor/js/bootstrap.js' %}"></script>

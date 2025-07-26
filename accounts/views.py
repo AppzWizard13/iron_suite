@@ -802,9 +802,40 @@ class DashboardView(TemplateView):
             'team', 'gallery', 'blog', '404'
         ]
 
+        # Yearly growth: Compare active members at each year end to previous year
+        growth_per_year = {}
+        today = timezone.now().date()
+        current_month_index = today.month - 1
+
+        members_by_year = []
+        for yr in years:
+            months_list = membership_trends.get(yr, [0] * 12)
+            if yr == today.year:
+                value = months_list[current_month_index] if current_month_index < len(months_list) else 0
+            else:
+                value = months_list[11] if len(months_list) > 11 else 0
+            members_by_year.append(value)
+
+        for i, year in enumerate(years):
+            curr = members_by_year[i]
+            if i == 0:
+                percent = 100.0 if curr > 0 else 0
+                growth_per_year[year] = {"percent": percent, "count": curr}
+            else:
+                prev = members_by_year[i - 1]
+                if prev:
+                    percent = round(((curr - prev) / prev) * 100, 2)
+                else:
+                    percent = 100.0 if curr > 0 else 0
+                growth_per_year[year] = {"percent": percent, "count": curr}
+
+
+        print("growth_per_year", growth_per_year)
+
         # Final Context Update
         context.update(config_dict)
         context.update({
+            'growth_per_year_json': json.dumps(growth_per_year),
             'running_classes': running_classes,
             'monthly_revenue_json': json.dumps(monthly_revenue_by_year),
             'membership_trends_json': json.dumps(membership_trends),
