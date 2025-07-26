@@ -1,0 +1,44 @@
+{% extends "advadmin/index.html" %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-semi-bold py-3 mb-4">
+      <span class="text-muted fw-light">Settings /</span> Notification Configuration
+    </h4>
+
+    <div class="card">
+      <h5 class="card-header">Edit Notification Configuration</h5>
+      <div class="card-body col-lg-7">
+        <form method="post" novalidate>
+          {% csrf_token %}
+            <div class="mb-3">
+            <label for="id_days_before_expiry" class="form-label">Days Before Expiry</label>
+            {{ form.days_before_expiry }}
+            {% if form.days_before_expiry.errors %}
+                <div class="text-danger">{{ form.days_before_expiry.errors }}</div>
+            {% endif %}
+            </div>
+            <div class="mb-3">
+            <label for="id_message_template" class="form-label">Message Template</label>
+            {{ form.message_template }}
+            <div class="form-text">
+                Use <code>{name}</code> for user name and <code>{expiry}</code> for expiry date.
+            </div>
+            {% if form.message_template.errors %}
+                <div class="text-danger">{{ form.message_template.errors }}</div>
+            {% endif %}
+            </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="bx bx-save me-1"></i> Save
+          </button>
+          <a href="{% url 'notification_log_list' %}" class="btn btn-outline-secondary ms-2">
+            Cancel
+          </a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

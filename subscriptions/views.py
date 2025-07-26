@@ -34,3 +34,5 @@ class UpcomingRenewalMemberListView(ListView):
         context = super().get_context_data(**kwargs)
         context['page_name'] = "renewals"
         return context
+    
+

@@ -397,7 +397,7 @@ class UserDeleteView(LoginRequiredMixin, DeleteView):
 
 # Home Page View
 class HomePageView(TemplateView):
-    template_name = "gym_ui/index.html"
+    template_name = "gym_ui/iron_board/index.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         total_categories = Category.objects.all().prefetch_related('products')

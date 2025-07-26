@@ -355,7 +355,7 @@
             <span class="menu-header-text">Communication</span>
           </li>
           <li class="menu-item {% if page_name == 'notifications' %}active{% endif %}">
-            <a href="#" class="menu-link">
+            <a href="{% url 'notification_log_list' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-bell"></i>
               <div data-i18n="Notifications">Notifications</div>
             </a>

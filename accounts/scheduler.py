@@ -7,15 +7,48 @@ from django.contrib.auth import get_user_model
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
+
 import pytz
 import requests
 from django.utils import timezone
 from attendance.models import Schedule, QRToken
-
+from notifications.models import NotificationConfig, NotificationLog
+from notifications.utils import send_whatsapp_message
 # Configure global logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 User = get_user_model()
+
+
+
+def send_whatsapp_expiry_alerts_job():
+    config = NotificationConfig.objects.first()
+    if not config:
+        return  # or log error
+
+    expiry_date = timezone.localdate() + timezone.timedelta(days=config.days_before_expiry)
+    members = User.objects.filter(
+        staff_role='Member',
+        is_active=True,
+        on_subscription=True,
+        package_expiry_date=expiry_date
+    )
+
+    for member in members:
+        msg_body = config.message_template.format(
+            name=member.first_name,
+            expiry=member.package_expiry_date
+        )
+        success, error = send_whatsapp_message(member.phone_number, msg_body)
+        NotificationLog.objects.create(
+            user=member,
+            phone_number=member.phone_number,
+            success=success,
+            error_message=error,
+            message_body=msg_body
+        )
+
 
 def self_ping():
     """
@@ -165,6 +198,17 @@ def start():
     scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(minutes=5))
     scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
     scheduler.add_job(expire_user_subscriptions, IntervalTrigger(hours=1))
+    # WhatsApp reminders at 7:00 AM and 3:00 PM IST (UTC+5:30)
+    scheduler.add_job(
+        send_whatsapp_expiry_alerts_job,
+        CronTrigger(hour=7, minute=0, timezone='Asia/Kolkata'),
+        name='Morning WhatsApp Reminders'
+    )
+    scheduler.add_job(
+        send_whatsapp_expiry_alerts_job,
+        CronTrigger(hour=15, minute=0, timezone='Asia/Kolkata'),
+        name='Evening WhatsApp Reminders'
+    )
     scheduler.start()
     logger.info("Scheduler started.")
     atexit.register(lambda: scheduler.shutdown())

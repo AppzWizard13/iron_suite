@@ -132,7 +132,35 @@ class ScheduleCreateView(CreateView):
     template_name = 'attendance/schedule_form.html'
     success_url = reverse_lazy('schedule_list')
 
+from django.views.generic.edit import UpdateView
+from django.urls import reverse_lazy
+from django.contrib import messages
+from attendance.models import Schedule
 
+class ScheduleUpdateView(UpdateView):
+    model = Schedule
+    fields = ['name', 'start_time', 'end_time', 'trainer', 'capacity', 'status']
+    template_name = 'attendance/schedule_form.html'
+    success_url = reverse_lazy('schedule_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, "Schedule updated successfully.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "There was an error updating the schedule.")
+        return super().form_invalid(form)
+
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect, get_object_or_404
+@require_POST
+def schedule_delete(request, pk):
+    schedule = get_object_or_404(Schedule, pk=pk)
+    schedule.delete()
+    messages.success(request, f"Schedule '{schedule.name}' deleted successfully.")
+    return redirect('schedule_list')
+
+    
 class EnrollmentListView(ListView):
     """
     ListView for class enrollments.

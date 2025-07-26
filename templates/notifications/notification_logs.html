@@ -1,0 +1,161 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-semi-bold py-3 mb-4"><span class="text-muted fw-light">Manage /</span> Notification Logs</h4>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <h5 class="card-header">Notification Log</h5>
+      <div class="card-body">
+        <!-- Search Form -->
+        <form method="get" action="" class="mb-3 d-flex align-items-center flex-wrap gap-2" style="max-width: 100%;">
+          <div class="input-group" style="width: 220px;">
+            <input type="text" name="search" class="form-control" placeholder="Search username/phone" value="{{ request.GET.search }}">
+          </div>
+          <div class="input-group" style="width: 400px;">
+            <input type="date" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
+            <span class="input-group-text">to</span>
+            <input type="date" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
+          </div>
+          <button type="submit" class="btn btn-primary d-flex align-items-center">
+            <i class="bx bx-search me-1"></i> Filter
+          </button>
+          {% if request.GET.search or request.GET.from_date or request.GET.to_date %}
+          <a href="?" class="btn btn-outline-secondary d-flex align-items-center">
+            <i class="bx bx-x me-1"></i> Clear
+          </a>
+          {% endif %}
+          <a href="{% url 'notification_config' %}" class="btn btn-info d-flex align-items-center ms-auto" style="white-space:nowrap;">
+            <i class="bx bx-cog me-1"></i> Notification Configuration
+          </a>
+        </form>
+
+
+
+
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Date / Time</th>
+                <th>User</th>
+                <th>Phone Number</th>
+                <th style="min-width:220px;">Message</th>
+                <th>Status</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in logs %}
+              <tr>
+                <td>{{ log.id }}</td>
+                <td>{{ log.sent_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                  {% if log.user %}
+                    {{ log.user.get_full_name|default:log.user.username }}
+                  {% else %}
+                    <span class="text-muted">Deleted user</span>
+                  {% endif %}
+                </td>
+                <td>{{ log.phone_number }}</td>
+                <td>
+                  <pre style="white-space: pre-line; background: #f8f9fa; padding: 7px; border-radius: 4px;">{{ log.message_body }}</pre>
+                </td>
+                <td>
+                  {% if log.success %}
+                    <span class="badge bg-success">Sent</span>
+                  {% else %}
+                    <span class="badge bg-danger">Failed</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if not log.success %}
+                    <span class="text-danger">{{ log.error_message|linebreaksbr }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="text-center text-muted py-4">No notification logs found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination controls (if paginated) -->
+        {% if is_paginated %}
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <div>
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </div>
+          <nav>
+            <ul class="pagination mb-0">
+              {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">First</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+              </li>
+              {% endif %}
+              {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                  <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                  <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ i }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Last</a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Auto-dismiss toast messages
+    var toastElements = document.querySelectorAll('.toast');
+    toastElements.forEach(function(toastEl) {
+      setTimeout(function() {
+        var toast = bootstrap.Toast.getInstance(toastEl);
+        if (toast) {
+          toast.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

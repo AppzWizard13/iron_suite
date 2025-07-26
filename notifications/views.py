@@ -1,66 +1,118 @@
-# views.py
 from django.views import View
 from django.shortcuts import render, redirect
 from django.utils import timezone
-from datetime import timedelta
 from django.contrib import messages
-from twilio.rest import Client
-from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.views.generic import ListView, DetailView, TemplateView
+from .models import NotificationConfig, NotificationLog
+from django.utils.dateparse import parse_date
+from django.db.models import Q
+from .utils import send_whatsapp_message
 User = get_user_model()
 
+from django.views.generic import UpdateView, CreateView
+from django.urls import reverse_lazy
+from .models import NotificationConfig
+
+from django.views.generic import UpdateView
+from django.urls import reverse_lazy
+from .models import NotificationConfig
+from .forms import NotificationConfigForm
+
+class NotificationConfigEditView(UpdateView):
+    model = NotificationConfig
+    form_class = NotificationConfigForm   # <--- use custom form with widgets!
+    template_name = 'notifications/notification_config_form.html'
+    success_url = reverse_lazy('notification_log_list')
+
+    def get_object(self):
+        # Only one config row; create if needed
+        obj, created = NotificationConfig.objects.get_or_create(pk=1)
+        return obj
+
+class NotificationLogListView(ListView):
+    model = NotificationLog
+    template_name = 'notifications/notification_logs.html'
+    context_object_name = 'logs'
+    paginate_by = 25
+
+    def get_queryset(self):
+        queryset = NotificationLog.objects.select_related('user').order_by('-sent_at')
+        search_query = self.request.GET.get('search', '').strip()
+        from_date = self.request.GET.get('from_date', '').strip()
+        to_date = self.request.GET.get('to_date', '').strip()
+
+        # Apply search filter
+        if search_query:
+            queryset = queryset.filter(
+                Q(user__username__icontains=search_query) |
+                Q(user__first_name__icontains=search_query) |
+                Q(user__last_name__icontains=search_query) |
+                Q(phone_number__icontains=search_query)
+            )
+        # Apply from_date filter
+        if from_date:
+            queryset = queryset.filter(sent_at__date__gte=parse_date(from_date))
+        # Apply to_date filter
+        if to_date:
+            queryset = queryset.filter(sent_at__date__lte=parse_date(to_date))
+
+        return queryset
+
+
+    
 
 class SendWhatsAppExpiryAlertsView(View):
-    template_name = 'advadmin/send_expiry_alerts.html'  
+    template_name = 'advadmin/send_expiry_alerts.html'
 
     def get(self, request):
-        # Fetch members whose expiry is in exactly 3 days
-        expiry_date = timezone.localdate() + timedelta(days=3)
+        # Get config (assumes only one row)
+        config = NotificationConfig.objects.first()
+        if not config:
+            messages.error(request, "NotificationConfig is not set. Please create it in admin.")
+            return render(request, self.template_name, {'members': []})
+
+        expiry_date = timezone.localdate() + timezone.timedelta(days=config.days_before_expiry)
         members = User.objects.filter(
             staff_role='Member',
             is_active=True,
             on_subscription=True,
             package_expiry_date=expiry_date
         )
-        return render(request, self.template_name, {'members': members})
+        return render(request, self.template_name, {'members': members, 'config': config})
 
     def post(self, request):
-        expiry_date = timezone.localdate() + timedelta(days=3)
+        config = NotificationConfig.objects.first()
+        if not config:
+            messages.error(request, "NotificationConfig is not set. Please create it in admin.")
+            return redirect('send_expiry_alerts')
+
+        expiry_date = timezone.localdate() + timezone.timedelta(days=config.days_before_expiry)
         members = User.objects.filter(
             staff_role='Member',
             is_active=True,
             on_subscription=True,
             package_expiry_date=expiry_date
         )
-
-        # Twilio credentials
-        account_sid = settings.TWILIO_ACCOUNT_SID
-        auth_token = settings.TWILIO_AUTH_TOKEN
-        from_whatsapp_number = settings.TWILIO_WHATSAPP_FROM
-
-        client = Client(account_sid, auth_token)
         sent, failed = 0, 0
 
         for member in members:
-            to_number = member.phone_number
-            if not to_number.startswith('+'):  
-                to_number = '+91' + to_number  
-
-            msg_body = (
-                f"Dear {member.first_name}, your subscription expires on {member.package_expiry_date}. "
-                "Please renew soon to continue the service."
+            msg_body = config.message_template.format(
+                name=member.first_name,
+                expiry=member.package_expiry_date
             )
-            try:
-                client.messages.create(
-                    from_=from_whatsapp_number,
-                    body=msg_body,
-                    to=f'whatsapp:{to_number}'
-                )
+            success, error = send_whatsapp_message(member.phone_number, msg_body)
+            NotificationLog.objects.create(
+                user=member,
+                phone_number=member.phone_number,
+                success=success,
+                error_message=error,
+                message_body=msg_body
+            )
+            if success:
                 sent += 1
-            except Exception as e:
-                # Optionally log error e
+            else:
                 failed += 1
 
         messages.success(request, f"WhatsApp alerts sent to {sent} members. {failed} failures.")
-        return redirect('send_expiry_alerts')  # Change to your URL name
-
+        return redirect('send_expiry_alerts')

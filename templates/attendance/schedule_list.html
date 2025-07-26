@@ -1,43 +1,149 @@
 {% extends 'advadmin/index.html' %}
+{% load static %}
 {% block content %}
-<div class="container-xxl flex-grow-1 container-p-y">
-  <h4 class="fw-semi-bold py-3 mb-4">
-    <span class="text-muted fw-light">Manage /</span> Class Schedules
-  </h4>
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Class Schedules</h5>
-      <a href="{% url 'schedule_create' %}" class="btn btn-primary">+ Create New</a>
-    </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover">
-         <thead>
-          <tr>
-            <th>Name</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-            <th>Trainer</th>
-            <th>Capacity</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for schedule in schedules %}
-          <tr>
-            <td>{{ schedule.name }}</td>
-            <td>{{ schedule.start_time }}</td>
-            <td>{{ schedule.end_time }}</td>
-            <td>{{ schedule.trainer.get_full_name }}</td>
-            <td>{{ schedule.capacity }}</td>
-            <td>{{ schedule.get_status_display }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-        </table>
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-semi-bold py-3 mb-4"><span class="text-muted fw-light">Manage /</span> Class Schedules</h4>
+
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+      {% for message in messages %}
+      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">{{ message }}</div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
       </div>
-      {% include 'partials/pagination.html' with page_obj=page_obj %}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <h5 class="card-header">Class Schedules List</h5>
+      <div class="card-body">
+
+        <!-- Top bar -->
+        <div class="d-flex justify-content-between mb-3">
+          <a href="{% url 'schedule_create' %}" class="btn btn-primary">
+            <i class="bx bx-plus me-1"></i> Create New
+          </a>
+
+          <form method="GET" action="{% url 'schedule_list' %}" class="d-flex" style="max-width: 500px;">
+            <div class="input-group">
+              <input type="text" name="search" class="form-control" placeholder="Search schedules..." value="{{ request.GET.search }}">
+              <button type="submit" class="btn btn-primary"><i class="bx bx-search"></i></button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Trainer</th>
+                <th>Capacity</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for schedule in schedules %}
+              <tr>
+                <td>{{ schedule.id }}</td>
+                <td>{{ schedule.name }}</td>
+                <td>{{ schedule.start_time|date:"Y-m-d H:i" }}</td>
+                <td>{{ schedule.end_time|date:"Y-m-d H:i" }}</td>
+                <td>{{ schedule.trainer.get_full_name }}</td>
+                <td>{{ schedule.capacity }}</td>
+                <td>
+                  {% if schedule.status == 'live' %}
+                    <span class="badge bg-success">Live</span>
+                  {% elif schedule.status == 'upcoming' %}
+                    <span class="badge bg-warning text-dark">Upcoming</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Completed</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <a href="{% url 'schedule_edit' schedule.id %}" class="btn btn-sm btn-icon btn-secondary">
+                    <i class="bx bx-edit"></i>
+                  </a>
+                  <button class="btn btn-sm btn-icon btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                          data-schedule-id="{{ schedule.id }}" data-schedule-name="{{ schedule.name }}">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center py-4">
+                  <div class="text-muted">No schedules found</div>
+                  <a href="{% url 'schedule_create' %}" class="btn btn-primary mt-2">
+                    <i class="bx bx-plus me-1"></i> Create New Schedule
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% include 'partials/pagination.html' with page_obj=page_obj %}
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="deleteForm" method="post">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete <strong id="scheduleName"></strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var scheduleId = button.getAttribute('data-schedule-id');
+      var scheduleName = button.getAttribute('data-schedule-name');
+      var scheduleNameField = document.getElementById('scheduleName');
+      var deleteForm = document.getElementById('deleteForm');
+      var actionUrl = "{% url 'schedule_delete' 0 %}".replace("0", scheduleId);
+
+      scheduleNameField.textContent = scheduleName;
+      deleteForm.setAttribute("action", actionUrl);
+    });
+
+    // Auto-dismiss toast messages
+    document.querySelectorAll('.toast').forEach(function (toastEl) {
+      setTimeout(function () {
+        bootstrap.Toast.getOrCreateInstance(toastEl).hide();
+      }, 5000);
+    });
+  });
+</script>
+
 {% endblock %}

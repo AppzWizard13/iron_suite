@@ -35,6 +35,7 @@ urlpatterns = [
     path('', include('payments.urls')),
     path('', include('attendance.urls')),
     path('', include('subscriptions.urls')),
+    path('', include('notifications.urls')),
     # SSO 
     path('accounts/', include('allauth.urls')),
 
