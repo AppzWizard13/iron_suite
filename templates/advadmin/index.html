@@ -383,6 +383,14 @@
               <div data-i18n="Settings">Manage Features</div>
             </a>
           </li>
+          <li class="menu-item {% if page_name == 'review_list' %}active{% endif %}">
+            <a href="{% url 'review_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-cog"></i>
+              <div data-i18n="Settings">Manage Review</div>
+            </a>
+          </li>
+
+          
           <li class="menu-item {% if page_name == 'settings' %}active{% endif %}">
             <a href="#" class="menu-link">
               <i class="menu-icon tf-icons bx bx-cog"></i>
