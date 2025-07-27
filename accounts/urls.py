@@ -17,6 +17,8 @@ from .views import (
     ClassTimetableView, ContactView, GalleryView,
     ServicesView, TeamView, Error404View
 )
+from .views import GymListView, GymCreateView, GymUpdateView, GymDeleteView
+
 
 urlpatterns = [
     # Landing page
@@ -28,6 +30,11 @@ urlpatterns = [
     path('my-profile/update/', ProfileUpdateView.as_view(), name='profile_update'),
     path('password-reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset/verify/<str:user_username>/', PasswordResetVerifyView.as_view(), name='password_reset_verify'),
+
+    path('gyms/', GymListView.as_view(), name='gym_list'),
+    path('gyms/add/', GymCreateView.as_view(), name='gym_add'),
+    path('gyms/edit/<int:pk>/', GymUpdateView.as_view(), name='gym_edit'),
+    path('gyms/delete/<int:pk>/', GymDeleteView.as_view(), name='gym_delete'),
 
     # Dashboard search
     path('dashboard/search/', DashboardSearchView.as_view(), name='dashboard_search_list'),

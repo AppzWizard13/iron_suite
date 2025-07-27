@@ -87,16 +87,12 @@ WSGI_APPLICATION = 'iron_board.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': (
-            BASE_DIR / os.getenv('DB_NAME', 'db_dev.sqlite3') 
-            if 'sqlite' in os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
-            else os.getenv('DB_NAME', 'db_dev.sqlite3')
-        ),
-        'USER': os.getenv('DB_USER', ''),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', ''),
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', 'codespikedb'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', 'db'),  # Container name of the database service
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 

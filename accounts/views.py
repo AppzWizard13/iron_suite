@@ -70,6 +70,45 @@ from .forms import (
 logger = logging.getLogger(__name__)
 
 
+
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from .models import Gym
+from .forms import GymForm  
+
+class GymListView(ListView):
+    model = Gym
+    template_name = 'advadmin/gym_list.html'
+    context_object_name = 'gyms'
+
+
+class GymCreateView(CreateView):
+    model = Gym
+    form_class = GymForm
+    template_name = 'advadmin/gym_form.html'
+    success_url = reverse_lazy('gym_list')
+
+
+class GymUpdateView(UpdateView):
+    model = Gym
+    form_class = GymForm
+    template_name = 'advadmin/gym_form.html'
+    success_url = reverse_lazy('gym_list')
+
+
+class GymDeleteView(LoginRequiredMixin, DeleteView):
+    model = Gym
+    success_url = reverse_lazy('gym_list')
+    template_name = None  # No default template used
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Gym deleted successfully!")
+        return super().delete(request, *args, **kwargs)
+
+
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = CustomUser
     form_class = CustomUserForm
@@ -1572,6 +1611,10 @@ class MemberRegisterView(CreateView):
         try:
             user = form.save(commit=False)
             user.staff_role = 'Member'
+
+            # ✅ Set gym from current logged-in user (assuming you're logged in as a manager/admin tied to a gym)
+            user.gym = self.request.user.gym
+
             if form.cleaned_data.get('password1'):
                 user.set_password(form.cleaned_data['password1'])
             user.save()
@@ -1591,6 +1634,7 @@ class MemberRegisterView(CreateView):
         except Exception as e:
             messages.error(self.request, f"Error: {str(e)}")
             return self.form_invalid(form)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

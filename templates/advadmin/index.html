@@ -371,6 +371,12 @@
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Admin</span>
           </li>
+          <li class="menu-item {% if page_name == 'manage_gym' %}active{% endif %}">
+            <a href="{% url 'gym_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
+              <div data-i18n="Roles & Permissions">Manage GYM</div>
+            </a>
+          </li>
           <li class="menu-item {% if page_name == 'roles_permissions' %}active{% endif %}">
             <a href="#" class="menu-link">
               <i class="menu-icon tf-icons bx bx-shield-quarter"></i>

@@ -14,6 +14,20 @@ from django.db.models import Max
 from .models import CustomUser, SocialMedia
 
 from django.core.exceptions import ValidationError
+from django import forms
+from .models import Gym
+class GymForm(forms.ModelForm):
+    class Meta:
+        model = Gym
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'location': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'latitude': forms.NumberInput(attrs={'class': 'form-control'}),
+            'longitude': forms.NumberInput(attrs={'class': 'form-control'}),
+            'proprietor_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 class CustomUserForm(UserCreationForm):
     password1 = forms.CharField(
@@ -127,7 +141,6 @@ class ReviewForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ReviewForm, self).__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
-            print("self.instance.review_dateself.instance.review_date", self.instance.review_date)
             self.fields['review_date'].initial = self.instance.review_date
 
 

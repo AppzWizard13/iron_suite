@@ -1,0 +1,51 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Manage / Gym /</span> {% if object %}Edit{% else %}Create{% endif %}
+  </h4>
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          {{ form.name.label_tag }} {{ form.name }}
+          {% for error in form.name.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.location.label_tag }} {{ form.location }}
+          {% for error in form.location.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.latitude.label_tag }} {{ form.latitude }}
+          {% for error in form.latitude.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.longitude.label_tag }} {{ form.longitude }}
+          {% for error in form.longitude.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.proprietor_name.label_tag }} {{ form.proprietor_name }}
+          {% for error in form.proprietor_name.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.is_active.label_tag }} {{ form.is_active }}
+          {% for error in form.is_active.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="d-flex">
+          <button type="submit" class="btn btn-primary">{% if object %}Update{% else %}Create{% endif %}</button>
+          <a href="{% url 'gym_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

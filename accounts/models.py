@@ -4,14 +4,32 @@ from django.utils.timezone import now
 
 from products.models import Package  # Fix the NameError issue
 
+
+# users/models.py
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
+from django.db import models
+from django.core.validators import FileExtensionValidator
+from django_multitenant.models import TenantModelMixin       # Import the Gym (tenant) model
+from products.models import Package
+from django.db import models
+
+class Gym(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    location = models.TextField()
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    proprietor_name = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+    
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
             raise ValueError("The Phone Number field must be set")
-
-        extra_fields.pop("username", None)  # Remove username if provided
+        extra_fields.pop("username", None)
         extra_fields.setdefault("is_active", True)
-
         user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -20,24 +38,20 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, phone_number, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-
         return self.create_user(phone_number, password, **extra_fields)
 
-from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
-from django.core.validators import FileExtensionValidator
-
-class CustomUser(AbstractUser):
+class CustomUser(AbstractUser, TenantModelMixin):
     username = models.CharField(max_length=20, unique=True, blank=True, null=True)  
     phone_number = models.CharField(max_length=15, unique=True)
     member_id = models.BigAutoField(primary_key=True)  
     join_date = models.DateField(auto_now_add=True)
     package_expiry_date = models.DateField(null=True)
+    tenant_id = "gym_id"
+
 
     STAFF_ROLES = [
         ('Admin', 'Admin'),
@@ -77,6 +91,9 @@ class CustomUser(AbstractUser):
     groups = models.ManyToManyField(Group, related_name="customuser_set", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_permissions_set", blank=True)
 
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='users')    # <--- Multi-tenancy here!
+    multitenant_shared_fields = ["gym"]                                            # <--- Required by django-multitenant
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'phone_number'
@@ -89,7 +106,6 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.phone_number})"
-
 
 
 
