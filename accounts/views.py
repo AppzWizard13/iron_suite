@@ -138,6 +138,7 @@ class UserCreateView(LoginRequiredMixin, CreateView):
             max_member_id = CustomUser.objects.aggregate(Max('member_id'))['member_id__max'] or 0
             user.member_id = max_member_id + 1
             user.username = self.generate_username(user.member_id)
+            user.gym = self.request.user.gym
 
             user.save()
             messages.success(self.request, "User added successfully.")

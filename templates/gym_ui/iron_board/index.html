@@ -41,49 +41,40 @@
             </div>
         </div>
         <!-- Spinner End -->
-
         <!-- Navbar & Hero Start -->
         <div class="container-fluid position-relative p-0" id="home">
-            <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-5 py-lg-0">
-                <a href="" class="navbar-brand p-0">
+            <nav class="navbar navbar-expand-lg navbar-light px-3 px-lg-5 py-3 py-lg-0">
+                <a href="#" class="navbar-brand p-0">
                     <h1 class="m-0">Iron Board</h1>
-                    <!-- <img src="{% static 'iron_board/img/logo.png' %}" alt="Logo"> -->
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                     <span class="fa fa-bars"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <div class="navbar-nav mx-auto py-0">
+                    <div class="navbar-nav mx-auto py-0 text-center">
                         <a href="{% url 'home' %}" class="nav-item nav-link active">Home</a>
                         <a href="{% url 'login' %}" class="nav-item nav-link">Admin</a>
                         <a href="#about" class="nav-item nav-link">About</a>
                         <a href="#feature" class="nav-item nav-link">Feature</a>
                         <a href="#pricing" class="nav-item nav-link">Pricing</a>
-                        {% comment %} <a href="#review" class="nav-item nav-link">Review</a> {% endcomment %}
                         <a href="#contact" class="nav-item nav-link">Contact</a>
                     </div>
-                    <a href="" class="btn btn-primary-gradient rounded-pill py-2 px-4 ms-3 d-none d-lg-block">Start Free Trial</a>
+                    <!-- Button hidden on small screens, shown on lg and above -->
+                    <a href="#" class="btn btn-primary-gradient rounded-pill py-2 px-4 ms-0 ms-lg-3 mt-3 mt-lg-0 d-block d-lg-inline-block">Start Free Trial</a>
                 </div>
             </nav>
 
             <div class="container-fluid bg-primary hero-header">
-                <div class="container-xxl py-5">
-                    <div class="row g-5">
-                        <div class="col-lg-8 text-center text-lg-start py-5 mx-5">
-                            <h1 class="text-white mb-4 animated slideInDown">The Smart Solution to Own and Elevate Your Fitness Space</h1>
-                            <p class="text-white pb-1 animated slideInDown">Transform the way you manage your gym—unlock efficiency, gain total control, and monitor every detail in real time with our revolutionary app.</p>
-                            <a href="" class="btn btn-primary-gradient py-sm-3 px-4 px-sm-5 rounded-pill me-3 animated slideInLeft">Read More</a>
-                            <a href="" class="btn btn-secondary-gradient py-sm-3 px-4 px-sm-5 rounded-pill animated slideInRight">Contact Us</a>
-                        </div>
-                        {% comment %} <div class="col-lg-4 d-flex justify-content-center justify-content-lg-end wow fadeInUp" data-wow-delay="0.3s">
-                            <div class="owl-carousel screenshot-carousel">
-                                <img class="img-fluid" src="{% static 'iron_board/img/screenshot-1.png' %}" alt="">
-                                <img class="img-fluid" src="{% static 'iron_board/img/screenshot-2.png' %}" alt="">
-                                <img class="img-fluid" src="{% static 'iron_board/img/screenshot-3.png' %}" alt="">
-                                <img class="img-fluid" src="{% static 'iron_board/img/screenshot-4.png' %}" alt="">
-                                <img class="img-fluid" src="{% static 'iron_board/img/screenshot-5.png' %}" alt="">
+                <div class="container py-5">
+                    <div class="row g-5 align-items-center">
+                        <div class="col-lg-8 text-center text-lg-start">
+                            <h1 class="text-white mb-4 animated slideInDown fs-2 fs-md-3 fs-lg-1">The Smart Solution to Own and Elevate Your Fitness Space</h1>
+                            <p class="text-white mb-4 animated slideInDown">Transform the way you manage your gym—unlock efficiency, gain total control, and monitor every detail in real time with our revolutionary app.</p>
+                            <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start">
+                                <a href="#" class="btn btn-primary-gradient py-2 px-4 rounded-pill mb-3 mb-sm-0 me-sm-3 animated slideInLeft">Read More</a>
+                                <a href="#" class="btn btn-secondary-gradient py-2 px-4 rounded-pill animated slideInRight">Contact Us</a>
                             </div>
-                        </div> {% endcomment %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,15 +85,15 @@
 
         <!-- About Start -->
         <div class="container-xxl py-5" id="about">
-            <div class="container-fluid py-5 px-lg-5">
+            <div class="container-fluid px-3 px-lg-5 py-5">
                 <div class="row g-5 align-items-center">
                     <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
                         <h5 class="text-primary-gradient fw-medium">About App</h5>
-                        <h1 class="mb-4">#1 The Ultimate Fitness Management App</h1>
-                        <p class="mb-4">Take full control of your fitness journey and facility with our powerful all-in-one app. Seamlessly track workouts, monitor progress, and manage every aspect of your gym experience. With intuitive tools and smart analytics, achieving your goals—whether personal or professional—has never been easier.</p>
+                        <h1 class="mb-4 fs-3 fs-md-2">#1 The Ultimate Fitness Management App</h1>
+                        <p class="mb-4">Take full control of your fitness journey and facility with our powerful all-in-one app. Seamlessly track workouts, monitor progress, and manage every aspect of your gym experience.</p>
                         <div class="row g-4 mb-4">
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.5s">
-                                <div class="d-flex">
+                                <div class="d-flex align-items-center">
                                     <i class="fa fa-cogs fa-2x text-primary-gradient flex-shrink-0 mt-1"></i>
                                     <div class="ms-3">
                                         <h2 class="mb-0" data-toggle="counter-up">1234</h2>
@@ -111,7 +102,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.7s">
-                                <div class="d-flex">
+                                <div class="d-flex align-items-center">
                                     <i class="fa fa-comments fa-2x text-secondary-gradient flex-shrink-0 mt-1"></i>
                                     <div class="ms-3">
                                         <h2 class="mb-0" data-toggle="counter-up">1234</h2>
@@ -120,15 +111,18 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="" class="btn btn-primary-gradient py-sm-3 px-4 px-sm-5 rounded-pill mt-3">Read More</a>
+                        <a href="#" class="btn btn-primary-gradient py-2 px-4 rounded-pill mt-3">Read More</a>
                     </div>
                     <div class="col-lg-6">
-                        <img class="img-fluid wow fadeInUp" data-wow-delay="0.5s" src="{% static 'iron_board/img/about.png' %}">
+                        <img class="img-fluid wow fadeInUp" data-wow-delay="0.5s" src="{% static 'iron_board/img/about.png' %}" alt="About Image">
                     </div>
                 </div>
             </div>
         </div>
         <!-- About End -->
+
+        
+
 
 
         <!-- Features Start -->

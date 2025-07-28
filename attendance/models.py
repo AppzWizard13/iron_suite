@@ -5,6 +5,8 @@ from django.utils.crypto import get_random_string
 from datetime import timedelta, date
 import datetime
 from django.utils.timezone import now
+from accounts.models import Gym
+from django_multitenant.mixins import TenantModelMixin
 
 
 # ✅ Avoid lambda: use a named function for token generation
@@ -16,7 +18,7 @@ def default_expiry():
     return timezone.now() + timedelta(hours=4)
 
 
-class Schedule(models.Model):
+class Schedule(models.Model,TenantModelMixin):
     SESSION_STATUS = [
         ('upcoming', 'Upcoming'),
         ('live', 'Live'),
@@ -24,6 +26,12 @@ class Schedule(models.Model):
     ]
 
     name = models.CharField(max_length=100)  # e.g., "Zumba", "HIIT"
+    gym = models.ForeignKey(  # 👈 This is the tenant reference
+            Gym,
+            on_delete=models.CASCADE,
+            related_name='schedules'
+        )
+    tenant_id = 'gym_id' 
     trainer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -61,7 +69,7 @@ class Schedule(models.Model):
         self.save(update_fields=['status'])
 
 
-class QRToken(models.Model):
+class QRToken(models.Model, TenantModelMixin):
     schedule = models.ForeignKey(
         Schedule,
         on_delete=models.CASCADE,

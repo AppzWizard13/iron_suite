@@ -132,6 +132,13 @@ class ScheduleCreateView(CreateView):
     template_name = 'attendance/schedule_form.html'
     success_url = reverse_lazy('schedule_list')
 
+    def form_valid(self, form):
+        # Automatically set the gym from the current user
+        form.instance.gym = self.request.user.gym
+        return super().form_valid(form)
+
+
+
 from django.views.generic.edit import UpdateView
 from django.urls import reverse_lazy
 from django.contrib import messages
