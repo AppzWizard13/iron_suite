@@ -459,23 +459,9 @@ def payment_failed(request):
         {'message': 'Payment Failed'}
     )
 
-
 class PaymentListView(ListView):
     """
     Displays a paginated list of payments with filtering by user and date, and sortable columns.
-
-    GET parameters:
-        user_id: (int) Filter payments by user/customer.
-        date_from: (YYYY-MM-DD) Filter payments with created_at >= date_from.
-        date_to: (YYYY-MM-DD) Filter payments with created_at <= date_to.
-        sort: (str) Field to sort by (id, customer__username, amount, etc.).
-        order: (str) 'asc' or 'desc' for sort order.
-
-    Context:
-        payments: filtered/sorted/paginated queryset.
-        users: all users for dropdown.
-        current_sort: current sort field.
-        current_order: current order (asc/desc).
     """
     model = Payment
     template_name = 'advadmin/payments/payment_list.html'
@@ -486,10 +472,13 @@ class PaymentListView(ListView):
         """
         Filter payments by user and date, and apply sorting from GET parameters.
         """
-        queryset = Payment.objects.select_related('customer')
+        user_gym = self.request.user.gym
+        queryset = Payment.objects.select_related('customer').filter(customer__gym=user_gym)
+
         user_id = self.request.GET.get('user_id')
         if user_id:
             queryset = queryset.filter(customer_id=user_id)
+
         date_from = self.request.GET.get('date_from')
         date_to = self.request.GET.get('date_to')
         if date_from and date_to:
@@ -501,7 +490,6 @@ class PaymentListView(ListView):
 
         sort_by = self.request.GET.get('sort', 'created_at')
         order = '' if self.request.GET.get('order', 'desc') == 'asc' else '-'
-        # Allow simple whitelisting of sortable fields
         allowed = {
             'id', 'customer__username', 'amount', 'payment_method',
             'status', 'transaction_id', 'created_at', 'updated_at'
@@ -514,25 +502,18 @@ class PaymentListView(ListView):
         Add users list and sort context to template.
         """
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.all()
+        context['users'] = User.objects.filter(gym=self.request.user.gym)
         context['page_name'] = "payment_list"
         context['current_sort'] = self.request.GET.get('sort', 'created_at')
         context['current_order'] = 'asc' if self.request.GET.get('order', 'desc') == 'asc' else 'desc'
         return context
 
-
 def choose_package(request, member_id):
     """
     Render available subscription packages for a user to choose from.
-
-    Args:
-        request (HttpRequest): Django HttpRequest object.
-        member_id (int): The member id of the user.
-
-    Returns:
-        HttpResponse: Renders the package selection template.
     """
-    packages = Package.objects.all()
+    user_gym = request.user.gym
+    packages = Package.objects.filter(gym=user_gym)
     return render(request, 'advadmin/choose_package.html', {
         'packages': packages,
         'member_id': member_id,

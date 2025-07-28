@@ -13,7 +13,8 @@ from django_multitenant.models import TenantModelMixin       # Import the Gym (t
 from products.models import Package
 from django.db import models
 
-class Gym(models.Model):
+
+class Gym(models.Model):  # 👈 GOOD
     name = models.CharField(max_length=255, unique=True)
     location = models.TextField()
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -23,6 +24,7 @@ class Gym(models.Model):
 
     def __str__(self):
         return self.name
+
     
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):

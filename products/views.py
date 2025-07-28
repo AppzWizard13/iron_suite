@@ -371,8 +371,10 @@ class ProductDetailView(DetailView):
 
         return context
     
+from django.conf import settings
+from django.views.generic import ListView
 from .models import Package
-from .forms import PackageForm  # You need to create this form
+from .forms import PackageForm
 
 class PackageListView(ListView):
     model = Package
@@ -380,10 +382,16 @@ class PackageListView(ListView):
     context_object_name = 'packages'
 
     def get_queryset(self):
+        user = self.request.user
         query = self.request.GET.get('search', '')
+
+        # Only fetch packages belonging to the user's gym
+        qs = Package.objects.filter(gym=user.gym)
+
         if query:
-            return Package.objects.filter(name__icontains=query)
-        return super().get_queryset()
+            qs = qs.filter(name__icontains=query)
+
+        return qs
 
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
@@ -400,6 +408,7 @@ class PackageListView(ListView):
         return context
 
 
+
 class PackageCreateView(CreateView):
     model = Package
     form_class = PackageForm
@@ -407,6 +416,13 @@ class PackageCreateView(CreateView):
     success_url = reverse_lazy('package_list')
 
     def form_valid(self, form):
+        user_gym = getattr(self.request.user, 'gym', None)
+
+        if not user_gym:
+            messages.error(self.request, "User is not associated with any gym.")
+            return self.form_invalid(form)  # fail early if gym is missing
+
+        form.instance.gym = user_gym  # ✅ assign gym before saving
         response = super().form_valid(form)
         messages.success(self.request, "Package added successfully!")
         return response
@@ -420,6 +436,7 @@ class PackageCreateView(CreateView):
         return ['admin_panel/add_package.html']
 
     def form_invalid(self, form):
+        print("❌ Package form errors:", form.errors)  # Debug output
         messages.error(self.request, "There was an error adding the package. Please check the form.")
         return super().form_invalid(form)
 

@@ -1,6 +1,10 @@
 from django.db import models
-from django.utils.timezone import now  # Fix the NameError issue
-
+from django.utils.timezone import now 
+from django_multitenant.mixins import TenantModelMixin
+import uuid
+from django.db import models
+from django.core.validators import MinValueValidator
+from django.utils import timezone
 class Category(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -18,11 +22,6 @@ class subcategory(models.Model):
     def __str__(self):
         return self.name
 
-
-import uuid
-from django.db import models
-from django.core.validators import MinValueValidator
-from django.utils import timezone
 
 class Product(models.Model):
     # EXISTING FIELDS (preserved exactly)
@@ -93,9 +92,10 @@ class Product(models.Model):
             self.sku = f"{self.category.name[:3]}-{uuid.uuid4().hex[:6]}".upper()
         super().save(*args, **kwargs)
 
-from django.db import models
 
-class Package(models.Model):
+
+
+class Package(TenantModelMixin, models.Model):
     PACKAGE_TYPE_CHOICES = [
         ('monthly', 'Monthly'),
         ('quarterly', 'Quarterly'),
@@ -109,14 +109,22 @@ class Package(models.Model):
         ('percent', 'Percentage'),
     ]
 
+    gym = models.ForeignKey(
+        'accounts.Gym',  # ✅ string reference avoids circular import
+        on_delete=models.CASCADE,
+        related_name='packages'
+    )
+    tenant_id = 'gym_id'  # 👈 Required for TenantModelMixin
+
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-    
+
     type = models.CharField(
         max_length=20,
         choices=PACKAGE_TYPE_CHOICES,
         default='monthly'
     )
+
     duration_days = models.PositiveIntegerField(
         help_text="Total duration of the package in days"
     )
@@ -145,7 +153,6 @@ class Package(models.Model):
     )
 
     is_active = models.BooleanField(default=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

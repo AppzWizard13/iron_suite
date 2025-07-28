@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.generic import ListView
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+
 User = get_user_model()
 
 class UpcomingRenewalMemberListView(ListView):
@@ -13,16 +14,14 @@ class UpcomingRenewalMemberListView(ListView):
     def get_queryset(self):
         today = timezone.localdate()
         first_day = today.replace(day=1)
+
         if today.month == 12:
-            last_day = today.replace(year=today.year+1, month=1, day=1) - timezone.timedelta(days=1)
+            last_day = today.replace(year=today.year + 1, month=1, day=1) - timezone.timedelta(days=1)
         else:
-            last_day = today.replace(month=today.month+1, day=1) - timezone.timedelta(days=1)
-
-
-        print("first_day", first_day)
-        print("last_day", last_day)
+            last_day = today.replace(month=today.month + 1, day=1) - timezone.timedelta(days=1)
 
         return User.objects.filter(
+            gym=self.request.user.gym,
             staff_role='Member',
             is_active=True,
             on_subscription=True,
@@ -34,5 +33,3 @@ class UpcomingRenewalMemberListView(ListView):
         context = super().get_context_data(**kwargs)
         context['page_name'] = "renewals"
         return context
-    
-

@@ -317,7 +317,6 @@ class CustomLoginView(LoginView):
 
 
 
-
 class UserListView(ListView):
     model = User
     template_name = 'admin_panel/user_list.html'
@@ -325,8 +324,11 @@ class UserListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # Base queryset filtered by staff_role = 'Customer'
-        queryset = super().get_queryset().filter(staff_role__iexact='Member')
+        user = self.request.user
+        queryset = super().get_queryset().filter(
+            staff_role__iexact='Member',
+            gym=user.gym  # Filter users by the same gym as the logged-in user
+        )
 
         search_query = self.request.GET.get('q')
         sort_param = self.request.GET.get('sort')
@@ -367,7 +369,6 @@ class UserListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_name'] = "user_list"
-        # Example: 'Admin Users', 'Manager Users', etc.
         return context
 
 
@@ -379,7 +380,12 @@ class UserStaffRoleListView(ListView):
 
     def get_queryset(self):
         role = self.kwargs.get('role')
-        queryset = User.objects.filter(staff_role__iexact=role)
+        user = self.request.user
+
+        queryset = User.objects.filter(
+            staff_role__iexact=role,
+            gym=user.gym  # Filter by the current user's gym
+        )
 
         search_query = self.request.GET.get('q')
         sort_param = self.request.GET.get('sort')
@@ -418,9 +424,7 @@ class UserStaffRoleListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role = self.kwargs.get('role', '').lower()
-    
         context['page_name'] = f"{role}_Users"
-        # Example: 'Admin Users', 'Manager Users', etc.
         return context
 
 
@@ -532,31 +536,36 @@ class BlockedUserListView(LoginRequiredMixin, ListView):
     template_name = 'advadmin/blocked_users.html'
     permission_required = 'auth.change_user'
     context_object_name = 'users'
-    
+
     def get_queryset(self):
-        return User.objects.filter(is_active=False).order_by('-date_joined')
-    
+        return User.objects.filter(
+            is_active=False,
+            gym=self.request.user.gym  # Multi-tenant filter
+        ).order_by('-date_joined')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_name'] = "blocked_users"
-        # Example: 'Admin Users', 'Manager Users', etc.
         return context
-    
 
 class InactiveUserListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'advadmin/inactive_users.html'
     permission_required = 'auth.change_user'
     context_object_name = 'users'
-    
+
     def get_queryset(self):
-        return User.objects.filter(on_subscription=False,staff_role="Member").order_by('-date_joined')
+        return User.objects.filter(
+            on_subscription=False,
+            staff_role="Member",
+            gym=self.request.user.gym  # Multi-tenant filter
+        ).order_by('-date_joined')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_name'] = "inactive_users"
-        # Example: 'Admin Users', 'Manager Users', etc.
         return context
+
 class UnblockUserView(LoginRequiredMixin, View):
     permission_required = 'auth.change_user'
     

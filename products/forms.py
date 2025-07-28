@@ -1,8 +1,7 @@
 from django import forms
 from .models import *
-
-from django import forms
-from .models import Category
+from django.utils.safestring import mark_safe
+from markdownx.widgets import MarkdownxWidget
 
 class CategoryForm(forms.ModelForm):
     image = forms.ImageField(required=False, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
@@ -14,8 +13,6 @@ class CategoryForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
-
-
 
 class subcategoryForm(forms.ModelForm):
     class Meta:
@@ -31,13 +28,6 @@ class subcategoryForm(forms.ModelForm):
         else:
             self.fields['category'].choices = [("", "No Category Found")]
             self.fields['category'].widget.attrs['disabled'] = 'disabled'  # Disable dropdown
-
-
-
-from django import forms
-from .models import Product
-from django.utils.safestring import mark_safe
-from markdownx.widgets import MarkdownxWidget
 
 class ProductForm(forms.ModelForm):
     image_1 = forms.ImageField(required=False, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
@@ -64,13 +54,10 @@ class ProductForm(forms.ModelForm):
             'country_of_origin': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
-
-from .models import Package
-
 class PackageForm(forms.ModelForm):
     class Meta:
         model = Package
-        fields = '__all__'
+        exclude = ['gym']  # ✅ exclude gym so it doesn't expect user input
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),

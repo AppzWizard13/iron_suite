@@ -654,7 +654,8 @@ class SubscriptionOrderListView(ListView):
         Apply filters, sorting, and select_related for efficiency.
         Accepts 'q' (search), 'status', 'date', and 'sort' from GET params.
         """
-        queryset = super().get_queryset()
+        user = self.request.user
+        queryset = super().get_queryset().filter(gym=user.gym)  # Filter by tenant
 
         # Filters
         q = self.request.GET.get('q', '').strip()
@@ -664,6 +665,7 @@ class SubscriptionOrderListView(ListView):
                 Q(customer__last_name__icontains=q) |
                 Q(customer__member_id__icontains=q)
             )
+
         status = self.request.GET.get('status')
         if status:
             queryset = queryset.filter(status=status)

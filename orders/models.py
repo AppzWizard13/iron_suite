@@ -2,19 +2,17 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
-
-from accounts.models import Customer
+from accounts.models import Customer, Gym
 from products.models import Package, Product
 from django.conf import settings
-
+from django_multitenant.mixins import TenantModelMixin
 
 User = get_user_model()
 
-
-class Cart(models.Model):
+class Cart(models.Model, TenantModelMixin):
     customer = models.OneToOneField(Customer, on_delete=models.CASCADE, related_name='cart')
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='carts')
+    tenant_id = 'gym_id'
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -25,8 +23,16 @@ class Cart(models.Model):
     def __str__(self):
         return f"Cart #{self.id} - {self.customer}"
 
-class CartItem(models.Model):
+    def save(self, *args, **kwargs):
+        if self.customer and not self.gym:
+            self.gym = self.customer.gym
+        super().save(*args, **kwargs)
+
+
+class CartItem(models.Model, TenantModelMixin):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='cart_items')
+    tenant_id = 'gym_id'
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     price_at_addition = models.DecimalField(max_digits=10, decimal_places=2)
@@ -38,9 +44,13 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.product.name} in Cart #{self.cart.id}"
 
-# --- ORDER FLOW (PHYSICAL/PRODUCT) ---
+    def save(self, *args, **kwargs):
+        if self.cart and not self.gym:
+            self.gym = self.cart.gym
+        super().save(*args, **kwargs)
 
-class Order(models.Model):
+
+class Order(models.Model, TenantModelMixin):
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
         PROCESSING = 'processing', 'Processing'
@@ -54,6 +64,9 @@ class Order(models.Model):
         PENDING = 'pending', 'Pending'
         COMPLETED = 'completed', 'Completed'
         REFUNDED = 'refunded', 'Refunded'
+
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='orders')
+    tenant_id = 'gym_id'
 
     order_number = models.CharField(max_length=20, unique=True)
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='orders')
@@ -72,22 +85,21 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.order_number:
-            from datetime import datetime
-            today = datetime.now().strftime('%Y%m%d')
+            today = timezone.now().strftime('%Y%m%d')
             last_order = Order.objects.filter(order_number__contains=f'ORD-{today}').order_by('order_number').last()
-            if last_order:
-                last_num = int(last_order.order_number.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
+            new_num = int(last_order.order_number.split('-')[-1]) + 1 if last_order else 1
             self.order_number = f'ORD-{today}-{new_num:04d}'
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Order #{self.order_number} - {self.get_status_display()}"
 
-class OrderItem(models.Model):
+
+class OrderItem(models.Model, TenantModelMixin):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='order_items')
+    tenant_id = 'gym_id'
+
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     product_name = models.CharField(max_length=255)
     product_sku = models.CharField(max_length=255)
@@ -102,9 +114,13 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.product_name} in Order #{self.order.order_number}"
 
-# --- SUBSCRIPTION ORDER (MEMBERSHIPS/PACKAGES) ---
+    def save(self, *args, **kwargs):
+        if self.order and not self.gym:
+            self.gym = self.order.gym
+        super().save(*args, **kwargs)
 
-class SubscriptionOrder(models.Model):
+
+class SubscriptionOrder(models.Model, TenantModelMixin):
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
         ACTIVE = 'active', 'Active'
@@ -117,6 +133,9 @@ class SubscriptionOrder(models.Model):
         COMPLETED = 'completed', 'Completed'
         REFUNDED = 'refunded', 'Refunded'
         FAILED = 'failed', 'Failed'
+
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='subscription_orders')
+    tenant_id = 'gym_id'
 
     order_number = models.CharField(max_length=20, unique=True)
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='subscription_orders')
@@ -137,16 +156,11 @@ class SubscriptionOrder(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.order_number:
-            from datetime import datetime
-            today = datetime.now().strftime('%Y%m%d')
+            today = timezone.now().strftime('%Y%m%d')
             last_order = SubscriptionOrder.objects.filter(
                 order_number__contains=f'{settings.SUBSCRIPTION_ORDER_PREFIX}{today}'
             ).order_by('order_number').last()
-            if last_order:
-                last_num = int(last_order.order_number.rsplit('-', 1)[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
+            new_num = int(last_order.order_number.rsplit('-', 1)[-1]) + 1 if last_order else 1
             self.order_number = f'{settings.SUBSCRIPTION_ORDER_PREFIX}{today}-{new_num:04d}'
         if not self.end_date and self.package:
             self.end_date = self.start_date + timedelta(days=self.package.duration_days)
@@ -156,9 +170,11 @@ class SubscriptionOrder(models.Model):
         return f"SubscriptionOrder #{self.order_number} - {self.get_status_display()}"
 
 
-class TempOrder(models.Model):
+class TempOrder(models.Model, TenantModelMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='temp_orders')
+    tenant_id = 'gym_id'
     quantity = models.PositiveIntegerField(default=1)
     timestamp = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -167,4 +183,3 @@ class TempOrder(models.Model):
 
     def __str__(self):
         return f"TempOrder {self.id} - User: {self.user}, Product: {self.product}"
-    

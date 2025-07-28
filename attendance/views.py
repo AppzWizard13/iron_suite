@@ -24,7 +24,7 @@ CustomUser = get_user_model()
 
 class AttendanceAdminView(ListView):
     """
-    Admin view for listing attendance with filters.
+    Admin view for listing attendance with filters, scoped to gym.
     """
     model = Attendance
     template_name = 'attendance/view_attendance.html'
@@ -36,6 +36,8 @@ class AttendanceAdminView(ListView):
         Optionally filter attendance by user, date, or status.
         """
         queryset = super().get_queryset().select_related('user', 'schedule')
+        queryset = queryset.filter(schedule__gym=self.request.user.gym)  # Multi-tenant filter
+
         q = self.request.GET.get('q')
         date = self.request.GET.get('date')
         status = self.request.GET.get('status')
@@ -51,15 +53,17 @@ class AttendanceAdminView(ListView):
             queryset = queryset.filter(check_in_time__date=date)
         if status:
             queryset = queryset.filter(status=status)
+
         return queryset.order_by('-check_in_time')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_name'] = "view_attendance"
         return context
+
 class AttendanceReportView(ListView):
     """
-    View for generating filtered attendance reports.
+    View for generating filtered attendance reports, scoped to gym.
     """
     model = Attendance
     template_name = 'attendance/attendance_report.html'
@@ -71,6 +75,8 @@ class AttendanceReportView(ListView):
         Optionally filter attendance by user, date, or status.
         """
         queryset = super().get_queryset().select_related('user', 'schedule')
+        queryset = queryset.filter(schedule__gym=self.request.user.gym)  # Multi-tenant filter
+
         q = self.request.GET.get('q')
         date = self.request.GET.get('date')
         status = self.request.GET.get('status')
@@ -94,7 +100,7 @@ class AttendanceReportView(ListView):
             queryset = queryset.filter(status=status)
 
         return queryset
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_name'] = "attendance_report"
@@ -103,24 +109,27 @@ class AttendanceReportView(ListView):
 
 class ScheduleListView(ListView):
     """
-    ListView for all schedules.
+    ListView for all schedules filtered by tenant (gym).
     """
     model = Schedule
     template_name = 'attendance/schedule_list.html'
     context_object_name = 'schedules'
     paginate_by = 20
 
-    def get_context_data(self, **kwargs):
+    def get_queryset(self):
         """
-        Add pagination to context.
+        Filter schedules by the logged-in user's gym.
         """
-        context = super().get_context_data(**kwargs)
-        context['page_obj'] = context.get('page_obj')
-        return context
+        user = self.request.user
+        return super().get_queryset().filter(gym=user.gym)
 
     def get_context_data(self, **kwargs):
+        """
+        Add page name and pagination to context.
+        """
         context = super().get_context_data(**kwargs)
         context['page_name'] = "schedule_list"
+        context['page_obj'] = context.get('page_obj')
         return context
 
 class ScheduleCreateView(CreateView):
@@ -170,7 +179,7 @@ def schedule_delete(request, pk):
     
 class EnrollmentListView(ListView):
     """
-    ListView for class enrollments.
+    ListView for class enrollments filtered by tenant (gym).
     """
     model = ClassEnrollment
     template_name = 'attendance/enrollment_list.html'
@@ -179,20 +188,18 @@ class EnrollmentListView(ListView):
 
     def get_queryset(self):
         """
-        Prefetch user and schedule.
+        Prefetch user and schedule, and filter enrollments by gym.
         """
-        return super().get_queryset().select_related('user', 'schedule')
+        return super().get_queryset().select_related('user', 'schedule').filter(
+            schedule__gym=self.request.user.gym
+        )
 
     def get_context_data(self, **kwargs):
         """
-        Add pagination to context.
+        Add page name and pagination context.
         """
         context = super().get_context_data(**kwargs)
         context['page_obj'] = context.get('page_obj')
-        return context
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
         context['page_name'] = "enrollment_list"
         return context
 
@@ -209,7 +216,7 @@ class EnrollmentCreateView(CreateView):
 
 class QRTokenListView(ListView):
     """
-    ListView for QR tokens.
+    ListView for QR tokens filtered by tenant (gym).
     """
     model = QRToken
     template_name = 'attendance/qr_token_list.html'
@@ -218,18 +225,20 @@ class QRTokenListView(ListView):
 
     def get_queryset(self):
         """
-        Prefetch schedule.
+        Filter QR tokens by the logged-in user's gym via schedule.
         """
-        return super().get_queryset().select_related('schedule')
+        user = self.request.user
+        return super().get_queryset().select_related('schedule').filter(schedule__gym=user.gym)
 
     def get_context_data(self, **kwargs):
         """
-        Add pagination to context.
+        Add pagination and page name to context.
         """
         context = super().get_context_data(**kwargs)
         context['page_obj'] = context.get('page_obj')
         context['page_name'] = "qr_token_list"
         return context
+
 
 
 class QRTokenCreateView(CreateView):
