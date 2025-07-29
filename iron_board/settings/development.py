@@ -13,7 +13,7 @@ ALLOWED_HOSTS = ['*']
 # Example: Use console backend for emails in dev
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-ENABLE_QR_SCHEDULER = False  # Set to False to disable
+ENABLE_QR_SCHEDULER = True  # Set to False to disable
 
 
 USERNAME_PREFIX = "MEMBER-DEV-TEST"

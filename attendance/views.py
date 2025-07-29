@@ -205,13 +205,15 @@ class EnrollmentListView(ListView):
 
 
 class EnrollmentCreateView(CreateView):
-    """
-    CreateView for class enrollments.
-    """
     model = ClassEnrollment
     form_class = ClassEnrollmentForm
     template_name = 'attendance/enrollment_form.html'
     success_url = reverse_lazy('enrollment_list')
+
+    def form_valid(self, form):
+        instance = form.save(commit=False)
+        instance.gym = instance.schedule.gym  # Ensure gym is set before saving
+        return super().form_valid(form)
 
 
 class QRTokenListView(ListView):

@@ -21,14 +21,15 @@ from .forms import NotificationConfigForm
 
 class NotificationConfigEditView(UpdateView):
     model = NotificationConfig
-    form_class = NotificationConfigForm   # <--- use custom form with widgets!
+    form_class = NotificationConfigForm
     template_name = 'notifications/notification_config_form.html'
     success_url = reverse_lazy('notification_log_list')
 
     def get_object(self):
-        # Only one config row; create if needed
-        obj, created = NotificationConfig.objects.get_or_create(pk=1)
+        gym = self.request.user.gym
+        obj, created = NotificationConfig.objects.get_or_create(gym=gym)
         return obj
+
 
 class NotificationLogListView(ListView):
     model = NotificationLog

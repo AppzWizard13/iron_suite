@@ -40,4 +40,6 @@ class ClassEnrollmentForm(forms.ModelForm):
 
     @staticmethod
     def get_active_members():
-        return CustomUser.objects.filter(staff_role='Member', is_active=True, on_subscription=True)
+        gym_members = CustomUser.objects.filter(staff_role='Member', is_active=True, on_subscription=True)
+        print("gym_members", gym_members)
+        return gym_members

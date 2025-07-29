@@ -36,6 +36,7 @@ def initiate_cashfree_payment(request, obj):
     payment, created = Payment.objects.get_or_create(
         content_type=ContentType.objects.get_for_model(obj),
         object_id=obj.id,
+        gym = request.user.gym,
         defaults={
             'payment_method': 'cashfree',
             'amount': obj.total,
@@ -102,7 +103,8 @@ def initiate_cashfree_payment(request, obj):
             request_payload=json.dumps(payload),
             response_status=response.status_code,
             response_body=json.dumps(res_data),
-            link_id=res_data.get("link_id")
+            link_id=res_data.get("link_id"),
+            gym = request.user.gym,
         )
     except Exception as e:
         PaymentAPILog.objects.create(
@@ -195,6 +197,7 @@ def initiate_subscription_payment(request):
         payment_status=SubscriptionOrder.PaymentStatus.PENDING,
         start_date=timezone.now().date(),
         end_date=timezone.now().date() + timedelta(days=package.duration_days),
+        gym=request.user.gym  
     )
 
     del request.session['pending_member_member_id']
@@ -242,7 +245,8 @@ def buy_subscription_package(request):
         status=SubscriptionOrder.Status.PENDING,
         payment_status=SubscriptionOrder.PaymentStatus.PENDING,
         start_date=today,
-        end_date=new_expiry
+        end_date=new_expiry,
+        gym=request.user.gym
     )
 
     # Set these right-away for pending payment - will confirm on webhook success

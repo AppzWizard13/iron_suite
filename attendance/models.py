@@ -202,8 +202,5 @@ class ClassEnrollment(models.Model, TenantModelMixin):
     def __str__(self):
         return f"{self.user.username} → {self.schedule.name}"
 
-    def save(self, *args, **kwargs):
-        if self.schedule and not self.gym:
-            self.gym = self.schedule.gym
-        super().save(*args, **kwargs)
+
 
