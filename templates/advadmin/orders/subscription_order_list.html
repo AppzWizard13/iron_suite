@@ -189,15 +189,18 @@
                   </span>
                 </td>
                 <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
-                {% comment %} <td class="text-center">
-                  <div class="d-flex justify-content-center gap-2">
-                    <!-- Edit Button (optional; remove if not needed) -->
-                    {# <a href="{% url 'subscription_order_edit' order.pk %}" class="btn btn-icon btn-secondary btn-sm">
-                      <i class="bx bx-edit"></i>
-                    </a> #}
-                    <!-- Cancel/Delete/Other actions as needed -->
-                  </div>
-                </td> {% endcomment %}
+                <td class="text-center">
+                  {% if order.invoice_number %}
+                    <a href="{% url 'download_invoice' order.order_number %}" 
+                      class="btn btn-sm btn-outline-primary" 
+                      target="_blank" 
+                      title="Download Invoice">
+                      <i class="bx bx-download"></i> Download
+                    </a>
+                  {% else %}
+                    <span class="text-muted">No Invoice</span>
+                  {% endif %}
+                </td>
               </tr>
               {% empty %}
               <tr>

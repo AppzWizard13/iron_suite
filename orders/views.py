@@ -712,3 +712,18 @@ class SubscriptionOrderListView(ListView):
             'page_name': 'subscription_orders'
         })
         return context
+
+from django.http import FileResponse, Http404
+from django.conf import settings
+import os
+
+def download_invoice(request, order_number):
+    # Compose the path dynamically based on BASE_DIR
+    invoice_dir = os.path.join(settings.BASE_DIR, 'invoices')
+    invoice_filename = f"INV-{order_number}.pdf"
+    invoice_path = os.path.join(invoice_dir, invoice_filename)
+
+    if not os.path.exists(invoice_path):
+        raise Http404("Invoice not found")
+
+    return FileResponse(open(invoice_path, 'rb'), as_attachment=True, filename=invoice_filename)

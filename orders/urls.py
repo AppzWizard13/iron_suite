@@ -41,6 +41,9 @@ urlpatterns = [
     path('subscription-orders/', views.SubscriptionOrderListView.as_view(), name='subscription_orders'),
 
 
+    path('download-invoice/<str:order_number>/', views.download_invoice, name='download_invoice'),
+
+
 
     
 
