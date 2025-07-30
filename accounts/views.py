@@ -1734,12 +1734,12 @@ class LoginWithOTPView(View):
             return False
 
 
+
 class VerifyOTPView(View):
     template_name = 'advadmin/verify_otp.html'
 
     def get(self, request):
         stored_otp = request.session.get('otp')
-        print("stored_otpstored_otpstored_otpstored_otp", stored_otp)
         if 'phone_number' not in request.session:
             messages.error(request, "Session expired. Please request OTP again.")
             return redirect('login_with_otp')
@@ -1749,7 +1749,6 @@ class VerifyOTPView(View):
         user_otp = request.POST.get('otp')
         phone_number = request.session.get('phone_number')
         stored_otp = request.session.get('otp')
-        print("stored_otpstored_otpstored_otpstored_otp", stored_otp)
         otp_valid_until = request.session.get('otp_valid_until')
 
         if not all([user_otp, stored_otp, otp_valid_until]):
@@ -1767,7 +1766,11 @@ class VerifyOTPView(View):
                 messages.error(request, "No user found with the corresponding phone number.")
                 return render(request, self.template_name)
 
+            # ✅ Specify backend manually
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
+
+            # Clear OTP session values
             request.session.pop('otp', None)
             request.session.pop('otp_valid_until', None)
             request.session.pop('phone_number', None)
