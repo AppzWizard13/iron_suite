@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'subscriptions',
     'notifications',
     'api_v1',
+    'corsheaders',
     'markdownx',
     'cloudinary',
     'django_extensions',
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
