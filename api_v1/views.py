@@ -24,8 +24,8 @@ CustomUser = User
 @renderer_classes([JSONRenderer])
 class SendOTPAPIView(APIView):
     permission_classes = [AllowAny]
-    http_method_names = ['post']
-
+    http_method_names = ['post', 'options']  # important
+    
     def post(self, request):
         phone_number = request.data.get('phone_number')
 
