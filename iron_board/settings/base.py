@@ -12,11 +12,41 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default')
 DEBUG = False
 ALLOWED_HOSTS = ['*']
 
+CORS_ALLOW_ALL_ORIGINS = False
+
 CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:33441',
+    'http://localhost:3000',  # optional
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'https://iron-board.onrender.com',
 ]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+# Optional: allow cookies if using session-based OTP
+CORS_ALLOW_CREDENTIALS = True
+
+
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 INSTALLED_APPS = [
