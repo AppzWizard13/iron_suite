@@ -72,24 +72,25 @@ logger = logging.getLogger(__name__)
 
 
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView,CreateView, UpdateView, DeleteView
 from .models import Gym
 from .forms import GymForm  
 
-class GymListView(ListView):
+class GymListView(LoginRequiredMixin, ListView):
     model = Gym
     template_name = 'advadmin/gym_list.html'
     context_object_name = 'gyms'
 
 
-class GymCreateView(CreateView):
+class GymCreateView(LoginRequiredMixin,CreateView):
     model = Gym
     form_class = GymForm
     template_name = 'advadmin/gym_form.html'
     success_url = reverse_lazy('gym_list')
 
 
-class GymUpdateView(UpdateView):
+class GymUpdateView(LoginRequiredMixin,UpdateView):
     model = Gym
     form_class = GymForm
     template_name = 'advadmin/gym_form.html'
@@ -317,7 +318,7 @@ class CustomLoginView(LoginView):
 
 
 
-class UserListView(ListView):
+class UserListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'admin_panel/user_list.html'
     context_object_name = 'users'
@@ -372,7 +373,7 @@ class UserListView(ListView):
         return context
 
 
-class UserStaffRoleListView(ListView):
+class UserStaffRoleListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'admin_panel/user_list.html'
     context_object_name = 'users'
@@ -440,7 +441,7 @@ class UserDeleteView(LoginRequiredMixin, DeleteView):
     
 
 # Home Page View
-class HomePageView(TemplateView):
+class HomePageView(LoginRequiredMixin,TemplateView):
     template_name = "gym_ui/iron_board/index.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -611,7 +612,7 @@ class LogoutView(LoginRequiredMixin, View):
 
 
 
-class DashboardView(TemplateView):
+class DashboardView(LoginRequiredMixin,TemplateView):
     """
     Admin Dashboard View that serves summary statistics, charts, and daily status
     of users, attendance, revenue, subscriptions, and classes.
@@ -954,7 +955,7 @@ class DashboardSearchView(LoginRequiredMixin, TemplateView):
         return context
 
 # Static Pages
-class ServicesView(TemplateView):
+class ServicesView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/services.html'
 
     def get_context_data(self, **kwargs):
@@ -962,7 +963,7 @@ class ServicesView(TemplateView):
         context['total_categories'] = Category.objects.all()
         return context
 
-class AboutView(TemplateView):
+class AboutView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/about-us.html'
 
     def get_context_data(self, **kwargs):
@@ -1609,7 +1610,7 @@ class CustomerCreateView(View):
         )
 
 
-class MemberRegisterView(CreateView):
+class MemberRegisterView(LoginRequiredMixin,CreateView):
     model = CustomUser
     form_class = MemberRegistrationForm
     success_url = reverse_lazy('user_list')
@@ -1848,35 +1849,35 @@ class GoogleSSOCallbackView(View):
         return redirect('/dashboard')
 
 
-class BlogDetailsView(TemplateView):
+class BlogDetailsView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/blog-details.html'
 
-class BlogView(TemplateView):
+class BlogView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/blog.html'
 
-class BMICalculatorView(TemplateView):
+class BMICalculatorView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/bmi-calculator.html'
 
-class ClassDetailsView(TemplateView):
+class ClassDetailsView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/class-details.html'
 
-class ClassTimetableView(TemplateView):
+class ClassTimetableView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/class-timetable.html'
 
-class ContactView(TemplateView):
+class ContactView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/contact.html'
 
-class GalleryView(TemplateView):
+class GalleryView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/gallery.html'
 
 
-class ServicesView(TemplateView):
+class ServicesView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/services.html'
 
-class TeamView(TemplateView):
+class TeamView(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/team.html'
 
-class Error404View(TemplateView):
+class Error404View(LoginRequiredMixin,TemplateView):
     template_name = 'gym_ui/404.html'
 
 

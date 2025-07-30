@@ -12,7 +12,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
+
 
 from accounts.models import User
 from orders.models import Order, SubscriptionOrder, TempOrder
@@ -463,7 +465,7 @@ def payment_failed(request):
         {'message': 'Payment Failed'}
     )
 
-class PaymentListView(ListView):
+class PaymentListView(LoginRequiredMixin, ListView):
     """
     Displays a paginated list of payments with filtering by user and date, and sortable columns.
     """

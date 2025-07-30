@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
@@ -10,7 +11,7 @@ from .forms import CategoryForm, subcategoryForm, ProductForm
 from django.conf import settings
 
 
-class ManageItemsView(ListView):
+class ManageItemsView(LoginRequiredMixin, ListView):
     template_name = 'admin_panel/manage_items.html'
     context_object_name = 'items'
 
@@ -24,7 +25,7 @@ class ManageItemsView(ListView):
     def get_queryset(self):
         return None  # We're using get_context_data for multiple querysets
 
-class CategoryListView(ListView):
+class CategoryListView(LoginRequiredMixin, ListView):
     model = Category
     context_object_name = 'categories'
 
@@ -51,7 +52,7 @@ class CategoryListView(ListView):
         return context
 
 
-class CategoryCreateView(CreateView):
+class CategoryCreateView(LoginRequiredMixin,CreateView):
     model = Category
     form_class = CategoryForm
     template_name = 'admin_panel/add_category.html'
@@ -77,7 +78,7 @@ class CategoryCreateView(CreateView):
         messages.error(self.request, "There was an error adding the category. Please check the form.")
         return super().form_invalid(form)
 
-class CategoryUpdateView(UpdateView):
+class CategoryUpdateView(LoginRequiredMixin,UpdateView):
     model = Category
     form_class = CategoryForm
     template_name = 'admin_panel/edit_category.html'
@@ -115,7 +116,7 @@ class CategoryDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
 # Subcategory Views
-class SubcategoryListView(ListView):
+class SubcategoryListView(LoginRequiredMixin, ListView):
     model = subcategory
     template_name = 'admin_panel/subcategories.html'
     context_object_name = 'subcategories'
@@ -142,7 +143,7 @@ class SubcategoryListView(ListView):
         context['query'] = self.request.GET.get('search', '')
         return context
 
-class SubcategoryCreateView(CreateView):
+class SubcategoryCreateView(LoginRequiredMixin,CreateView):
     model = subcategory
     template_name = 'admin_panel/add_subcategory.html'
     fields = ['name', 'description', 'category']
@@ -169,7 +170,7 @@ class SubcategoryCreateView(CreateView):
         messages.success(self.request, "Subcategory added successfully!")
         return response
 
-class SubcategoryUpdateView(UpdateView):
+class SubcategoryUpdateView(LoginRequiredMixin,UpdateView):
     model = subcategory
     template_name = 'admin_panel/edit_subcategory.html'
     fields = ['name', 'description', 'category']
@@ -208,7 +209,7 @@ class SubcategoryDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
 # Product Views
-class ProductListView(ListView):
+class ProductListView(LoginRequiredMixin, ListView):
     model = Product
     template_name = 'admin_panel/products.html'
     context_object_name = 'products'
@@ -248,7 +249,7 @@ class ProductListView(ListView):
         context['selected_subcategory'] = self.request.GET.get('subcategory', '')
         return context
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin,CreateView):
     model = Product
     form_class = ProductForm
     template_name = 'admin_panel/add_product.html'
@@ -276,7 +277,7 @@ class ProductCreateView(CreateView):
                 messages.error(self.request, f"{field}: {error}")
         return super().form_invalid(form)
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(LoginRequiredMixin,UpdateView):
     model = Product
     form_class = ProductForm
     template_name = 'admin_panel/edit_product.html'
@@ -317,7 +318,7 @@ class ProductDeleteView(DeleteView):
         return response
 
 # Frontend Views
-class ProductGridView(ListView):
+class ProductGridView(LoginRequiredMixin, ListView):
     model = Product
     template_name = 'product_detail_view.html'
     context_object_name = 'products'
@@ -372,11 +373,13 @@ class ProductDetailView(DetailView):
         return context
     
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
+
 from .models import Package
 from .forms import PackageForm
 
-class PackageListView(ListView):
+class PackageListView(LoginRequiredMixin, ListView):
     model = Package
     form_class = PackageForm
     context_object_name = 'packages'
@@ -409,7 +412,7 @@ class PackageListView(ListView):
 
 
 
-class PackageCreateView(CreateView):
+class PackageCreateView(LoginRequiredMixin,CreateView):
     model = Package
     form_class = PackageForm
     template_name = 'admin_panel/add_package.html'
@@ -441,7 +444,7 @@ class PackageCreateView(CreateView):
         return super().form_invalid(form)
 
 
-class PackageUpdateView(UpdateView):
+class PackageUpdateView(LoginRequiredMixin,UpdateView):
     model = Package
     form_class = PackageForm
     template_name = 'admin_panel/edit_package.html'

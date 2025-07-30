@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, TemplateView
 from .models import NotificationConfig, NotificationLog
 from django.utils.dateparse import parse_date
@@ -19,7 +20,7 @@ from django.urls import reverse_lazy
 from .models import NotificationConfig
 from .forms import NotificationConfigForm
 
-class NotificationConfigEditView(UpdateView):
+class NotificationConfigEditView(LoginRequiredMixin,UpdateView):
     model = NotificationConfig
     form_class = NotificationConfigForm
     template_name = 'notifications/notification_config_form.html'
@@ -31,7 +32,7 @@ class NotificationConfigEditView(UpdateView):
         return obj
 
 
-class NotificationLogListView(ListView):
+class NotificationLogListView(LoginRequiredMixin, ListView):
     model = NotificationLog
     template_name = 'notifications/notification_logs.html'
     context_object_name = 'logs'

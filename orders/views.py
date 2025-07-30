@@ -640,7 +640,7 @@ def clear_order_session(request):
     return HttpResponse(status=200)
 
 
-class SubscriptionOrderListView(ListView):
+class SubscriptionOrderListView(LoginRequiredMixin, ListView):
     """
     List view for Subscription Orders with filtering, sorting, and pagination.
     """

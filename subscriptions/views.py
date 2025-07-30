@@ -1,11 +1,13 @@
 from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
+
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class UpcomingRenewalMemberListView(ListView):
+class UpcomingRenewalMemberListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'advadmin/upcoming_renewals.html'
     context_object_name = 'users'

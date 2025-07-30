@@ -13,7 +13,8 @@ from django.views.decorators.http import require_GET
 from django.views.generic import (
     ListView, CreateView, TemplateView
 )
-
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView
 from .forms import ScheduleForm, ClassEnrollmentForm
 from .models import (
     Attendance, Schedule, ClassEnrollment, QRToken, CheckInLog
@@ -22,7 +23,7 @@ from .models import (
 CustomUser = get_user_model()
 
 
-class AttendanceAdminView(ListView):
+class AttendanceAdminView(LoginRequiredMixin, ListView):
     """
     Admin view for listing attendance with filters, scoped to gym.
     """
@@ -61,7 +62,7 @@ class AttendanceAdminView(ListView):
         context['page_name'] = "view_attendance"
         return context
 
-class AttendanceReportView(ListView):
+class AttendanceReportView(LoginRequiredMixin, ListView):
     """
     View for generating filtered attendance reports, scoped to gym.
     """
@@ -107,7 +108,7 @@ class AttendanceReportView(ListView):
         return context
 
 
-class ScheduleListView(ListView):
+class ScheduleListView(LoginRequiredMixin, ListView):
     """
     ListView for all schedules filtered by tenant (gym).
     """
@@ -132,7 +133,7 @@ class ScheduleListView(ListView):
         context['page_obj'] = context.get('page_obj')
         return context
 
-class ScheduleCreateView(CreateView):
+class ScheduleCreateView(LoginRequiredMixin,CreateView):
     """
     CreateView for schedules.
     """
@@ -153,7 +154,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from attendance.models import Schedule
 
-class ScheduleUpdateView(UpdateView):
+class ScheduleUpdateView(LoginRequiredMixin,UpdateView):
     model = Schedule
     fields = ['name', 'start_time', 'end_time', 'trainer', 'capacity', 'status']
     template_name = 'attendance/schedule_form.html'
@@ -177,7 +178,7 @@ def schedule_delete(request, pk):
     return redirect('schedule_list')
 
     
-class EnrollmentListView(ListView):
+class EnrollmentListView(LoginRequiredMixin, ListView):
     """
     ListView for class enrollments filtered by tenant (gym).
     """
@@ -204,7 +205,7 @@ class EnrollmentListView(ListView):
         return context
 
 
-class EnrollmentCreateView(CreateView):
+class EnrollmentCreateView(LoginRequiredMixin,CreateView):
     model = ClassEnrollment
     form_class = ClassEnrollmentForm
     template_name = 'attendance/enrollment_form.html'
@@ -216,7 +217,7 @@ class EnrollmentCreateView(CreateView):
         return super().form_valid(form)
 
 
-class QRTokenListView(ListView):
+class QRTokenListView(LoginRequiredMixin, ListView):
     """
     ListView for QR tokens filtered by tenant (gym).
     """
@@ -243,7 +244,7 @@ class QRTokenListView(ListView):
 
 
 
-class QRTokenCreateView(CreateView):
+class QRTokenCreateView(LoginRequiredMixin,CreateView):
     """
     CreateView for QR tokens.
     """
@@ -253,7 +254,7 @@ class QRTokenCreateView(CreateView):
     success_url = reverse_lazy('qr_token_list')
 
 
-class CheckInLogListView(ListView):
+class CheckInLogListView(LoginRequiredMixin, ListView):
     """
     ListView for check-in logs.
     """
@@ -273,7 +274,7 @@ class CheckInLogListView(ListView):
         context['page_name'] = "checkin_log_list"
         return context
 
-class LiveQRView(TemplateView):
+class LiveQRView(LoginRequiredMixin,TemplateView):
     """
     Shows currently live schedules and associated QR tokens.
     """
@@ -315,7 +316,7 @@ class LiveQRView(TemplateView):
         context['page_name'] = "live_qr"
         return context
 
-class QRScanView(TemplateView):
+class QRScanView(LoginRequiredMixin,TemplateView):
     """
     View for QR scan display.
     """

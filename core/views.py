@@ -235,7 +235,7 @@ class ConfigurationDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class SystemReset(TemplateView):
+class SystemReset(LoginRequiredMixin,TemplateView):
     """
     System reset view for various types of system-wide resets.
     """
