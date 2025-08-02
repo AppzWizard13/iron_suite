@@ -18,8 +18,23 @@ EOF
 # Now migrate
 python manage.py migrate
 
+# Seeding scripts (run once only, create marker file after each)
+if [ ! -f .seeded_seed_workout_templates ]; then
+    echo "Seeding initial workout templates..."
+    python manage.py seed_workout_templates && touch .seeded_seed_workout_templates
+fi
 
-# (Optional) collect static
+if [ ! -f .seeded_seed_more_workout_templates ]; then
+    echo "Seeding more workout templates (variety)..."
+    python manage.py seed_more_workout_templates && touch .seeded_seed_more_workout_templates
+fi
+
+if [ ! -f .seeded_workout_seed ]; then
+    echo "Seeding basic workouts..."
+    python manage.py workout_seed && touch .seeded_workout_seed
+fi
+
+# Collect static files
 python manage.py collectstatic --noinput
 
 # Start server
