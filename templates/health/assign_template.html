@@ -1,0 +1,31 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-semi-bold py-3 mb-4">
+    <span class="text-muted fw-light">Workout Templates /</span> Assign Template to Members
+  </h4>
+  <div class="card mx-auto" >
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Assign Template to Members</h5>
+    </div>
+    <div class="card-body">
+      <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+              {{ form.members.label_tag }}
+              {{ form.members }}
+          </div>
+          <div class="mb-3">
+              {{ form.template.label_tag }}
+              {{ form.template }}
+          </div>
+          <div class="mb-3">
+              {{ form.start_date.label_tag }}
+              {{ form.start_date }}
+          </div>
+          <button type="submit" class="btn btn-success">Assign</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

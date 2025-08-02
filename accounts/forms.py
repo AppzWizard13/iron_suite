@@ -27,8 +27,13 @@ class GymForm(forms.ModelForm):
             'longitude': forms.NumberInput(attrs={'class': 'form-control'}),
             'proprietor_name': forms.TextInput(attrs={'class': 'form-control'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'admin': forms.Select(attrs={'class': 'form-control'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Restrict the admin field choices to users with staff_role='Admin'
+        self.fields['admin'].queryset = CustomUser.objects.filter(staff_role='Admin')
 
 
 class CustomUserForm(UserCreationForm):
@@ -76,9 +81,31 @@ class CustomUserForm(UserCreationForm):
         }
 
     def __init__(self, *args, **kwargs):
+        print("kwargskwargskwargskwargskwargskwargskwargskwargskwargs", kwargs)
         self.hide_staff_role = kwargs.pop('hide_staff_role', False)
         self.default_staff_role = kwargs.pop('default_staff_role', None)
+        is_superuser = kwargs.pop('is_superuser', False)  # Pop is_superuser flag
         super().__init__(*args, **kwargs)
+
+        # Dynamically set staff_role choices based on is_superuser
+        print("self.fields", )
+        if 'staff_role' in self.fields:
+            if is_superuser:
+                self.fields['staff_role'].choices = [
+                    ('Admin', 'Admin'),
+                    ('Manager', 'Manager'), 
+                    ('Employee', 'Employee'),
+                    ('Member', 'Member'),
+                    ('Trainer', 'Trainer')
+                ]
+            else:
+                # Exclude 'Admin'
+                self.fields['staff_role'].choices = [
+                    ('Manager', 'Manager'), 
+                    ('Employee', 'Employee'),
+                    ('Member', 'Member'),
+                    ('Trainer', 'Trainer')
+                ]
 
         if self.hide_staff_role:
             self.fields.pop('staff_role', None)  # Remove staff_role field if hiding

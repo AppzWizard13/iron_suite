@@ -180,7 +180,7 @@
           </div>
 
           <div class="menu-inner-shadow"></div>
-          <ul class="menu-inner py-1">
+          <ul class="menu-inner py-1" style ="margin-bottom: 200px;">
           <!-- Dashboard -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Main {{page_name}}</span>
@@ -275,16 +275,61 @@
             </a>
           </li>
 
+
           <!-- Operations -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Operations</span>
           </li>
-          <li class="menu-item {% if page_name == 'workout_programs' %}active{% endif %}">
-            <a href="#" class="menu-link">
+
+          <!-- Dashboard -->
+          <li class="menu-item {% if page_name == 'admin_dashboard' %}active{% endif %}">
+            <a href="{% url 'workout_dashboard' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-home"></i>
+              <div data-i18n="Dashboard">Dashboard</div>
+            </a>
+          </li>
+
+          <!-- Workout Programs -->
+          <li class="menu-item {% if page_name == 'workout_program_list' %}active{% endif %}">
+            <a href="{% url 'workout_program_list' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-dumbbell"></i>
               <div data-i18n="Workout Programs">Workout Programs</div>
             </a>
           </li>
+
+          <!-- Equipment -->
+          <li class="menu-item {% if page_name == 'equipment_list' %}active{% endif %}">
+            <a href="{% url 'equipment_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-cog"></i>
+              <div data-i18n="Equipment">Equipment</div>
+            </a>
+          </li>
+
+          <!-- Workout Categories -->
+          <li class="menu-item {% if page_name == 'workout_category_list' %}active{% endif %}">
+            <a href="{% url 'workout_category_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-grid-alt"></i>
+              <div data-i18n="Categories (Workout Category)">Workout Category</div>
+            </a>
+          </li>
+
+          <!-- Workout Templates -->
+          <li class="menu-item {% if page_name == 'workout_template_list' %}active{% endif %}">
+            <a href="{% url 'workout_template_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-spreadsheet"></i>
+              <div data-i18n="Workout Templates">Workout Templates</div>
+            </a>
+          </li>
+          <!-- Members -->
+          <li class="menu-item {% if page_name == 'member_list' %}active{% endif %}">
+            <a href="{% url 'member_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-user"></i>
+              <div data-i18n="Members">Members</div>
+            </a>
+          </li>
+
+
+
           <li class="menu-item {% if page_name == 'diet_plans' %}active{% endif %}">
             <a href="#" class="menu-link">
               <i class="menu-icon tf-icons bx bx-food-tag"></i>

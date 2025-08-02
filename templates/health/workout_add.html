@@ -1,0 +1,102 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-semi-bold py-3 mb-4">
+    <span class="text-muted fw-light">Workout Programs /</span> Add Workout Program
+  </h4>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Add Workout Program</h5>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <div class="text-danger small">{{ form.name.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+          {{ form.category }}
+          {% if form.category.errors %}
+            <div class="text-danger small">{{ form.category.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.type.id_for_label }}" class="form-label">Type</label>
+          {{ form.type }}
+          {% if form.type.errors %}
+            <div class="text-danger small">{{ form.type.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.level.id_for_label }}" class="form-label">Level</label>
+          {{ form.level }}
+          {% if form.level.errors %}
+            <div class="text-danger small">{{ form.level.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.sets.id_for_label }}" class="form-label">Sets</label>
+          {{ form.sets }}
+          {% if form.sets.errors %}
+            <div class="text-danger small">{{ form.sets.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.reps.id_for_label }}" class="form-label">Reps</label>
+          {{ form.reps }}
+          {% if form.reps.errors %}
+            <div class="text-danger small">{{ form.reps.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+          {{ form.notes }}
+          {% if form.notes.errors %}
+            <div class="text-danger small">{{ form.notes.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Equipment</label>
+          <div class="row">
+            {% for checkbox in form.equipment %}
+              <div class="col-6 col-md-4">
+                <div class="form-check my-1">
+                  {{ checkbox.tag }}
+                  <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          {% if form.equipment.errors %}
+            <div class="text-danger small">{{ form.equipment.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="text-end">
+          <a href="{% url 'workout_program_list' %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary ms-2">Add Workout</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

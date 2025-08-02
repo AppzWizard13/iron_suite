@@ -82,13 +82,25 @@ class GymListView(LoginRequiredMixin, ListView):
     template_name = 'advadmin/gym_list.html'
     context_object_name = 'gyms'
 
-
-class GymCreateView(LoginRequiredMixin,CreateView):
+class GymCreateView(LoginRequiredMixin, CreateView):
     model = Gym
     form_class = GymForm
     template_name = 'advadmin/gym_form.html'
     success_url = reverse_lazy('gym_list')
 
+    def form_valid(self, form):
+        response = super().form_valid(form)  # save the Gym instance first
+        gym = self.object  # the newly created Gym instance
+
+        # Update the admin user's gym field to point to this new gym
+        admin_user = gym.admin
+        print("admin_user", admin_user)
+        if admin_user:
+            print("----------------------", gym)
+            admin_user.gym = gym
+            admin_user.save(update_fields=['gym'])
+
+        return response
 
 class GymUpdateView(LoginRequiredMixin,UpdateView):
     model = Gym
@@ -96,6 +108,20 @@ class GymUpdateView(LoginRequiredMixin,UpdateView):
     template_name = 'advadmin/gym_form.html'
     success_url = reverse_lazy('gym_list')
 
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)  # save the Gym instance first
+        gym = self.object  # the newly created Gym instance
+
+        # Update the admin user's gym field to point to this new gym
+        admin_user = gym.admin
+        print("admin_user", admin_user)
+        if admin_user:
+            print("----------------------", gym)
+            admin_user.gym = gym
+            admin_user.save(update_fields=['gym'])
+
+        return response
 
 class GymDeleteView(LoginRequiredMixin, DeleteView):
     model = Gym
@@ -140,6 +166,7 @@ class UserCreateView(LoginRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         kwargs['hide_staff_role'] = getattr(self, 'hide_staff_role', False)
         kwargs['default_staff_role'] = getattr(self, 'default_staff_role', None)
+        kwargs['is_superuser'] = self.request.user.is_superuser  # <--- add this line
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -161,20 +188,36 @@ class UserCreateView(LoginRequiredMixin, CreateView):
 
             max_member_id = CustomUser.objects.aggregate(Max('member_id'))['member_id__max'] or 0
             user.member_id = max_member_id + 1
-            user.username = self.generate_username(user.member_id)
-            user.gym = self.request.user.gym
 
+            # Determine redirect_to early to pass into generate_username
+            redirect_to = self.request.GET.get('next') or self.success_url
+            self.redirect_to = redirect_to  # store on instance for use in generate_username
+
+            user.username = self.generate_username(user.member_id)
+
+            user.gym = self.request.user.gym
             user.save()
             messages.success(self.request, "User added successfully.")
 
-            redirect_to = self.request.GET.get('next') or self.success_url
             return redirect(redirect_to)
         except Exception as e:
             messages.error(self.request, f"An error occurred: {str(e)}")
             return self.form_invalid(form)
 
     def generate_username(self, member_id):
-        return f"MEMBER{str(member_id).zfill(5)}"
+        redirect_to = getattr(self, 'redirect_to', '')
+
+        if 'Trainer' in redirect_to:
+            prefix = "TRAINER"
+        elif 'Manager' in redirect_to:
+            prefix = "MANAGER"
+        elif 'Admin' in redirect_to:
+            prefix = "ADMIN"
+        else:
+            prefix = "MEMBER"
+
+        return f"{prefix}{str(member_id).zfill(5)}"
+
 
 from django import forms
 class UserEditForm(forms.ModelForm):
@@ -462,15 +505,29 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
         return context
 
 
+from django.shortcuts import redirect
 class UserDeleteView(LoginRequiredMixin, DeleteView):
     model = CustomUser
     slug_field = "username"
     slug_url_kwarg = "username"
     success_url = reverse_lazy('user_list')
 
+    def get(self, request, *args, **kwargs):
+        # Delete object immediately on GET request (bypass confirmation)
+        return self.delete(request, *args, **kwargs)
+
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'User has been deleted successfully.')
-        return super().delete(request, *args, **kwargs)
+        response = super().delete(request, *args, **kwargs)
+
+        # Get the previous page URL from the HTTP_REFERER header
+        next_url = request.META.get('HTTP_REFERER')
+        # Fallback to success_url if no referer found
+        if not next_url:
+            next_url = self.success_url
+
+        return redirect(next_url)
+
     
 
 # Home Page View

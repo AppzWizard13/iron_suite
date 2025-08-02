@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'attendance',
     'subscriptions',
     'notifications',
+    'health',
     'api_v1',
     'corsheaders',
     'markdownx',

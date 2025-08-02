@@ -22,8 +22,16 @@ class Gym(models.Model):  # 👈 GOOD
     proprietor_name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
 
+    # Add admin ForeignKey field referencing CustomUser
+    admin = models.ForeignKey(
+        'CustomUser',  # Use string here if CustomUser is declared below or imported
+        on_delete=models.CASCADE,
+        related_name='gyms_administered'
+    )
+
     def __str__(self):
         return self.name
+
 
     
 class CustomUserManager(BaseUserManager):

@@ -1,0 +1,57 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-semi-bold py-3 mb-4">
+    <span class="text-muted fw-light">Members /</span> All Members
+  </h4>
+  <div class="card">
+    <div class="card-header"><h5 class="mb-0">Member List</h5></div>
+    <div class="card-body">
+      <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Username</th><th>Name</th><th>Email</th>
+            <th>Assigned Plan</th><th>Start Date</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in members %}
+          <tr>
+            <td>{{ m.username }}</td>
+            <td>{{ m.get_full_name }}</td>
+            <td>{{ m.email }}</td>
+            <td>
+              {% for a in assignments %}
+                {% if a.member == m %}
+                  {{ a.template.name }}<br>
+                {% endif %}
+              {% empty %}None{% endfor %}
+            </td>
+            <td>
+              {% for a in assignments %}
+                {% if a.member == m %}
+                  {{ a.start_date|date:"Y-m-d" }}<br>
+                {% endif %}
+              {% empty %}–{% endfor %}
+            </td>
+            <td>
+              {% for a in assignments %}
+                {% if a.member == m %}
+                  {% if a.is_active %}<span class="badge bg-success">Active</span>{% else %}Inactive{% endif %}<br>
+                {% endif %}
+              {% empty %}–{% endfor %}
+            </td>
+          </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">No members found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

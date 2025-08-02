@@ -1,0 +1,26 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="container-xxl container-p-y">
+  <h4 class="fw-semi-bold py-3 mb-4">
+    <span class="text-muted fw-light">Equipment /</span> Add Equipment
+  </h4>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Add Equipment</h5>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label>Name</label>
+          <input type="text" name="name" class="form-control" required>
+        </div>
+        <div class="text-end">
+          <a href="{% url 'equipment_list' %}" class="btn btn-outline-secondary">Cancel</a>
+          <button class="btn btn-primary ms-2">Add Equipment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

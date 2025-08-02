@@ -1,0 +1,30 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="content-wrapper">
+  <div class="container-xxl container-p-y">
+    <h4 class="fw-semi-bold py-3 mb-4">
+      <span class="text-muted fw-light">Categories /</span> Workout Categories
+    </h4>
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Workout Categories List</h5>
+        <a href="{% url 'workout_category_add' %}" class="btn btn-primary">
+          <i class="bx bx-plus"></i> Add Category
+        </a>
+      </div>
+      <div class="card-body">
+        <table class="table table-hover">
+          <thead><tr><th>Name</th></tr></thead>
+          <tbody>
+            {% for c in categories %}
+              <tr><td>{{ c.name }}</td></tr>
+            {% empty %}
+              <tr><td class="text-center text-muted py-4">No workout categories found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

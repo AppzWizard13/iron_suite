@@ -1,0 +1,56 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="content-wrapper">
+  <div class="container-xxl container-p-y flex-grow-1">
+    <h4 class="fw-semi-bold py-3 mb-4">
+      <span class="text-muted fw-light">Workout Programs /</span> All Workouts
+    </h4>
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Workout Program List</h5>
+        <a href="{% url 'workout_program_add' %}" class="btn btn-primary">
+          <i class="bx bx-plus me-1"></i> Add Workout
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Level</th>
+              <th>Sets</th>
+              <th>Reps</th>
+              <th>Equipment</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for w in workouts %}
+            <tr>
+              <td>{{ w.name }}</td>
+              <td>{{ w.category }}</td>
+              <td>{{ w.get_type_display }}</td>
+              <td>{{ w.get_level_display }}</td>
+              <td>{{ w.sets }}</td>
+              <td>{{ w.reps }}</td>
+              <td>
+                {% for eq in w.equipment.all %}
+                  <span class="badge bg-secondary">{{ eq.name }}</span>
+                {% empty %}-{% endfor %}
+              </td>
+            </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center text-muted py-4">No workout programs found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

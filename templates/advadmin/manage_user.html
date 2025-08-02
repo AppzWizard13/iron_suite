@@ -105,11 +105,12 @@
                 {% comment %} <td>{{ user.city }}, {{ user.state }} ({{ user.pincode }})</td> {% endcomment %}
                 <td class="text-center">
                   <div class="d-flex justify-content-center gap-2">
-                    {% if not user.on_subscription %}
-                      <a href="{% url 'choose_package' member_id=user.member_id %}" class="btn btn-icon btn-primary">
-                        <i class="bx bx-refresh"></i>
-                      </a>
-                    {% endif %}
+                  {% if not user.on_subscription and user.staff_role|lower == "member" %}
+                    <a href="{% url 'choose_package' member_id=user.member_id %}" class="btn btn-icon btn-primary">
+                      <i class="bx bx-refresh"></i>
+                    </a>
+                  {% endif %}
+
                     <a href="{% url 'user_edit' user.username %}" class="btn btn-icon btn-secondary">
                       <i class="bx bx-edit"></i>
                     </a>

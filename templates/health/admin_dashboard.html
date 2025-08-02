@@ -1,0 +1,39 @@
+{% extends 'advadmin/index.html' %}
+{% block content %}
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-semi-bold py-3 mb-4">
+      <span class="text-muted fw-light">Dashboard /</span> Admin Overview
+    </h4>
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card card-body text-center border-primary bg-light">
+          <div class="fs-3 fw-bold mb-2">{{ stats.num_users }}</div>
+          <div class="text-primary">Total Users</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card card-body text-center border-success bg-light">
+          <div class="fs-3 fw-bold mb-2">{{ stats.num_workout_programs }}</div>
+          <div class="text-success">Workout Programs</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card card-body text-center border-warning bg-light">
+          <div class="fs-3 fw-bold mb-2">{{ stats.num_templates }}</div>
+          <div class="text-warning">Workout Templates</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card card-body text-center border-info bg-light">
+          <div class="fs-3 fw-bold mb-2">{{ stats.num_assignments }}</div>
+          <div class="text-info">Active Assignments</div>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-info mt-2">
+      Welcome to the <b>Gym Admin Dashboard</b>. Use the menu to manage programs, templates, members, and assignments.
+    </div>
+  </div>
+</div>
+{% endblock %}
