@@ -52,12 +52,14 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav mx-auto py-0 text-center">
-                        <a href="{% url 'home' %}" class="nav-item nav-link active">Home</a>
-                        <a href="{% url 'login' %}" class="nav-item nav-link">Admin</a>
-                        <a href="#about" class="nav-item nav-link">About</a>
-                        <a href="#feature" class="nav-item nav-link">Feature</a>
-                        <a href="#pricing" class="nav-item nav-link">Pricing</a>
-                        <a href="#contact" class="nav-item nav-link">Contact</a>
+                        <a href="{% url 'home' %}" class="nav-item nav-link {% if page_name == 'Login' %}active{% endif %}">Home</a>
+                        <a href="{% url 'login' %}" class="nav-item nav-link {% if page_name == 'Login' %}active{% endif %}">Admin</a>
+                        {% if page_name != 'Login' %}
+                            <a href="#about" class="nav-item nav-link">About</a>
+                            <a href="#feature" class="nav-item nav-link">Feature</a>
+                            <a href="#pricing" class="nav-item nav-link">Pricing</a>
+                            <a href="#contact" class="nav-item nav-link">Contact</a>
+                        {% endif %}
                     </div>
                     <!-- Button hidden on small screens, shown on lg and above -->
                     <a href="#" class="btn btn-primary-gradient rounded-pill py-2 px-4 ms-0 ms-lg-3 mt-3 mt-lg-0 d-block d-lg-inline-block">Start Free Trial</a>

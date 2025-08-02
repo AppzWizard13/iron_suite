@@ -29,14 +29,16 @@ class GymForm(forms.ModelForm):
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
+
+
 class CustomUserForm(UserCreationForm):
     password1 = forms.CharField(
-        required=False,  # Make password optional
+        required=False,  # password optional
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter Password'}),
         label="Password"
     )
     password2 = forms.CharField(
-        required=False,  # Make password optional
+        required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm Password'}),
         label="Confirm Password"
     )
@@ -59,23 +61,32 @@ class CustomUserForm(UserCreationForm):
             'pincode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Pincode'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'gender': forms.Select(attrs={'class': 'form-control'}, choices=[
-                ('Male', 'Male'), 
-                ('Female', 'Female'), 
+                ('Male', 'Male'),
+                ('Female', 'Female'),
                 ('Other', 'Other')
             ]),
             'staff_role': forms.Select(attrs={'class': 'form-control'}, choices=[
                 ('Admin', 'Admin'), 
                 ('Manager', 'Manager'), 
-                ('Employee', 'Employee')
+                ('Employee', 'Employee'),
+                ('Trainer', 'Trainer')  # Make sure to include Trainer option if needed
             ]),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'is_staff': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
     def __init__(self, *args, **kwargs):
+        self.hide_staff_role = kwargs.pop('hide_staff_role', False)
+        self.default_staff_role = kwargs.pop('default_staff_role', None)
         super().__init__(*args, **kwargs)
 
-        # If updating an existing user, make password fields optional
+        if self.hide_staff_role:
+            self.fields.pop('staff_role', None)  # Remove staff_role field if hiding
+
+        if self.default_staff_role:
+            self.initial['staff_role'] = self.default_staff_role
+
+        # Make password fields optional when editing
         if self.instance and self.instance.pk:
             self.fields['password1'].required = False
             self.fields['password2'].required = False
@@ -83,22 +94,25 @@ class CustomUserForm(UserCreationForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
 
-        # Auto-generate member_id
+        # Auto-assign member_id if missing
         if not instance.member_id:
             max_member_id = CustomUser.objects.aggregate(Max('member_id'))['member_id__max'] or 0
-            instance.member_id = max_member_id + 1  
+            instance.member_id = max_member_id + 1
 
         # Auto-generate username
         instance.username = f"MEMBER{str(instance.member_id).zfill(5)}"
 
-        # Set password only if provided
+        # Assign default staff_role if field hidden
+        if self.hide_staff_role and self.default_staff_role:
+            instance.staff_role = self.default_staff_role
+
+        # Set password if provided
         if self.cleaned_data.get('password1'):
             instance.set_password(self.cleaned_data['password1'])
 
         if commit:
             instance.save()
         return instance
-
 
 
 User = get_user_model()

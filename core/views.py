@@ -10,6 +10,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.shortcuts import redirect
 
+from attendance.models import *
 from payments.models import Payment, Transaction
 from .models import BusinessDetails, Configuration
 from .forms import BusinessDetailsForm, ConfigurationForm
@@ -250,6 +251,7 @@ class SystemReset(LoginRequiredMixin,TemplateView):
             {'label': 'Order & Payment Reset', 'action': 'order_payment'},
             {'label': 'User Reset', 'action': 'user'},
             {'label': 'CMS Reset', 'action': 'cms'},
+            {'label': 'Attendance Reset', 'action': 'attendance'},
             {'label': 'Product Reset', 'action': 'product'},
             {'label': 'All Reset', 'action': 'all'},
         ]
@@ -289,6 +291,14 @@ class SystemReset(LoginRequiredMixin,TemplateView):
             elif reset_type == 'product':
                 Product.objects.all().delete()
                 messages.success(request, "All product data reset successfully.")
+            elif reset_type == 'attendance':
+                Schedule.objects.all().delete()
+                QRToken.objects.all().delete()
+                Attendance.objects.all().delete()
+                CheckInLog.objects.all().delete()
+                ClassEnrollment.objects.all().delete()
+                messages.success(request, "All attendance related data reset successfully.")
+
             elif reset_type == 'all':
                 Transaction.objects.all().delete()
                 Payment.objects.all().delete()

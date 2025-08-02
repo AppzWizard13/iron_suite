@@ -74,7 +74,7 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView,CreateView, UpdateView, DeleteView
-from .models import Gym
+from .models import Gym, MonthlyMembershipTrend
 from .forms import GymForm  
 
 class GymListView(LoginRequiredMixin, ListView):
@@ -108,20 +108,27 @@ class GymDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Gym deleted successfully!")
         return super().delete(request, *args, **kwargs)
-
-
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = CustomUser
     form_class = CustomUserForm
     success_url = reverse_lazy('user_list')
 
     # Redirect unauthenticated users to login page
-    login_url = 'login'  # <-- Uses your existing login URL
-    redirect_field_name = 'next'  # Default: keeps track of where to return after login
+    login_url = 'login'
+    redirect_field_name = 'next'
+
+    def dispatch(self, request, *args, **kwargs):
+        next_url = request.GET.get('next', '')
+        if '/staff/Trainer/' in next_url:
+            self.hide_staff_role = True
+            self.default_staff_role = 'Trainer'
+        else:
+            self.hide_staff_role = False
+            self.default_staff_role = None
+        return super().dispatch(request, *args, **kwargs)
 
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-
         if admin_mode == 'advanced':
             return ['advadmin/create_user.html']
         elif admin_mode == 'standard':
@@ -129,11 +136,27 @@ class UserCreateView(LoginRequiredMixin, CreateView):
         else:
             return ['admin_panel/add_user.html']
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['hide_staff_role'] = getattr(self, 'hide_staff_role', False)
+        kwargs['default_staff_role'] = getattr(self, 'default_staff_role', None)
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['hide_staff_role'] = getattr(self, 'hide_staff_role', False)
+        context['default_staff_role'] = getattr(self, 'default_staff_role', None)
+        return context
+
     def form_valid(self, form):
         try:
             user = form.save(commit=False)
 
-            if 'password1' in form.cleaned_data:
+            # Auto set staff_role if hidden in form
+            if getattr(form, 'default_staff_role', None):
+                user.staff_role = form.default_staff_role
+
+            if 'password1' in form.cleaned_data and form.cleaned_data['password1']:
                 user.set_password(form.cleaned_data['password1'])
 
             max_member_id = CustomUser.objects.aggregate(Max('member_id'))['member_id__max'] or 0
@@ -143,7 +166,9 @@ class UserCreateView(LoginRequiredMixin, CreateView):
 
             user.save()
             messages.success(self.request, "User added successfully.")
-            return super().form_valid(form)
+
+            redirect_to = self.request.GET.get('next') or self.success_url
+            return redirect(redirect_to)
         except Exception as e:
             messages.error(self.request, f"An error occurred: {str(e)}")
             return self.form_invalid(form)
@@ -294,6 +319,12 @@ class CustomLoginView(LoginView):
         else:
             return ['admin_panel/authentication-login-basic.html']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pass the page name to the context
+        context['page_name'] = 'Login'
+        return context
+
     def form_valid(self, form):
         user = form.get_user()
         login(self.request, user)
@@ -314,7 +345,9 @@ class CustomLoginView(LoginView):
             "Invalid credentials. Please try again.",
             extra_tags='danger'
         )
+        # page_name will still be in context using get_context_data
         return self.render_to_response(self.get_context_data(form=form))
+
 
 
 
@@ -441,7 +474,7 @@ class UserDeleteView(LoginRequiredMixin, DeleteView):
     
 
 # Home Page View
-class HomePageView(LoginRequiredMixin,TemplateView):
+class HomePageView(TemplateView):
     template_name = "gym_ui/iron_board/index.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -610,9 +643,7 @@ class LogoutView(LoginRequiredMixin, View):
 
 
 
-
-
-class DashboardView(LoginRequiredMixin,TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     """
     Admin Dashboard View that serves summary statistics, charts, and daily status
     of users, attendance, revenue, subscriptions, and classes.
@@ -630,12 +661,37 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             return ['admin_panel/standard.html']
         return [self.template_name]
 
+    def get_membership_trends(self, years):
+        today = timezone.now().date()
+        membership_trends = defaultdict(lambda: [0] * 12)
+
+        # Query all relevant records upfront for efficiency and filter by user's gym
+        trends = MonthlyMembershipTrend.objects.filter(
+            year__in=years,
+            month__lte=12,  # Just a safety, all months 1-12
+            gym=self.request.user.gym
+        ).order_by('year', 'month')
+
+        # Build a quick lookup dictionary {(year, month): member_count}
+        trends_dict = {(t.year, t.month): t.member_count for t in trends}
+        print("trends_dict", trends_dict)
+        for year in years:
+            for month in range(1, 13):
+                # Ignore future months beyond current month in current year
+                if year > today.year or (year == today.year and month > today.month):
+                    continue
+
+                count = trends_dict.get((year, month), 0)
+                membership_trends[year][month - 1] = count
+
+        return membership_trends
+
     def get_context_data(self, **kwargs):
         """
         Collects and prepares context data for dashboard rendering.
         """
         context = super().get_context_data(**kwargs)
-
+        user_gym = self.request.user.gym
         today = timezone.now().date()
         first_day = today.replace(day=1)
         last_day = today.replace(day=calendar.monthrange(today.year, today.month)[1])
@@ -650,19 +706,19 @@ class DashboardView(LoginRequiredMixin,TemplateView):
 
         # User Metrics
         active_users_count = CustomUser.objects.filter(
-            staff_role='Member', is_active=True, on_subscription=True
+            staff_role='Member', is_active=True, on_subscription=True, gym=user_gym
         ).count()
 
         new_signups_today = CustomUser.objects.filter(
-            staff_role='Member', join_date=today
+            staff_role='Member', join_date=today, gym=user_gym
         ).count()
 
         total_members = CustomUser.objects.filter(
-            staff_role='Member', is_active=True
+            staff_role='Member', is_active=True, gym=user_gym
         ).count()
 
         # Attendance Metrics
-        attended_today = Attendance.objects.filter(date=today).values('user').distinct().count()
+        attended_today = Attendance.objects.filter(date=today, user__gym=user_gym).values('user').distinct().count()
         attendance_rate = round((attended_today / total_members * 100), 1) if total_members else 0
 
         expiring_memberships = 0  # Placeholder for expiring membership logic
@@ -671,11 +727,12 @@ class DashboardView(LoginRequiredMixin,TemplateView):
         current_month_income = Payment.objects.filter(
             status=Payment.Status.COMPLETED,
             created_at__date__gte=first_day,
-            created_at__date__lte=today
+            created_at__date__lte=today,
+            gym=user_gym
         ).aggregate(total=Sum('amount'))['total'] or 0
 
         # Transaction Summary
-        transactions = Transaction.objects.all()
+        transactions = Transaction.objects.filter(gym=user_gym)
 
         total_sales_amount = transactions.filter(
             category=Transaction.Category.SALES,
@@ -701,7 +758,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
         profit = total_income - total_expense
 
         # Subscription Order Status Breakdown
-        orders = SubscriptionOrder.objects.values('status').annotate(count=Count('id'))
+        orders = SubscriptionOrder.objects.filter(gym=user_gym).values('status').annotate(count=Count('id'))
         status_map = {
             'pending': 'pending_orders',
             'processing': 'processing_orders',
@@ -733,6 +790,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             end_date__gte=today,
             end_date__lte=last_day,
             status__in=[SubscriptionOrder.Status.ACTIVE, SubscriptionOrder.Status.PENDING],
+            gym=user_gym,
         )
         upcoming_renewals_result = upcoming_renewals_qs.aggregate(
             renewals_count=Count('id'),
@@ -747,6 +805,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             end_date__gte=first_day,
             end_date__lte=last_day,
             payment_status=SubscriptionOrder.PaymentStatus.PENDING,
+            gym=user_gym,
         )
         pending_dues_result = pending_dues_qs.aggregate(
             pending_dues_count=Count('id'),
@@ -757,7 +816,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
 
         # Enquiries
         try:
-            total_enquiries = Enquiry.objects.count()
+            total_enquiries = Enquiry.objects.filter(gym=user_gym).count()
         except Exception:
             total_enquiries = 0
 
@@ -766,7 +825,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
 
         # Chart Data: Membership Trends and Earnings
         earliest_year_qs = CustomUser.objects.filter(
-            staff_role='Member', is_active=True
+            staff_role='Member', is_active=True, gym=user_gym
         )
         earliest_year = earliest_year_qs.aggregate(
             earliest=Min('join_date')
@@ -774,19 +833,9 @@ class DashboardView(LoginRequiredMixin,TemplateView):
         base_year = earliest_year.year if earliest_year else today.year - 2
         years = list(range(base_year, today.year + 1))
 
-        membership_trends = defaultdict(lambda: [0] * 12)
-        for year in years:
-            for month in range(1, 13):
-                if year > today.year or (year == today.year and month > today.month):
-                    continue
-                start = today.replace(year=year, month=month, day=1)
-                end_day = calendar.monthrange(year, month)[1]
-                end = today.replace(year=year, month=month, day=end_day)
-                count = CustomUser.objects.filter(
-                    staff_role='Member', is_active=True, on_subscription=True,
-                    join_date__lte=end
-                ).count()
-                membership_trends[year][month - 1] = count
+        membership_trends = self.get_membership_trends(years)
+
+        print("membership_trends", membership_trends)
 
         yearly_earnings = {}
         for year in years:
@@ -795,7 +844,8 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             amount = Payment.objects.filter(
                 status=Payment.Status.COMPLETED,
                 created_at__date__gte=year_start,
-                created_at__date__lte=year_end
+                created_at__date__lte=year_end,
+                gym=user_gym
             ).aggregate(total=Sum('amount'))['total'] or 0
             yearly_earnings[year] = float(amount)
 
@@ -806,7 +856,8 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             monthly_payments = (
                 Payment.objects.filter(
                     status=Payment.Status.COMPLETED,
-                    created_at__year=year
+                    created_at__year=year,
+                    gym=user_gym
                 )
                 .annotate(month=TruncMonth('created_at'))
                 .values('month')
@@ -820,18 +871,19 @@ class DashboardView(LoginRequiredMixin,TemplateView):
 
         # Update today's schedule statuses
         Schedule.objects.filter(
-            schedule_date=today
+            schedule_date=today,
+            gym=user_gym
         ).select_related('trainer').prefetch_related(
             'enrollments', 'attendances'
         ).update(status='upcoming')
 
-        schedules_today = Schedule.objects.filter(schedule_date=today)
+        schedules_today = Schedule.objects.filter(schedule_date=today, gym=user_gym)
         for schedule in schedules_today:
             schedule.update_status()
 
         # Running Classes
         running_classes_qs = Schedule.objects.filter(
-            schedule_date=today, status='live'
+            schedule_date=today, status='live', gym=user_gym
         ).select_related('trainer').prefetch_related('enrollments', 'attendances')
 
         running_classes = []
@@ -852,40 +904,51 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             'team', 'gallery', 'blog', '404'
         ]
 
-        # Yearly growth: Compare active members at each year end to previous year
-        growth_per_year = {}
-        today = timezone.now().date()
-        current_month_index = today.month - 1
+        # Yearly and Monthly growth calculation
+        print("membership_trends>>>>>>>>>>", membership_trends)
+        growth_per_month = {}
+        current_month_index = today.month - 1  # zero-based index
 
-        members_by_year = []
-        for yr in years:
-            months_list = membership_trends.get(yr, [0] * 12)
-            if yr == today.year:
-                value = months_list[current_month_index] if current_month_index < len(months_list) else 0
-            else:
-                value = months_list[11] if len(months_list) > 11 else 0
-            members_by_year.append(value)
+        for year in years:
+            months_list = membership_trends.get(year, [0] * 12)
+            for month_idx in range(len(months_list)):
+                # Skip future months beyond current month this year
+                if year == today.year and month_idx > current_month_index:
+                    break
 
-        for i, year in enumerate(years):
-            curr = members_by_year[i]
-            if i == 0:
-                percent = 100.0 if curr > 0 else 0
-                growth_per_year[year] = {"percent": percent, "count": curr}
-            else:
-                prev = members_by_year[i - 1]
-                if prev:
-                    percent = round(((curr - prev) / prev) * 100, 2)
+                curr = months_list[month_idx]
+
+                # Find previous month value:
+                if month_idx == 0:
+                    prev_year = year - 1
+                    prev_month_val = membership_trends.get(prev_year, [0] * 12)[11] if prev_year in membership_trends else 0
+                else:
+                    prev_month_val = months_list[month_idx - 1]
+
+                if prev_month_val:
+                    percent = round(((curr - prev_month_val) / prev_month_val) * 100, 2)
                 else:
                     percent = 100.0 if curr > 0 else 0
-                growth_per_year[year] = {"percent": percent, "count": curr}
 
+                key = f"{year}-{month_idx + 1:02d}"
+                growth_per_month[key] = {"percent": percent, "count": curr}
 
-        print("growth_per_year", growth_per_year)
+                print(f"{key} : Count = {curr}, Growth % = {percent}")
+
+        # Get only the last two months data in JSON format
+        month_keys = list(growth_per_month.keys())
+        last_two = month_keys
+        last_two_dict = {k: growth_per_month[k] for k in last_two}
+        growth_per_month_json = json.dumps(last_two_dict)
+        growth_months = list(last_two_dict.keys())[::-1]
+
+        print("Last two months growth (JSON):", growth_per_month_json)
 
         # Final Context Update
         context.update(config_dict)
         context.update({
-            'growth_per_year_json': json.dumps(growth_per_year),
+            'growth_per_month_json': growth_per_month_json,
+            'growth_month_keys': growth_months,
             'running_classes': running_classes,
             'monthly_revenue_json': json.dumps(monthly_revenue_by_year),
             'membership_trends_json': json.dumps(membership_trends),
@@ -917,8 +980,6 @@ class DashboardView(LoginRequiredMixin,TemplateView):
         context.update(order_status_counts)
 
         return context
-
-
 
 class DashboardSearchView(LoginRequiredMixin, TemplateView):
     template_name = 'admin_panel/index.html'

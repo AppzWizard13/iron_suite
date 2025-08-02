@@ -20,7 +20,7 @@ python manage.py migrate
 
 
 # (Optional) collect static
-# python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput
 
 # Start server
 python manage.py runserver 0.0.0.0:8000

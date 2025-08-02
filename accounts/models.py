@@ -255,3 +255,17 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.user.email})"
+    
+class MonthlyMembershipTrend(models.Model):
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='membership_trends')
+    year = models.PositiveIntegerField()
+    month = models.PositiveIntegerField()
+    member_count = models.PositiveIntegerField()
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('gym', 'year', 'month')
+        ordering = ['-year', '-month']
+
+    def __str__(self):
+        return f"{self.gym} {self.year}-{self.month}: {self.member_count}"

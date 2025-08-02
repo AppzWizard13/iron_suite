@@ -360,7 +360,7 @@
               <div data-i18n="Email & SMS">Email & SMS</div>
             </a>
           </li>
-
+          {% if request.user.is_superuser  %}
           <!-- Administration -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Admin</span>
@@ -720,6 +720,7 @@
               <div data-i18n="Tables">Tables</div>
             </a>
           </li>
+          
 
           <!-- Misc -->
           <li class="menu-header small text-uppercase"><span class="menu-header-text">Misc</span></li>
@@ -739,6 +740,7 @@
               <div data-i18n="Documentation">Documentation</div>
             </a>
           </li>
+          {% endif %}
 
 
           </ul>
@@ -778,8 +780,8 @@
                 <!-- Place this tag where you want the button to render. -->
                 <li class="nav-item lh-1 me-3">
                   <a class="dropdown-item" href="{% url 'home' %}">
-                    <i class="bx bx-store me-2"></i>
-                    <span class="align-middle">Shop</span>
+                    <i class="bx bx-home me-2"></i>
+                    <span class="align-middle">Home</span>
                   </a>
                 </li>
 
@@ -819,8 +821,8 @@
                     </li>
                     <li>
                       <a class="dropdown-item" href="{% url 'home' %}">
-                        <i class="bx bx-store me-2"></i>
-                        <span class="align-middle">Shop</span>
+                        <i class="bx bx-home me-2"></i>
+                        <span class="align-middle">Home</span>
                       </a>
                     </li>
                     <li>
@@ -829,6 +831,7 @@
                         <span class="align-middle">My Profile</span>
                       </a>
                     </li>
+                    {% if request.user.is_superuser %}
                     <li>
                       <a class="dropdown-item" href="{% url 'business_details' %}">
                         <i class="bx bx-cog me-2"></i>
@@ -843,6 +846,7 @@
                         </span>
                       </a>
                     </li>
+                    {% endif %}
                     <li>
                       <div class="dropdown-divider"></div>
                     </li>
@@ -1092,23 +1096,51 @@
                       <div class="col-md-4">
                         <div class="card-body">
                           <div class="text-center">
-                            <div class="dropdown">
-                              <button
-                                class="btn btn-sm btn-outline-primary dropdown-toggle"
-                                type="button"
-                                id="growthReportId"
-                                data-bs-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                              >
-                                {{ current_year }}
-                              </button>
-                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
-                                {% for year in years %}
-                                  <a class="dropdown-item year-select" data-year="{{ year }}" href="javascript:void(0);">{{ year }}</a>
-                                {% endfor %}
-                              </div>
-                            </div>
+                           <div class="dropdown">
+                            <button
+                              class="btn btn-sm btn-outline-primary dropdown-toggle"
+                              type="button"
+                              id="growthReportId"
+                              data-bs-toggle="dropdown"
+                              aria-haspopup="true"
+                              aria-expanded="false"
+                            >
+                              {{ growth_month_keys|first }} <!-- Default label showing first full key like '2025-07' -->
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="growthReportId" id="growthDropdownMenu">
+                              {% for key in growth_month_keys %}
+                                <li><a class="dropdown-item" href="#" data-key="{{ key }}">{{ key }}</a></li>
+                              {% endfor %}
+                            </ul>
+                          </div>
+
+                          <script>
+                            // Ensure window.growthYearData is defined as an object mapping full keys "YYYY-MM"
+                            document.addEventListener('DOMContentLoaded', function() {
+                              const dropdownMenu = document.getElementById('growthDropdownMenu');
+                              const dropdownBtn = document.getElementById('growthReportId');
+
+                              dropdownMenu.addEventListener('click', function(e) {
+                                let target = e.target;
+                                if (target.matches('a.dropdown-item')) {
+                                  e.preventDefault();
+                                  let key = target.getAttribute('data-key');
+                                  if (key && window.growthYearData && window.growthYearData[key]) {
+                                    renderGrowthRadialBar(key);
+                                    dropdownBtn.textContent = key;
+                                  }
+                                }
+                              });
+
+                              // Render the latest month key by default on page load
+                              let keys = Object.keys(window.growthYearData || {});
+                              if (keys.length) {
+                                renderGrowthRadialBar(keys[keys.length - 1]);
+                                dropdownBtn.textContent = keys[keys.length - 1];
+                              }
+                            });
+                          </script>
+
                           </div>
                         </div>
 
@@ -1141,15 +1173,14 @@
                         </div>
 
                         <script>
-                          // All required dashboard data injected by Django
-                          window.yearlyEarnings = {{ yearly_earnings_json|safe }};
-                          window.growthYearData = {{ growth_per_year_json|safe }};
+                          window.growthYearData = {{ growth_per_month_json|safe }};
                           window.growthYears = {{ years|safe }};
+                          window.yearlyEarnings = {{ yearly_earnings_json|safe }};
                           window.currentYear = {{ current_year }};
                         </script>
                       </div>
 
-
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1336,7 +1367,7 @@
               <div class="col-md-12 col-lg-12 order-2 mb-4">
                 <div class="card h-100">
                   <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="card-title m-0 me-2">Running Class Activities Overview</h5>
+                    <h5 class="card-title m-0 me-2">Running Class Activities Overview  {{years}}</h5>
                   </div>
                   <div class="card-body">
                     <ul class="p-0 m-0">
@@ -1367,6 +1398,12 @@
                 <!--/ Transactions -->
               </div>
             </div>
+            <script>
+              // For income chart etc.
+              window.monthlyRevenue = {{ monthly_revenue_json|safe }};
+              window.currentYear = {{ current_year }};
+              // For growth progress chart:
+          </script>
             <!-- / Content -->
             {% endblock %}
 
@@ -1512,17 +1549,8 @@
         });
 
     </script>
-    <script>
-        // For income chart etc.
-        window.monthlyRevenue = {{ monthly_revenue_json|safe }};
-        window.currentYear = {{ current_year }};
-        // For growth progress chart:
-    </script>
-    <script>
-      window.growthYearData = {{ growth_per_year_json|safe }};
-      // For reference: {2024: {"percent":0,"count":0}, 2025: {"percent":100,"count":3} }
-      window.growthYears = {{ years|safe }};
-  </script>
+
+
 
     <script src="{% static 'advadmin/assets/vendor/libs/jquery/jquery.js' %}"></script>
     <script src="{% static 'advadmin/assets/vendor/libs/popper/popper.js' %}"></script>

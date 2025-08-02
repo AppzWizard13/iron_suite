@@ -1,10 +1,15 @@
 import logging
 import atexit
 from datetime import timedelta, time
+import calendar
+
+
+
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
+from accounts.models import CustomUser, Gym, MonthlyMembershipTrend
 from accounts.utils import generate_invoice_pdf
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -224,6 +229,33 @@ def remove_unwanted_qr_tokens():
     logger.info(
         f"🗑️ Removed {deleted} unwanted QR tokens (expired and unused) from the database."
     )
+    
+def update_membership_trends():
+    today = timezone.now().date()
+    year = today.year
+    month = today.month
+    end_day = calendar.monthrange(year, month)[1]
+    end = today.replace(day=end_day)
+
+    gym_ids = CustomUser.objects.values_list('gym_id', flat=True).distinct()
+
+    for gym_id in gym_ids:
+        count = CustomUser.objects.filter(
+            staff_role='Member',
+            is_active=True,
+            on_subscription=True,
+            join_date__lte=end,
+            gym_id=gym_id
+        ).count()
+
+        obj, created = MonthlyMembershipTrend.objects.update_or_create(
+            gym_id=gym_id,
+            year=year,
+            month=month,
+            defaults={'member_count': count}
+        )
+        logger.info(f"Updated membership trend for gym {gym_id} — {year}-{month}: {count}")
+
 
 
 def start():
@@ -237,6 +269,7 @@ def start():
     # scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(minutes=5))
     # scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
     # scheduler.add_job(expire_user_subscriptions, IntervalTrigger(hours=1))
+    scheduler.add_job(update_membership_trends, IntervalTrigger(seconds=30))
     scheduler.add_job(generate_missing_invoices_job, IntervalTrigger(seconds=20))
     # WhatsApp reminders at 7:00 AM and 3:00 PM IST (UTC+5:30)
     scheduler.add_job(
@@ -249,7 +282,6 @@ def start():
         CronTrigger(hour=15, minute=0, timezone='Asia/Kolkata'),
         name='Evening WhatsApp Reminders'
     )
-
     # scheduler.add_job(
     #     generate_missing_invoices_job,
     #     CronTrigger(hour=0, minute=1, timezone='Asia/Kolkata'),

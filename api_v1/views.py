@@ -141,3 +141,54 @@ class VerifyOTPAPIView(APIView):
             "email": user.email,
             "phone_number": user.phone_number
         }, status=status.HTTP_200_OK)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class LoginAPIView(APIView):
+    permission_classes = [permissions.AllowAny]  # Allow public access
+
+    def post(self, request, *args, **kwargs):
+        mobile = request.data.get('mobile')
+        password = request.data.get('password')
+
+        print("mobile", mobile)
+        print("password", password)
+        if not mobile or not password:
+            return Response(
+                {'detail': "Mobile and password required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(request, username=mobile, password=password)  # OR use custom logic if username!=mobile
+        if not user:
+            return Response(
+                {'detail': "Invalid credentials."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        if not user.is_active:
+            return Response(
+                {'detail': "User account is disabled."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Generate JWT
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': {
+                'id': user.username,
+                'mobile': user.username,  # change if mobile field is different!
+                'name': user.get_full_name() or user.username,
+                'email': user.email,
+                # Include anything else you need
+            }
+        }, status=status.HTTP_200_OK)

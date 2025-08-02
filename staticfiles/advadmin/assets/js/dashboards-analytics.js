@@ -90,66 +90,50 @@
         window.totalRevenueChart.render();
     }
 
-    // --- Year selection for all widgets ---
-    document.querySelectorAll('.year-select').forEach(function (item) {
-        item.addEventListener('click', function () {
-            let year = parseInt(this.getAttribute('data-year'), 10);
-            let lastYear = year - 1;
-            // Update year button text
-            var growthReportBtn = document.getElementById('growthReportId');
-            if (growthReportBtn) growthReportBtn.innerText = year;
-            // Earnings update
-            var thisYearEarningEl = document.getElementById('thisYearEarning');
-            var thisYearLabelEl = document.getElementById('thisYearLabel');
-            var lastYearEarningEl = document.getElementById('lastYearEarning');
-            var lastYearLabelEl = document.getElementById('lastYearLabel');
-            if (thisYearEarningEl) {
-                var thisYearAmount = window.yearlyEarnings[year] || 0;
-                thisYearEarningEl.innerText = '₹' + thisYearAmount.toLocaleString(undefined, {minimumFractionDigits: 2});
-            }
-            if (thisYearLabelEl) thisYearLabelEl.innerText = year;
-            if (lastYearEarningEl) {
-                var lastYearAmount = window.yearlyEarnings[lastYear] || 0;
-                lastYearEarningEl.innerText = '₹' + lastYearAmount.toLocaleString(undefined, {minimumFractionDigits: 2});
-            }
-            if (lastYearLabelEl) lastYearLabelEl.innerText = lastYear;
-            // Charts update
-            renderGrowthRadialBar(year);
-            let newSeries = getTrendSeries(year);
-            if (window.totalRevenueChart)
-                window.totalRevenueChart.updateSeries(newSeries);
-            let incomeSeries = getRevenueSeries(year);
-            if (window.incomeChart)
-                window.incomeChart.updateSeries(incomeSeries);
-        });
-    });
-
     // --- Growth/Decline Radial Chart ---
     let growthData = (window.growthYearData || {});
     let growthRadialChart = null;
-    function renderGrowthRadialBar(year) {
-        let yd = growthData[year] || {percent: 0, count: 0};
+
+    function renderGrowthRadialBar(key) {
+        let yd = growthData[key] || { percent: 0, count: 0 };
         let percent = Math.abs(yd.percent || 0);
         let count = yd.count || 0;
         let isDecline = (yd.percent || 0) < 0;
-        let color = isDecline ? "#e53935" : config.colors.primary;
+
+        // You must ensure these color variables exist in your config
+        let color = isDecline ? "#e53935" : (config.colors.primary || "#007bff");
+        let cardColor = config.cardColor || "#f8f9fa";   // example fallback
+        let headingColor = config.headingColor || "#343a40"; // example fallback
+
         let label = isDecline ? "Decline" : "Growth";
         let suffix = "%";
         let sign = (yd.percent > 0) ? "+" : (yd.percent < 0 ? "-" : "");
         let display = sign + percent + suffix + " (" + count + ")";
+
         const options = {
             series: [percent],
             labels: [label],
-            chart: { height: 240, type: 'radialBar', animations: { enabled: true }},
+            chart: {
+                height: 240,
+                type: 'radialBar',
+                animations: { enabled: true }
+            },
             plotOptions: {
                 radialBar: {
                     size: 150,
                     offsetY: 10,
-                    startAngle: -150, endAngle: 150,
+                    startAngle: -150,
+                    endAngle: 150,
                     hollow: { size: '55%' },
                     track: { background: cardColor, strokeWidth: '100%' },
                     dataLabels: {
-                        name: { offsetY: 15, color: headingColor, fontSize: '15px', fontWeight: 600, fontFamily: 'Public Sans' },
+                        name: {
+                            offsetY: 15,
+                            color: headingColor,
+                            fontSize: '15px',
+                            fontWeight: 600,
+                            fontFamily: 'Public Sans'
+                        },
                         value: {
                             offsetY: -25,
                             color: headingColor,
@@ -176,8 +160,10 @@
             },
             stroke: { dashArray: 5 }
         };
+
         const chartElem = document.getElementById("growthChart");
         if (!chartElem) return;
+
         if (!growthRadialChart) {
             growthRadialChart = new ApexCharts(chartElem, options);
             growthRadialChart.render();
@@ -191,14 +177,22 @@
                 plotOptions: options.plotOptions
             });
         }
-        var labelElem = document.getElementById("growthChartLabel");
+
+        const labelElem = document.getElementById("growthChartLabel");
         if (labelElem) {
-            labelElem.innerText = year + ": " + display + " members";
+            labelElem.innerText = key + ": " + display + " members";
         }
     }
 
-    renderGrowthRadialBar(window.currentYear);
+    // Use the latest month key as default for rendering
+    let monthKeys = Object.keys(growthData);
+    let latestMonthKey = monthKeys.length ? monthKeys[monthKeys.length - 1] : null;
 
+    if (latestMonthKey) {
+        renderGrowthRadialBar(latestMonthKey);
+    }
+
+    
     // --- Profit Report Line Chart ---
     const profileReportChartEl = document.querySelector('#profileReportChart'),
         profileReportChartConfig = {

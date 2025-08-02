@@ -46,7 +46,7 @@
             {% endif %}
             <button type="submit" class="btn btn-primary ms-2">Search</button>
           </form>
-          <a href="{% url 'user_registration' %}" class="btn btn-primary">
+          <a href="{% url 'user_registration' %}?next={{ request.path }}" class="btn btn-primary">
             <i class="bx bx-plus me-1"></i> Add Member
           </a>
         </div>

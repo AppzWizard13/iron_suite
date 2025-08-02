@@ -127,29 +127,48 @@
     // --- Growth/Decline Radial Chart ---
     let growthData = (window.growthYearData || {});
     let growthRadialChart = null;
-    function renderGrowthRadialBar(year) {
-        let yd = growthData[year] || {percent: 0, count: 0};
+
+    function renderGrowthRadialBar(key) {
+        console.log("Selected key:", key);
+        let yd = growthData[key] || { percent: 0, count: 0 };
         let percent = Math.abs(yd.percent || 0);
         let count = yd.count || 0;
         let isDecline = (yd.percent || 0) < 0;
-        let color = isDecline ? "#e53935" : config.colors.primary;
+
+        // Make sure these config colors are defined somewhere globally
+        let color = isDecline ? "#e53935" : (config.colors.primary || "#007bff");
+        let cardColor = config.cardColor || "#f8f9fa";   // fallback example
+        let headingColor = config.headingColor || "#343a40"; // fallback example
+
         let label = isDecline ? "Decline" : "Growth";
         let suffix = "%";
         let sign = (yd.percent > 0) ? "+" : (yd.percent < 0 ? "-" : "");
         let display = sign + percent + suffix + " (" + count + ")";
+
         const options = {
             series: [percent],
             labels: [label],
-            chart: { height: 240, type: 'radialBar', animations: { enabled: true }},
+            chart: {
+                height: 240,
+                type: 'radialBar',
+                animations: { enabled: true }
+            },
             plotOptions: {
                 radialBar: {
                     size: 150,
                     offsetY: 10,
-                    startAngle: -150, endAngle: 150,
+                    startAngle: -150,
+                    endAngle: 150,
                     hollow: { size: '55%' },
                     track: { background: cardColor, strokeWidth: '100%' },
                     dataLabels: {
-                        name: { offsetY: 15, color: headingColor, fontSize: '15px', fontWeight: 600, fontFamily: 'Public Sans' },
+                        name: {
+                            offsetY: 15,
+                            color: headingColor,
+                            fontSize: '15px',
+                            fontWeight: 600,
+                            fontFamily: 'Public Sans'
+                        },
                         value: {
                             offsetY: -25,
                             color: headingColor,
@@ -176,8 +195,10 @@
             },
             stroke: { dashArray: 5 }
         };
+
         const chartElem = document.getElementById("growthChart");
         if (!chartElem) return;
+
         if (!growthRadialChart) {
             growthRadialChart = new ApexCharts(chartElem, options);
             growthRadialChart.render();
@@ -191,13 +212,34 @@
                 plotOptions: options.plotOptions
             });
         }
-        var labelElem = document.getElementById("growthChartLabel");
+
+        const labelElem = document.getElementById("growthChartLabel");
         if (labelElem) {
-            labelElem.innerText = year + ": " + display + " members";
+            labelElem.innerText = key + ": " + display + " members";
         }
     }
 
-    renderGrowthRadialBar(window.currentYear);
+    // Dropdown menu event listener to change the chart data when a month is selected
+    document.getElementById('growthDropdownMenu').addEventListener('click', function(e) {
+        let target = e.target;
+        if (target.matches('a.dropdown-item')) {
+            e.preventDefault();
+            let key = target.getAttribute('data-key');
+            if (key && window.growthYearData[key]) {
+                renderGrowthRadialBar(key);
+                document.getElementById('growthReportId').textContent = key;
+            }
+        }
+    });
+
+    // Initialize the chart with the latest month key on page load
+    let monthKeys = Object.keys(growthData);
+    let latestMonthKey = monthKeys.length ? monthKeys[monthKeys.length - 1] : null;
+
+    if (latestMonthKey) {
+        renderGrowthRadialBar(latestMonthKey);
+    }
+
 
     // --- Profit Report Line Chart ---
     const profileReportChartEl = document.querySelector('#profileReportChart'),
