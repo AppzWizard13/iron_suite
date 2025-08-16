@@ -639,9 +639,7 @@ class TodayWorkoutAPIView(APIView):
     def get(self, request):
         try:
             today = timezone.now().date()
-            today = today + timedelta(days=3)
 
-            print("qqqqqqqqqqqqqqqqqqqqqqqqq", today)
             day_name = calendar.day_name[today.weekday()].lower()
             
             # Get user's active assignments
@@ -666,7 +664,6 @@ class TodayWorkoutAPIView(APIView):
             
             today_workouts = []
 
-            print("assignments", assignments)
             
             for assignment in assignments:
                 # Find today's workout
@@ -702,7 +699,6 @@ class TodayWorkoutAPIView(APIView):
             })
             
         except Exception as e:
-            print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", e)
             return Response({
                 'status': 'error',
                 'message': str(e)
@@ -714,9 +710,7 @@ class UpcomingWorkoutsAPIView(APIView):
     
     def get(self, request):
         try:
-            print("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
             today = timezone.now().date()
-            today = today + timedelta(days=3)
             next_7_days = [today + timedelta(days=i) for i in range(1, 8)]
             
             # Get user's active assignments
@@ -727,7 +721,6 @@ class UpcomingWorkoutsAPIView(APIView):
             ).select_related('weekly_template').prefetch_related(
                 'weekly_template__day_templates__activities__exercise__equipment'
             )
-            print("ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooccccccccccccc", assignments)
             if not assignments.exists():
                 return Response({
                     'status': 'success',
@@ -738,7 +731,6 @@ class UpcomingWorkoutsAPIView(APIView):
                 })
             
             upcoming_workouts = []
-            print("ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooccccccccccccc", assignments)
             for future_date in next_7_days:
                 day_name = calendar.day_name[future_date.weekday()].lower()
                 day_workouts = []
@@ -770,7 +762,6 @@ class UpcomingWorkoutsAPIView(APIView):
                         'total_workouts': len(day_workouts)
                     })
 
-            print("ppppppppppppppppppppppppppppppppppppppppppp", upcoming_workouts)
             
             return Response({
                 'status': 'success',
@@ -794,7 +785,6 @@ class WeeklyWorkoutScheduleAPIView(APIView):
         try:
             today = timezone.now().date()
 
-            print("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
             
             # Get user's active assignments
             assignments = UserWorkoutAssignment.objects.filter(
@@ -817,7 +807,6 @@ class WeeklyWorkoutScheduleAPIView(APIView):
             assignments_data = []
 
 
-            print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", assignments)
             
             for assignment in assignments:
                 # Get all day templates for this assignment
