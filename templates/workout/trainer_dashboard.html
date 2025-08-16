@@ -1,0 +1,117 @@
+<!-- workout/templates/workout/trainer_dashboard.html -->
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block title %}Trainer Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+<div class="row">
+    <div class="col-lg-8 mb-4 order-0">
+        <div class="card">
+            <div class="d-flex align-items-end row">
+                <div class="col-sm-7">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Welcome {{ user.get_full_name|default:user.username }}! 🎉</h5>
+                        <p class="mb-4">You have <span class="fw-bold">{{ active_assignments }}</span> active assignments and <span class="fw-bold">{{ total_templates }}</span> workout templates.</p>
+                        <a href="{% url 'workout:create_template' %}" class="btn btn-sm btn-outline-primary">Create New Template</a>
+                    </div>
+                </div>
+                <div class="col-sm-5 text-center text-sm-left">
+                    <div class="card-body pb-0 px-0 px-md-4">
+                        <img src="{% static 'assets/img/illustrations/man-with-laptop-light.png' %}" height="140" alt="View Badge User" data-app-dark-img="illustrations/man-with-laptop-dark.png" data-app-light-img="illustrations/man-with-laptop-light.png">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-4 order-1">
+        <div class="row">
+            <div class="col-lg-6 col-md-12 col-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                                <i class="bx bx-calendar-week text-success"></i>
+                            </div>
+                        </div>
+                        <span class="fw-semibold d-block mb-1">Templates</span>
+                        <h3 class="card-title mb-2">{{ total_templates }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                                <i class="bx bx-user-check text-info"></i>
+                            </div>
+                        </div>
+                        <span class="fw-semibold d-block mb-1">Active Assignments</span>
+                        <h3 class="card-title mb-2">{{ active_assignments }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Templates -->
+    <div class="col-md-6 col-lg-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="card-title m-0 me-2">Recent Templates</h5>
+                <a href="{% url 'workout:template_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% for template in templates %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex flex-column">
+                            <h6 class="mb-1">{{ template.name }}</h6>
+                            <small class="text-muted">{{ template.fitness_level }} - {{ template.goal }}</small>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn p-0" type="button" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'workout:template_detail' template.pk %}">View</a>
+                                <a class="dropdown-item" href="{% url 'workout:assign_template' template.pk %}">Assign</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No templates created yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Assignments -->
+    <div class="col-md-6 col-lg-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="card-title m-0 me-2">Recent Assignments</h5>
+                <a href="{% url 'workout:assignment_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% for assignment in assignments %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex flex-column">
+                            <h6 class="mb-1">{{ assignment.user.get_full_name|default:assignment.user.username }}</h6>
+                            <small class="text-muted">{{ assignment.weekly_template.name }}</small>
+                        </div>
+                        <span class="badge bg-label-{{ assignment.status|yesno:'success,warning' }}">{{ assignment.get_status_display }}</span>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No assignments yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

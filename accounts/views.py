@@ -392,8 +392,6 @@ class CustomLoginView(LoginView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-
-
 class UserListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'admin_panel/user_list.html'
@@ -1853,18 +1851,25 @@ class LoginWithOTPView(View):
 
 
 
+# from django.views import View
+# from django.shortcuts import render, redirect
+# from django.contrib import messages
+# from django.contrib.auth import login
+# from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+# from .models import User
+
 class VerifyOTPView(View):
     template_name = 'advadmin/verify_otp.html'
 
     def get(self, request):
-        stored_otp = request.session.get('otp')
         if 'phone_number' not in request.session:
             messages.error(request, "Session expired. Please request OTP again.")
             return redirect('login_with_otp')
         return render(request, self.template_name)
 
     def post(self, request):
-        user_otp = request.POST.get('otp')
+        user_otp = request.POST.get('otp', '').strip()
         phone_number = request.session.get('phone_number')
         stored_otp = request.session.get('otp')
         otp_valid_until = request.session.get('otp_valid_until')
@@ -1873,7 +1878,11 @@ class VerifyOTPView(View):
             messages.error(request, "Session expired. Please request OTP again.")
             return redirect('login_with_otp')
 
-        if timezone.now() > timezone.datetime.fromisoformat(otp_valid_until):
+        otp_expiry = parse_datetime(otp_valid_until)
+        if otp_expiry is not None and timezone.is_naive(otp_expiry):
+            otp_expiry = timezone.make_aware(otp_expiry)
+
+        if timezone.now() > otp_expiry:
             messages.error(request, "OTP has expired. Please request a new one.")
             return redirect('login_with_otp')
 
@@ -1884,19 +1893,18 @@ class VerifyOTPView(View):
                 messages.error(request, "No user found with the corresponding phone number.")
                 return render(request, self.template_name)
 
-            # ✅ Specify backend manually
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
 
             # Clear OTP session values
-            request.session.pop('otp', None)
-            request.session.pop('otp_valid_until', None)
-            request.session.pop('phone_number', None)
+            for k in ('otp', 'otp_valid_until', 'phone_number'):
+                request.session.pop(k, None)
 
             return redirect('otp_login_success')
         else:
             messages.error(request, "Invalid OTP. Please try again.")
             return render(request, self.template_name)
+
 
 
 class OTPLoginSuccessView(View):

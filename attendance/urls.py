@@ -18,6 +18,6 @@ urlpatterns = [
 
     path('qr/livecheckin/', views.qr_checkin_view, name='qr_livecheckin'),
     path('qr/scan/', views.QRScanView.as_view(), name='qr_scan'),
-
     path('api/check-qr-status/<int:schedule_id>/', views.check_qr_status, name='check_qr_status'),
+    path('api/attendance/', views.AttendanceListView.as_view(), name='attendance-list'),
 ]

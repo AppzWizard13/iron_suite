@@ -25,4 +25,5 @@ urlpatterns = [
     # Members
     path('members/', views.MemberListView.as_view(), name='member_list'),
     # If you add a member-workout assignment page, add it here as needed
+
 ]

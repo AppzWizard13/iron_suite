@@ -1,0 +1,89 @@
+<!-- workout/templates/workout/exercise_form.html -->
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block title %}
+  {% if form.instance.pk %}Edit Exercise{% else %}Add Exercise{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            {% if form.instance.pk %}
+                Edit Exercise: {{ form.instance.name }}
+            {% else %}
+                Add New Exercise
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Exercise Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Equipment</label>
+                    {{ form.equipment }}
+                    {% if form.equipment.errors %}
+                        <div class="text-danger">{{ form.equipment.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Muscle Groups</label>
+                {{ form.muscle_groups }}
+                {% if form.muscle_groups.errors %}
+                    <div class="text-danger">{{ form.muscle_groups.errors }}</div>
+                {% endif %}
+                <div class="form-text">Separate multiple muscle groups with commas (e.g., Chest, Triceps, Shoulders)</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Instructions</label>
+                {{ form.instructions }}
+                {% if form.instructions.errors %}
+                    <div class="text-danger">{{ form.instructions.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Safety Notes</label>
+                {{ form.safety_notes }}
+                {% if form.safety_notes.errors %}
+                    <div class="text-danger">{{ form.safety_notes.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Video URL (Optional)</label>
+                {{ form.video_url }}
+                {% if form.video_url.errors %}
+                    <div class="text-danger">{{ form.video_url.errors }}</div>
+                {% endif %}
+                <div class="form-text">Link to instructional video (YouTube, Vimeo, etc.)</div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'workout:exercise_list' %}" class="btn btn-outline-secondary">
+                    <i class="bx bx-arrow-back"></i> Back to Exercises
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bx bx-check"></i> 
+                    {% if form.instance.pk %}Update Exercise{% else %}Create Exercise{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,198 @@
+<!-- workout/templates/workout/update_template.html -->
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block title %}Update Template - {{ object.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .day-card {
+        border: 1px solid #d9dee3;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+    }
+    .activity-row {
+        border-bottom: 1px solid #eee;
+        padding: 10px 0;
+    }
+    .activity-row:last-child {
+        border-bottom: none;
+    }
+    .activity-header {
+        background-color: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 0.25rem;
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Update Weekly Workout Template</h5>
+        <p class="text-muted mb-0">Modify the details of "{{ object.name }}"</p>
+    </div>
+    <div class="card-body">
+        <form method="post" id="templateForm">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Template Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fitness Level</label>
+                    {{ form.fitness_level }}
+                    {% if form.fitness_level.errors %}
+                        <div class="text-danger">{{ form.fitness_level.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Goal</label>
+                    {{ form.goal }}
+                    {% if form.goal.errors %}
+                        <div class="text-danger">{{ form.goal.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Sessions Per Week</label>
+                    {{ form.total_sessions_per_week }}
+                    {% if form.total_sessions_per_week.errors %}
+                        <div class="text-danger">{{ form.total_sessions_per_week.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Estimated Duration Per Session</label>
+                    {{ form.estimated_duration_per_session }}
+                    {% if form.estimated_duration_per_session.errors %}
+                        <div class="text-danger">{{ form.estimated_duration_per_session.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Current Schedule Preview -->
+            <h6 class="mb-3">Current Weekly Schedule</h6>
+            <div class="alert alert-info">
+                <i class="bx bx-info-circle me-2"></i>
+                <strong>Note:</strong> To modify individual workouts, please edit them from the template detail page after saving these basic changes.
+            </div>
+
+            {% if object.day_templates.all %}
+            <div class="row mb-4">
+                {% for day_template in object.day_templates.all %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">{{ day_template.get_day_display }}</h6>
+                            {% if day_template.is_rest_day %}
+                                <span class="badge bg-label-secondary">Rest Day</span>
+                            {% else %}
+                                <span class="badge bg-label-primary">{{ day_template.activities.count }} activities</span>
+                            {% endif %}
+                        </div>
+                        {% if not day_template.is_rest_day %}
+                        <div class="card-body">
+                            <h6 class="mb-2">{{ day_template.name }}</h6>
+                            <small class="text-muted">Duration: {{ day_template.estimated_duration }}</small>
+                            {% if day_template.activities.all %}
+                                <div class="mt-2">
+                                    {% for activity in day_template.activities.all|slice:":3" %}
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small>{{ activity.exercise.name }}</small>
+                                        <span class="badge bg-light text-dark">{{ activity.sets }}x{{ activity.reps }}</span>
+                                    </div>
+                                    {% endfor %}
+                                    {% if day_template.activities.count > 3 %}
+                                        <small class="text-muted">... and {{ day_template.activities.count|add:"-3" }} more</small>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'workout:template_detail' object.pk %}" class="btn btn-outline-secondary">
+                        <i class="bx bx-arrow-back"></i> Back to Template
+                    </a>
+                    <a href="{% url 'workout:template_list' %}" class="btn btn-outline-primary">
+                        <i class="bx bx-list-ul"></i> All Templates
+                    </a>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bx bx-check"></i> Update Template
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+
+<!-- Success/Error Messages -->
+{% if messages %}
+<div class="mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add form validation
+    const form = document.getElementById('templateForm');
+    form.addEventListener('submit', function(e) {
+        const templateName = document.querySelector('input[name="name"]').value.trim();
+        if (!templateName) {
+            e.preventDefault();
+            alert('Please enter a template name.');
+            return false;
+        }
+    });
+
+    // Auto-save functionality (optional)
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // You can add auto-save functionality here if needed
+            console.log('Field changed:', this.name);
+        });
+    });
+});
+</script>
+{% endblock %}

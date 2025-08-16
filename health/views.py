@@ -121,3 +121,6 @@ class WorkoutCategoryCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, "Workout Category created!")
         return super().form_valid(form)
+
+
+

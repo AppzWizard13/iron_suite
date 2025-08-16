@@ -1,0 +1,305 @@
+<!-- workout/templates/workout/create_weekly_template.html -->
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block title %}Create Weekly Template{% endblock %}
+
+{% block extra_css %}
+<style>
+    .day-card {
+        border: 1px solid #d9dee3;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+    }
+    .activity-row {
+        border-bottom: 1px solid #eee;
+        padding: 10px 0;
+    }
+    .activity-row:last-child {
+        border-bottom: none;
+    }
+    .activity-header {
+        background-color: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 0.25rem;
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Create Weekly Workout Template</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" id="templateForm">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Template Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fitness Level</label>
+                    {{ form.fitness_level }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Goal</label>
+                    {{ form.goal }}
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Sessions Per Week</label>
+                    {{ form.total_sessions_per_week }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Estimated Duration Per Session</label>
+                    {{ form.estimated_duration_per_session }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Description</label>
+                {{ form.description }}
+            </div>
+
+            <!-- Daily Templates -->
+            <h6 class="mb-3">Weekly Schedule</h6>
+            <div id="weeklySchedule">
+                {% for day in weekdays %}
+                <div class="day-card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">{{ day|title }}</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="{{ day }}_rest" name="{{ day }}_rest">
+                                <label class="form-check-label" for="{{ day }}_rest">Rest Day</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body {{ day }}-content">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Workout Name</label>
+                                <input type="text" class="form-control" name="{{ day }}_name" placeholder="e.g., Upper Body Strength">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Duration</label>
+                                <input type="text" class="form-control" name="{{ day }}_duration" placeholder="45-55min" value="45-55min">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="{{ day }}_notes" rows="2" placeholder="Special instructions for this day"></textarea>
+                        </div>
+
+                        <!-- Activities Section -->
+                        <div class="activities-section">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">Activities</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-activity" data-day="{{ day }}">
+                                    <i class="bx bx-plus"></i> Add Activity
+                                </button>
+                            </div>
+                            
+                            <!-- Activity Headers -->
+                            <div class="activity-header d-none" id="{{ day }}_header">
+                                <div class="row">
+                                    <div class="col-md-3">Exercise</div>
+                                    <div class="col-md-2">Sets</div>
+                                    <div class="col-md-2">Reps</div>
+                                    <div class="col-md-2">Weight/RPE</div>
+                                    <div class="col-md-2">Duration</div>
+                                    <div class="col-md-1">Action</div>
+                                </div>
+                            </div>
+                            
+                            <div class="activities-container" id="{{ day }}_activities">
+                                <!-- Activities will be added here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'workout:trainer_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="bx bx-arrow-back"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bx bx-check"></i> Create Template
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+
+<!-- Activity Template -->
+<script type="text/template" id="activity-template">
+    <div class="activity-row">
+        <div class="row">
+            <div class="col-md-3">
+                <select class="form-select exercise-select" name="#{day}_exercise_#{index}" required>
+                    <option value="">Select Exercise</option>
+                    {% for exercise in exercises %}
+                        <option value="{{ exercise.id }}">{{ exercise.name }} ({{ exercise.equipment.name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" name="#{day}_sets_#{index}" placeholder="Sets" min="1" max="10" value="3">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" name="#{day}_reps_#{index}" placeholder="Reps" value="10">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" name="#{day}_weight_#{index}" placeholder="Weight/RPE">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" name="#{day}_duration_#{index}" placeholder="Duration" value="10min">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-activity" title="Remove Activity">
+                    <i class="bx bx-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-12">
+                <input type="text" class="form-control" name="#{day}_cues_#{index}" placeholder="Form cues and instructions">
+            </div>
+        </div>
+    </div>
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let activityCounters = {};
+    
+    // Initialize counters for each day
+    ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
+        activityCounters[day] = 0;
+    });
+
+    // Add activity functionality
+    document.querySelectorAll('.add-activity').forEach(button => {
+        button.addEventListener('click', function() {
+            const day = this.dataset.day;
+            const template = document.getElementById('activity-template').innerHTML;
+            const activityHtml = template
+                .replace(/#{day}/g, day)
+                .replace(/#{index}/g, activityCounters[day]);
+            
+            // Show header if first activity
+            const header = document.getElementById(`${day}_header`);
+            if (activityCounters[day] === 0) {
+                header.classList.remove('d-none');
+            }
+            
+            document.getElementById(`${day}_activities`).insertAdjacentHTML('beforeend', activityHtml);
+            activityCounters[day]++;
+        });
+    });
+
+    // Remove activity functionality
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-activity')) {
+            const activityRow = e.target.closest('.activity-row');
+            const activitiesContainer = activityRow.parentElement;
+            const day = activitiesContainer.id.replace('_activities', '');
+            
+            activityRow.remove();
+            activityCounters[day]--;
+            
+            // Hide header if no activities left
+            if (activityCounters[day] === 0) {
+                document.getElementById(`${day}_header`).classList.add('d-none');
+            }
+        }
+    });
+
+    // Rest day toggle
+    document.querySelectorAll('input[type="checkbox"][id$="_rest"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const day = this.id.replace('_rest', '');
+            const content = document.querySelector(`.${day}-content`);
+            if (this.checked) {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
+        });
+    });
+
+    // Form validation
+    document.getElementById('templateForm').addEventListener('submit', function(e) {
+        const templateName = document.querySelector('input[name="name"]').value.trim();
+        if (!templateName) {
+            e.preventDefault();
+            alert('Please enter a template name.');
+            return false;
+        }
+
+        // Check if at least one day has activities or is marked as rest day
+        let hasValidDay = false;
+        ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
+            const isRestDay = document.querySelector(`#${day}_rest`).checked;
+            const hasActivities = document.querySelector(`#${day}_activities`).children.length > 0;
+            const hasName = document.querySelector(`input[name="${day}_name"]`).value.trim();
+            
+            if (isRestDay || (hasActivities && hasName)) {
+                hasValidDay = true;
+            }
+        });
+
+        if (!hasValidDay) {
+            e.preventDefault();
+            alert('Please add at least one workout day with activities or mark days as rest days.');
+            return false;
+        }
+    });
+
+    // Auto-generate workout names based on activities
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('exercise-select')) {
+            const day = e.target.name.split('_')[0];
+            const nameInput = document.querySelector(`input[name="${day}_name"]`);
+            
+            if (!nameInput.value.trim()) {
+                const exercises = document.querySelectorAll(`select[name^="${day}_exercise"]`);
+                const selectedExercises = Array.from(exercises)
+                    .map(select => select.options[select.selectedIndex]?.text)
+                    .filter(text => text && text !== 'Select Exercise');
+                
+                if (selectedExercises.length > 0) {
+                    const firstExercise = selectedExercises[0].split('(')[0].trim();
+                    if (selectedExercises.length === 1) {
+                        nameInput.value = `${firstExercise} Workout`;
+                    } else if (selectedExercises.length <= 3) {
+                        nameInput.value = `${firstExercise} + ${selectedExercises.length - 1} more`;
+                    } else {
+                        nameInput.value = `${day.charAt(0).toUpperCase() + day.slice(1)} Workout`;
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

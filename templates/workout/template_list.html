@@ -1,0 +1,149 @@
+<!-- workout/templates/workout/template_list.html -->
+{% extends 'advadmin/index.html' %}
+
+{% block title %}Workout Templates{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Workout Templates</h5>
+        <a href="{% url 'workout:create_template' %}" class="btn btn-primary">
+            <i class="bx bx-plus"></i> Create Template
+        </a>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card-body border-bottom">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="search" value="{{ current_search }}" placeholder="Search templates...">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="fitness_level">
+                    <option value="">All Fitness Levels</option>
+                    {% for level in fitness_levels %}
+                        <option value="{{ level.name }}" {% if level.name == current_fitness_level %}selected{% endif %}>
+                            {{ level.get_name_display }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="goal">
+                    <option value="">All Goals</option>
+                    {% for goal in goals %}
+                        <option value="{{ goal.name }}" {% if goal.name == current_goal %}selected{% endif %}>
+                            {{ goal.get_name_display }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary">Filter</button>
+                <a href="{% url 'workout:template_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive text-nowrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Fitness Level</th>
+                    <th>Goal</th>
+                    <th>Sessions/Week</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for template in templates %}
+                <tr>
+                    <td>
+                        <strong>{{ template.name }}</strong>
+                        {% if template.description %}
+                            <br><small class="text-muted">{{ template.description|truncatechars:50 }}</small>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-label-info">{{ template.fitness_level.get_name_display }}</span></td>
+                    <td><span class="badge bg-label-primary">{{ template.goal.get_name_display }}</span></td>
+                    <td>{{ template.total_sessions_per_week }}</td>
+                    <td>{{ template.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if template.is_active %}
+                            <span class="badge bg-label-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-label-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'workout:template_detail' template.pk %}">
+                                    <i class="bx bx-show me-1"></i> View
+                                </a>
+                                <a class="dropdown-item" href="{% url 'workout:update_template' template.pk %}">
+                                    <i class="bx bx-edit-alt me-1"></i> Edit
+                                </a>
+                                <a class="dropdown-item" href="{% url 'workout:assign_template' template.pk %}">
+                                    <i class="bx bx-user-plus me-1"></i> Assign
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" href="{% url 'workout:delete_template' template.pk %}">
+                                    <i class="bx bx-trash me-1"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <p class="text-muted mb-2">No templates found</p>
+                        <a href="{% url 'workout:create_template' %}" class="btn btn-primary">Create Your First Template</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="card-footer">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.fitness_level %}&fitness_level={{ request.GET.fitness_level }}{% endif %}{% if request.GET.goal %}&goal={{ request.GET.goal }}{% endif %}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.fitness_level %}&fitness_level={{ request.GET.fitness_level }}{% endif %}{% if request.GET.goal %}&goal={{ request.GET.goal }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.fitness_level %}&fitness_level={{ request.GET.fitness_level }}{% endif %}{% if request.GET.goal %}&goal={{ request.GET.goal }}{% endif %}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.fitness_level %}&fitness_level={{ request.GET.fitness_level }}{% endif %}{% if request.GET.goal %}&goal={{ request.GET.goal }}{% endif %}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

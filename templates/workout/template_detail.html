@@ -1,0 +1,111 @@
+<!-- workout/templates/workout/template_detail.html -->
+{% extends 'advadmin/index.html' %}
+
+{% block title %}{{ template.name }}{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">{{ template.name }}</h5>
+                <div>
+                    <a href="{% url 'workout:update_template' template.pk %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bx bx-edit-alt"></i> Edit
+                    </a>
+                    <a href="{% url 'workout:assign_template' template.pk %}" class="btn btn-sm btn-primary">
+                        <i class="bx bx-user-plus"></i> Assign
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Template Information</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Fitness Level:</strong> {{ template.fitness_level.get_name_display }}</li>
+                            <li><strong>Goal:</strong> {{ template.goal.get_name_display }}</li>
+                            <li><strong>Sessions per Week:</strong> {{ template.total_sessions_per_week }}</li>
+                            <li><strong>Duration per Session:</strong> {{ template.estimated_duration_per_session }}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Description</h6>
+                        <p>{{ template.description|default:"No description provided." }}</p>
+                    </div>
+                </div>
+
+                <!-- Weekly Schedule -->
+                <h6>Weekly Schedule</h6>
+                <div class="row">
+                    {% for day_template in day_templates %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">{{ day_template.get_day_display }}</h6>
+                                {% if day_template.is_rest_day %}
+                                    <span class="badge bg-label-secondary">Rest Day</span>
+                                {% else %}
+                                    <small class="text-muted">{{ day_template.estimated_duration }}</small>
+                                {% endif %}
+                            </div>
+                            {% if not day_template.is_rest_day %}
+                            <div class="card-body">
+                                <h6 class="mb-2">{{ day_template.name }}</h6>
+                                {% if day_template.activities.all %}
+                                    <div class="mb-3">
+                                        {% for activity in day_template.activities.all %}
+                                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                            <div>
+                                                <strong>{{ activity.exercise.name }}</strong>
+                                                <br><small class="text-muted">{{ activity.exercise.equipment.name }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-primary">{{ activity.sets }}x{{ activity.reps }}</span>
+                                                {% if activity.weight_percentage %}
+                                                    <br><small>{{ activity.weight_percentage }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% if day_template.notes %}
+                                    <small class="text-muted">{{ day_template.notes }}</small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Recent Assignments</h6>
+            </div>
+            <div class="card-body">
+                {% for assignment in assignments %}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="mb-1">{{ assignment.user.get_full_name|default:assignment.user.username }}</h6>
+                        <small class="text-muted">{{ assignment.assigned_date|date:"M d, Y" }}</small>
+                    </div>
+                    <span class="badge bg-label-{{ assignment.status|yesno:'success,warning' }}">
+                        {{ assignment.get_status_display }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-muted">No assignments yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

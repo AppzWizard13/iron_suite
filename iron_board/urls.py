@@ -38,6 +38,7 @@ urlpatterns = [
     path('', include('notifications.urls')),
     path('', include('health.urls')),
     path('', include('api_v1.urls')),
+    path('', include('workout.urls')),
     # SSO 
     path('accounts/', include('allauth.urls')),
 

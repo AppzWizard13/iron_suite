@@ -1,4 +1,11 @@
 from django.db import models
+from django.utils import timezone
+from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django_multitenant.models import TenantModelMixin
+from datetime import date
+
+
 # Get User model
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -57,3 +64,86 @@ class MemberWorkoutAssignment(models.Model):
 
     def __str__(self):
         return f"{self.member.user.username} - {self.template.name}"
+
+class BodyMeasurement(models.Model):
+    """
+    Stores weight progress for each gym customer.
+    Includes BMI and week tracking for historical graph purposes.
+    """
+
+    gym = models.ForeignKey(
+        'accounts.Gym',
+        on_delete=models.CASCADE,
+        related_name='measurements'
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='measurements'
+    )
+
+    date = models.DateField(default=timezone.now, db_index=True)
+
+    week_of_year = models.PositiveSmallIntegerField(editable=False, db_index=True)
+    year = models.PositiveSmallIntegerField(editable=False, db_index=True)
+
+    # Week count since user joined the gym
+    week_index_since_join = models.PositiveIntegerField(editable=False, db_index=True)
+
+    weight_kg = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        validators=[MinValueValidator(20), MaxValueValidator(400)]
+    )
+
+    height_cm = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        validators=[MinValueValidator(50), MaxValueValidator(300)]
+    )
+
+    bmi = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        validators=[MinValueValidator(10), MaxValueValidator(60)],
+        editable=False  # Prevent editing from forms/admin
+    )
+
+    class Meta:
+        unique_together = ('user', 'date')
+        ordering = ['-date']
+        indexes = [
+            models.Index(fields=['gym', 'user', 'date']),
+            models.Index(fields=['gym', 'user', 'year', 'week_of_year']),
+            models.Index(fields=['gym', 'user', 'week_index_since_join']),
+        ]
+
+    def save(self, *args, **kwargs):
+        # Ensure gym is set from user if not provided
+        if not self.gym_id and getattr(self.user, 'gym_id', None):
+            self.gym_id = self.user.gym_id
+
+        # Set year/week from date
+        iso_year, iso_week, _ = self.date.isocalendar()
+        self.year = iso_year
+        self.week_of_year = iso_week
+
+        # Calculate weeks since join
+        if getattr(self.user, "join_date", None):
+            days_since_join = (self.date - self.user.join_date).days
+            self.week_index_since_join = (days_since_join // 7) + 1
+        else:
+            self.week_index_since_join = 1
+
+        # Calculate BMI if height and weight present
+        if self.height_cm and self.weight_kg:
+            height_m = float(self.height_cm) / 100
+            self.bmi = round(float(self.weight_kg) / (height_m ** 2), 1)
+        else:
+            self.bmi = None
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user} - {self.date} (Week {self.week_index_since_join}) - {self.weight_kg} kg (BMI: {self.bmi})"

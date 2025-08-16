@@ -33,7 +33,6 @@ class Gym(models.Model):  # 👈 GOOD
         return self.name
 
 
-    
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:

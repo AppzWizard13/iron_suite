@@ -11,21 +11,16 @@ admin.site.register(WorkoutCategory)
 admin.site.register(Equipment)
 
 
-# admin.py
 
-from django.contrib import admin
-from .models import WorkoutTemplate, WorkoutTemplateDay, MemberWorkoutAssignment
+# from .models import BodyMeasurement
 
-class WorkoutTemplateDayInline(admin.TabularInline):
-    model = WorkoutTemplateDay
-    extra = 1
-
-@admin.register(WorkoutTemplate)
-class WorkoutTemplateAdmin(admin.ModelAdmin):
-    list_display = ['name']
-    inlines = [WorkoutTemplateDayInline]
-
-@admin.register(MemberWorkoutAssignment)
-class MemberWorkoutAssignmentAdmin(admin.ModelAdmin):
-    list_display = ['member', 'template', 'start_date', 'is_active']
-    list_filter = ['is_active', 'template']
+# @admin.register(BodyMeasurement)
+# class BodyMeasurementAdmin(admin.ModelAdmin):
+#     list_display = ('user', 'gym', 'date', 'weight_kg')
+#     list_filter = ('gym', 'date')
+#     autocomplete_fields = ('user', 'gym')
+#     search_fields = [
+#         'user__phone_number',
+#         'user__first_name',
+#         'user__last_name'
+#     ]

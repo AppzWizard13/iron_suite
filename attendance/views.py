@@ -19,6 +19,10 @@ from .forms import ScheduleForm, ClassEnrollmentForm
 from .models import (
     Attendance, Schedule, ClassEnrollment, QRToken, CheckInLog
 )
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import Attendance
+from .serializers import AttendanceSerializer
 
 CustomUser = get_user_model()
 
@@ -419,3 +423,14 @@ def check_qr_status(request, schedule_id):
         })
     else:
         return JsonResponse({'status': 'waiting'})
+
+
+
+
+
+class AttendanceListView(generics.ListAPIView):
+    serializer_class = AttendanceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Attendance.objects.filter(user=self.request.user)

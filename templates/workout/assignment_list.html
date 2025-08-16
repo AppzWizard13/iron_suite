@@ -1,0 +1,258 @@
+<!-- workout/templates/workout/assignment_list.html -->
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block title %}Workout Assignments{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">User Workout Assignments</h5>
+        <a href="{% url 'workout:template_list' %}" class="btn btn-outline-primary">
+            <i class="bx bx-plus"></i> Create Template to Assign
+        </a>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card-body border-bottom">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" name="search" value="{{ request.GET.search }}" placeholder="Search by user or template name...">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="assigned" {% if request.GET.status == 'assigned' %}selected{% endif %}>Assigned</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="paused" {% if request.GET.status == 'paused' %}selected{% endif %}>Paused</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control" name="date_from" value="{{ request.GET.date_from }}" placeholder="From Date">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary">Filter</button>
+                <a href="{% url 'workout:assignment_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive text-nowrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Workout Template</th>
+                    <th>Fitness Level</th>
+                    <th>Goal</th>
+                    <th>Start Date</th>
+                    <th>Status</th>
+                    {% comment %} <th>Progress</th>
+                    <th>Actions</th> {% endcomment %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial bg-label-primary rounded-circle">
+                                    {{ assignment.user.first_name.0|default:assignment.user.username.0|upper }}
+                                </span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{{ assignment.user.get_full_name|default:assignment.user.username }}</h6>
+                                <small class="text-muted">{{ assignment.user.email }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <strong>{{ assignment.weekly_template.name }}</strong>
+                        <br><small class="text-muted">{{ assignment.weekly_template.description|truncatechars:30 }}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-label-info">{{ assignment.weekly_template.fitness_level.get_name_display }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-label-primary">{{ assignment.weekly_template.goal.get_name_display }}</span>
+                    </td>
+                    <td>{{ assignment.start_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if assignment.status == 'active' %}
+                            <span class="badge bg-label-success">{{ assignment.get_status_display }}</span>
+                        {% elif assignment.status == 'assigned' %}
+                            <span class="badge bg-label-warning">{{ assignment.get_status_display }}</span>
+                        {% elif assignment.status == 'completed' %}
+                            <span class="badge bg-label-info">{{ assignment.get_status_display }}</span>
+                        {% elif assignment.status == 'paused' %}
+                            <span class="badge bg-label-secondary">{{ assignment.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    {% comment %} <td>
+                        <div class="d-flex align-items-center">
+                            <div class="progress me-2" style="width: 60px; height: 6px;">
+                                <div class="progress-bar" role="progressbar" style="width: 65%"></div>
+                            </div>
+                            <small class="text-muted">65%</small>
+                        </div>
+                    </td> {% endcomment %}
+                    {% comment %} <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'workout:template_detail' assignment.weekly_template.pk %}">
+                                    <i class="bx bx-show me-1"></i> View Template
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" onclick="changeStatus({{ assignment.id }}, 'active')">
+                                    <i class="bx bx-play me-1"></i> Activate
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="changeStatus({{ assignment.id }}, 'paused')">
+                                    <i class="bx bx-pause me-1"></i> Pause
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="changeStatus({{ assignment.id }}, 'completed')">
+                                    <i class="bx bx-check me-1"></i> Complete
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" href="#" onclick="deleteAssignment({{ assignment.id }})">
+                                    <i class="bx bx-trash me-1"></i> Remove
+                                </a>
+                            </div>
+                        </div>
+                    </td> {% endcomment %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <div class="py-4">
+                            <i class="bx bx-user-check display-4 text-muted"></i>
+                            <p class="text-muted mt-2 mb-3">No workout assignments found</p>
+                            <a href="{% url 'workout:template_list' %}" class="btn btn-primary">
+                                <i class="bx bx-plus"></i> Create Template to Assign
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="card-footer">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Status Change Modal -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Assignment Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to change this assignment status?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusChange">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeStatus(assignmentId, newStatus) {
+    // Show confirmation modal
+    const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+    modal.show();
+    
+    document.getElementById('confirmStatusChange').onclick = function() {
+        // Make AJAX request to change status
+        fetch(`/api/assignments/${assignmentId}/status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating status');
+        });
+        
+        modal.hide();
+    };
+}
+
+function deleteAssignment(assignmentId) {
+    if (confirm('Are you sure you want to remove this assignment? This action cannot be undone.')) {
+        fetch(`/api/assignments/${assignmentId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting assignment');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting assignment');
+        });
+    }
+}
+</script>
+{% endblock %}

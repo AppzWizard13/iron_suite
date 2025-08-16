@@ -275,58 +275,117 @@
             </a>
           </li>
 
-
           <!-- Operations -->
           <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Operations</span>
+            <span class="menu-header-text">WORKOUT MANAGEMENT</span>
           </li>
 
-          <!-- Dashboard -->
-          <li class="menu-item {% if page_name == 'admin_dashboard' %}active{% endif %}">
-            <a href="{% url 'workout_dashboard' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-home"></i>
-              <div data-i18n="Dashboard">Dashboard</div>
+          <!-- Trainer Dashboard -->
+          <li class="menu-item {% if page_name == 'trainer_dashboard' %}active{% endif %}">
+            <a href="{% url 'workout:trainer_dashboard' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-tachometer"></i>
+              <div data-i18n="Trainer Dashboard">Trainer Dashboard</div>
             </a>
           </li>
 
-          <!-- Workout Programs -->
-          <li class="menu-item {% if page_name == 'workout_program_list' %}active{% endif %}">
-            <a href="{% url 'workout_program_list' %}" class="menu-link">
+          <!-- Weekly Templates -->
+          <li class="menu-item {% if page_name == 'template_list' or page_name == 'create_template' or page_name == 'template_detail' %}active open{% endif %}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <i class="menu-icon tf-icons bx bx-calendar-week"></i>
+              <div data-i18n="Weekly Templates">Weekly Templates</div>
+            </a>
+            <ul class="menu-sub">
+              <li class="menu-item {% if page_name == 'template_list' %}active{% endif %}">
+                <a href="{% url 'workout:template_list' %}" class="menu-link">
+                  <div data-i18n="All Templates">All Templates</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'create_template' %}active{% endif %}">
+                <a href="{% url 'workout:create_template' %}" class="menu-link">
+                  <div data-i18n="Create Template">Create Template</div>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Workout Assignments -->
+          <li class="menu-item {% if page_name == 'assignment_list' %}active{% endif %}">
+            <a href="{% url 'workout:assignment_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-user-check"></i>
+              <div data-i18n="Assignments">User Assignments</div>
+            </a>
+          </li>
+
+          <!-- Exercise Management -->
+          <li class="menu-item {% if page_name == 'exercise_list' or page_name == 'create_exercise' %}active open{% endif %}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
               <i class="menu-icon tf-icons bx bx-dumbbell"></i>
-              <div data-i18n="Workout Programs">Workout Programs</div>
+              <div data-i18n="Exercises">Exercise Management</div>
             </a>
+            <ul class="menu-sub">
+              <li class="menu-item {% if page_name == 'exercise_list' %}active{% endif %}">
+                <a href="{% url 'workout:exercise_list' %}" class="menu-link">
+                  <div data-i18n="All Exercises">All Exercises</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'create_exercise' %}active{% endif %}">
+                <a href="{% url 'workout:create_exercise' %}" class="menu-link">
+                  <div data-i18n="Add Exercise">Add Exercise</div>
+                </a>
+              </li>
+            </ul>
           </li>
 
-          <!-- Equipment -->
-          <li class="menu-item {% if page_name == 'equipment_list' %}active{% endif %}">
-            <a href="{% url 'equipment_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-cog"></i>
-              <div data-i18n="Equipment">Equipment</div>
+          <!-- Equipment Management -->
+          <li class="menu-item {% if page_name == 'equipment_list' or page_name == 'create_equipment' %}active open{% endif %}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <i class="menu-icon tf-icons bx bx-wrench"></i>
+              <div data-i18n="Equipment">Equipment Management</div>
             </a>
+            <ul class="menu-sub">
+              <li class="menu-item {% if page_name == 'equipment_list' %}active{% endif %}">
+                <a href="{% url 'workout:equipment_list' %}" class="menu-link">
+                  <div data-i18n="All Equipment">All Equipment</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'create_equipment' %}active{% endif %}">
+                <a href="{% url 'workout:create_equipment' %}" class="menu-link">
+                  <div data-i18n="Add Equipment">Add Equipment</div>
+                </a>
+              </li>
+            </ul>
           </li>
 
-          <!-- Workout Categories -->
-          <li class="menu-item {% if page_name == 'workout_category_list' %}active{% endif %}">
-            <a href="{% url 'workout_category_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-grid-alt"></i>
-              <div data-i18n="Categories (Workout Category)">Workout Category</div>
+          {% comment %} <!-- User Workouts (for users) -->
+          <li class="menu-item {% if page_name == 'user_dashboard' or page_name == 'workout_calendar' or page_name == 'session_history' %}active open{% endif %}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <i class="menu-icon tf-icons bx bx-run"></i>
+              <div data-i18n="My Workouts">My Workouts</div>
             </a>
-          </li>
+            <ul class="menu-sub">
+              <li class="menu-item {% if page_name == 'user_dashboard' %}active{% endif %}">
+                <a href="{% url 'workout:user_dashboard' %}" class="menu-link">
+                  <div data-i18n="Dashboard">My Dashboard</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'workout_calendar' %}active{% endif %}">
+                <a href="{% url 'workout:workout_calendar' %}" class="menu-link">
+                  <div data-i18n="Calendar">Workout Calendar</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'session_history' %}active{% endif %}">
+                <a href="{% url 'workout:session_history' %}" class="menu-link">
+                  <div data-i18n="History">Session History</div>
+                </a>
+              </li>
+            </ul>
+          </li> {% endcomment %}
 
-          <!-- Workout Templates -->
-          <li class="menu-item {% if page_name == 'workout_template_list' %}active{% endif %}">
-            <a href="{% url 'workout_template_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-spreadsheet"></i>
-              <div data-i18n="Workout Templates">Workout Templates</div>
-            </a>
-          </li>
-          <!-- Members -->
-          <li class="menu-item {% if page_name == 'member_list' %}active{% endif %}">
-            <a href="{% url 'member_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-user"></i>
-              <div data-i18n="Members">Members</div>
-            </a>
-          </li>
+
+
+
+
+
 
 
 
@@ -1557,6 +1616,7 @@
           });
       });
     </script>
+    {% block extra_js %}
     <script>
         window.membershipTrends = {{ membership_trends_json|safe }};
         window.yearlyEarnings = {{ yearly_earnings_json|safe }};
@@ -1616,5 +1676,7 @@
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js' %}"></script>
+
+{% endblock %}
   </body>
 </html>

@@ -1,0 +1,63 @@
+<!-- workout/templates/workout/equipment_form.html -->
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block title %}
+  {% if form.instance.pk %}Edit Equipment{% else %}Add Equipment{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            {% if form.instance.pk %}
+                Edit Equipment: {{ form.instance.name }}
+            {% else %}
+                Add New Equipment
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Equipment Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Category</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <div class="text-danger">{{ form.category.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'workout:equipment_list' %}" class="btn btn-outline-secondary">
+                    <i class="bx bx-arrow-back"></i> Back to Equipment
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bx bx-check"></i> 
+                    {% if form.instance.pk %}Update Equipment{% else %}Create Equipment{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

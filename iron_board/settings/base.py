@@ -18,6 +18,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://9c4e825baae1.ngrok-free.app"
 ]
 
 CORS_ALLOW_METHODS = [
@@ -49,10 +50,12 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'https://iron-board.onrender.com',
+    'https://9c4e825baae1.ngrok-free.app',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 INSTALLED_APPS = [
+    # Your custom apps
     'accounts',
     'cms',
     'enquiry',
@@ -64,6 +67,9 @@ INSTALLED_APPS = [
     'notifications',
     'health',
     'api_v1',
+    'workout',
+
+
     'corsheaders',
     'markdownx',
     'cloudinary',
@@ -71,25 +77,33 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'django_user_agents',
     'cloudinary_storage',
+
+    # Django core
+    'django.contrib.sites',       # <-- IMPORTANT for allauth
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # SSO
+
+    # Auth and SSO
+    'rest_framework',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',    # recommended for social signup
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
-
-    'rest_framework',
+    # JWT, etc.
     'rest_framework_simplejwt',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
@@ -142,6 +156,8 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+
+DEFAULT_CHARSET = 'utf-8'
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
@@ -217,19 +233,31 @@ GOOGLE_OAUTH_REDIRECT_URI = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
 GOOGLE_SSO_ALLOWABLE_DOMAINS = []
 
 
+# Required for allauth
+SITE_ID = 1
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'SCOPE': ['profile', 'email'],
+        'SCOPE': [
+            'profile',
+            'email'
+        ],
         'AUTH_PARAMS': {
-            'access_type': 'online',
-            'redirect_uri': GOOGLE_OAUTH_REDIRECT_URI
+            'access_type': 'online'
         },
         'APP': {
-            'client_id': GOOGLE_OAUTH_CLIENT_ID,
-            'secret': GOOGLE_OAUTH_CLIENT_SECRET,
+            'client_id': '944738807710-absp2l77vio1fckr0o5970ck4ql2ip7q.apps.googleusercontent.com',
+            'secret': '',  # Optional, most mobile flows do not require this
+            'key': ''
         }
     }
 }
+
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.MySocialAccountAdapter'
+
+
+
+
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
