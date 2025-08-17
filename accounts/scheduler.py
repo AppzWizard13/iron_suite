@@ -264,11 +264,11 @@ def start():
         return
 
     scheduler = BackgroundScheduler()
-    # scheduler.add_job(self_ping, IntervalTrigger(seconds=15))
-    # scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(minutes=5))
-    # scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(minutes=5))
-    # scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
-    # scheduler.add_job(expire_user_subscriptions, IntervalTrigger(hours=1))
+    scheduler.add_job(self_ping, IntervalTrigger(seconds=15))
+    scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(minutes=5))
+    scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(minutes=5))
+    scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
+    scheduler.add_job(expire_user_subscriptions, IntervalTrigger(hours=1))
     scheduler.add_job(update_membership_trends, IntervalTrigger(seconds=30))
     scheduler.add_job(generate_missing_invoices_job, IntervalTrigger(seconds=20))
     # WhatsApp reminders at 7:00 AM and 3:00 PM IST (UTC+5:30)
