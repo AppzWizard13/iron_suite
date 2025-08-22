@@ -1,7 +1,7 @@
 # urls.py
 
 from django.urls import path, include
-
+from . import views
 from .views import MeasurementTodayView, SendOTPAPIView, VerifyOTPAPIView, LoginAPIView, SignOutAPIView, GoogleLogin, MeasurementProgressView
 from .views import UserProfileAPIView, TodayWorkoutAPIView, UpcomingWorkoutsAPIView, WeeklyWorkoutScheduleAPIView
 
@@ -26,6 +26,23 @@ urlpatterns = [
     path('api/workouts/today/', TodayWorkoutAPIView.as_view(), name='api_today_workout'),
     path('api/workouts/upcoming/', UpcomingWorkoutsAPIView.as_view(), name='api_upcoming_workouts'),
     path('api/workouts/weekly-schedule/', WeeklyWorkoutScheduleAPIView.as_view(), name='api_weekly_schedule'),
+
+    path('api/payments/initiate-subscription/', 
+         views.initiate_subscription_payment_api, 
+         name='initiate_subscription_payment_api'),
+    
+    path('api/payments/update-status/', 
+         views.update_payment_status_api, 
+         name='update_payment_status_api'),
+    
+    path('api/payments/status/<str:order_id>/', 
+         views.get_payment_status_api, 
+         name='get_payment_status_api'),
+    
+    # Webhook endpoint
+    path('webhook/cashfree/', 
+         views.cashfree_webhook, 
+         name='cashfree_webhook'),
 
 
     

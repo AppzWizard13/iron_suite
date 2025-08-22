@@ -3,6 +3,9 @@ import random
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from orders.models import Order, SubscriptionOrder
+from payments.models import Payment, PaymentAPILog
+from products.models import Package
 from rest_framework.permissions import IsAuthenticated
 
 from django.conf import settings
@@ -364,6 +367,7 @@ class UserProfileAPIView(APIView):
             "avatar_url": user.avatar.url if hasattr(user, 'avatar') and user.avatar else None,
             "name": user.get_full_name() or user.username,
             "email": user.email,
+            "member_id": user.member_id,
             "gender": getattr(user, 'gender', None),
             "phone": getattr(user, 'phone_number', '') or '',
             "gym_name": getattr(gym, 'name', '') or '',
@@ -843,3 +847,415 @@ class WeeklyWorkoutScheduleAPIView(APIView):
                 'status': 'error',
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponse
+from django.contrib.contenttypes.models import ContentType
+from datetime import timedelta
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def initiate_subscription_payment_api(request):
+    """
+    API endpoint to initiate gym membership subscription payment from Flutter app.
+    Creates necessary database entries before Cashfree payment processing.
+    
+    Expected payload:
+    {
+        "member_id": "string",
+        "package_id": "integer"
+    }
+    """
+    try:
+        # Get data from request
+        member_id = request.data.get('member_id')
+        package_id = request.data.get('package_id')
+        
+        # Validate required fields
+        if not member_id or not package_id:
+            return Response({
+                'success': False,
+                'message': 'Missing member_id or package_id'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get user and package objects
+        user = get_object_or_404(User, member_id=member_id)
+        package = get_object_or_404(Package, id=package_id)
+        
+        # Create subscription order
+        subscription_order = SubscriptionOrder.objects.create(
+            customer=user,
+            package=package,
+            total=package.final_price,
+            status=SubscriptionOrder.Status.PENDING,
+            payment_status=SubscriptionOrder.PaymentStatus.PENDING,
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date() + timedelta(days=package.duration_days),
+            gym=request.user.gym
+        )
+        
+        # Create payment record
+        payment, created = Payment.objects.get_or_create(
+            content_type=ContentType.objects.get_for_model(subscription_order),
+            object_id=subscription_order.id,
+            gym=request.user.gym,
+            defaults={
+                'payment_method': 'cashfree',
+                'amount': subscription_order.total,
+                'status': Payment.Status.PENDING,
+                'customer': user,
+            }
+        )
+        
+        if not created:
+            payment.payment_method = 'cashfree'
+            payment.amount = subscription_order.total
+            payment.status = Payment.Status.PENDING
+            payment.customer = user
+            payment.save()
+        
+        # Prepare response data for Flutter
+        response_data = {
+            'success': True,
+            'subscription_order': {
+                'id': subscription_order.id,
+                'order_number': subscription_order.order_number,
+                'total': float(subscription_order.total),
+                'customer_name': user.get_full_name() or user.username,
+                'customer_email': user.email,
+                'customer_phone': getattr(user, 'phone_number', ''),
+            },
+            'payment': {
+                'id': payment.id,
+                'amount': float(payment.amount),
+                'status': payment.status
+            }
+        }
+        
+        return Response(response_data, status=status.HTTP_201_CREATED)
+        
+    except User.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'User not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+        
+    except Package.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Package not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        logger.error(f"Error in initiate_subscription_payment_api: {str(e)}")
+        return Response({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_payment_status_api(request):
+    """
+    API endpoint to update payment status after successful payment from Flutter app.
+    
+    Expected payload:
+    {
+        "order_id": "string",
+        "payment_status": "SUCCESS" | "FAILED",
+        "transaction_id": "string",
+        "payment_method": "string",
+        "gateway_response": {} // optional
+    }
+    """
+    try:
+        order_id = request.data.get('order_id')
+        payment_status = request.data.get('payment_status')
+        transaction_id = request.data.get('transaction_id')
+        payment_method = request.data.get('payment_method', 'cashfree')
+        gateway_response = request.data.get('gateway_response', {})
+        
+        # Validate required fields
+        if not order_id or not payment_status:
+            return Response({
+                'success': False,
+                'message': 'Missing order_id or payment_status'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Find the subscription order
+        subscription_order = get_object_or_404(SubscriptionOrder, order_number=order_id)
+        
+        # Find the payment record
+        payment = Payment.objects.filter(
+            content_type=ContentType.objects.get_for_model(subscription_order),
+            object_id=subscription_order.id
+        ).first()
+        
+        if not payment:
+            return Response({
+                'success': False,
+                'message': 'Payment record not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Update payment record
+        if transaction_id:
+            payment.transaction_id = transaction_id
+        payment.gateway_response = gateway_response
+        
+        if payment_status.upper() == 'SUCCESS':
+            # Update payment status
+            payment.status = Payment.Status.COMPLETED
+            
+            # Update subscription order
+            subscription_order.status = SubscriptionOrder.Status.ACTIVE
+            subscription_order.payment_status = SubscriptionOrder.PaymentStatus.COMPLETED
+            
+            # Update user subscription details
+            user = subscription_order.customer
+            package = subscription_order.package
+            today = timezone.now().date()
+            
+            # Handle stacked subscriptions
+            cur_expiry = getattr(user, "package_expiry_date", None)
+            if cur_expiry and cur_expiry >= today:
+                user.package_expiry_date = cur_expiry + timedelta(days=package.duration_days)
+            else:
+                user.package_expiry_date = today + timedelta(days=package.duration_days)
+            
+            user.package = package
+            user.on_subscription = True
+            user.save(update_fields=['package_expiry_date', 'package', 'on_subscription'])
+            
+            # Update subscription order dates
+            subscription_order.start_date = today
+            subscription_order.end_date = user.package_expiry_date
+            subscription_order.save(update_fields=['start_date', 'end_date', 'status', 'payment_status'])
+            
+            payment.save(update_fields=['status', 'gateway_response', 'transaction_id'])
+            
+            response_data = {
+                'success': True,
+                'message': 'Payment updated successfully',
+                'subscription': {
+                    'status': subscription_order.status,
+                    'start_date': subscription_order.start_date.isoformat(),
+                    'end_date': subscription_order.end_date.isoformat(),
+                    'package_name': package.name
+                }
+            }
+            
+        elif payment_status.upper() == 'FAILED':
+            payment.status = Payment.Status.FAILED
+            subscription_order.payment_status = SubscriptionOrder.PaymentStatus.FAILED
+            subscription_order.status = SubscriptionOrder.Status.CANCELLED
+            
+            payment.save(update_fields=['status', 'gateway_response'])
+            subscription_order.save(update_fields=['payment_status', 'status'])
+            
+            response_data = {
+                'success': True,
+                'message': 'Payment failure recorded',
+                'subscription': {
+                    'status': subscription_order.status,
+                }
+            }
+        
+        else:
+            return Response({
+                'success': False,
+                'message': 'Invalid payment status'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except SubscriptionOrder.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Subscription order not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        logger.error(f"Error in update_payment_status_api: {str(e)}")
+        return Response({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_payment_status_api(request, order_id):
+    """
+    API endpoint to get payment status for a specific order.
+    """
+    try:
+        subscription_order = get_object_or_404(SubscriptionOrder, order_number=order_id)
+        
+        payment = Payment.objects.filter(
+            content_type=ContentType.objects.get_for_model(subscription_order),
+            object_id=subscription_order.id
+        ).first()
+        
+        response_data = {
+            'success': True,
+            'order': {
+                'order_id': subscription_order.order_number,
+                'status': subscription_order.status,
+                'payment_status': subscription_order.payment_status,
+                'total': float(subscription_order.total),
+                'start_date': subscription_order.start_date.isoformat() if subscription_order.start_date else None,
+                'end_date': subscription_order.end_date.isoformat() if subscription_order.end_date else None,
+            },
+            'payment': {
+                'status': payment.status if payment else None,
+                'transaction_id': payment.transaction_id if payment else None,
+                'amount': float(payment.amount) if payment else None,
+            } if payment else None
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except SubscriptionOrder.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Order not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        logger.error(f"Error in get_payment_status_api: {str(e)}")
+        return Response({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@csrf_exempt
+def cashfree_webhook(request):
+    """
+    Handles Cashfree webhook events for payment and refund status updates.
+    Ensures subscription renewal updates: User's `on_subscription` and `package_expiry_date`
+    are updated as per prepaid-recharge rule.
+    """
+    log_entry = PaymentAPILog.objects.create(
+        action='WEBHOOK',
+        request_url=request.path,
+        response_body=request.body.decode('utf-8') if request.body else None,
+        response_status=0
+    )
+
+    if request.method != 'POST':
+        log_entry.error_message = "Invalid method"
+        log_entry.response_status = 405
+        log_entry.save()
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        event_type = data.get("type")
+        link_id = None
+        payment_status = None
+
+        if event_type == "PAYMENT_SUCCESS_WEBHOOK":
+            order_data = data.get('data', {}).get('order', {})
+            payment_data = data.get('data', {}).get('payment', {})
+            link_id = order_data.get('order_tags', {}).get('link_id')
+            payment_status = payment_data.get('payment_status')
+        elif event_type == "PAYMENT_LINK_EVENT":
+            order_data = data.get('data', {}).get('order', {})
+            link_id = data.get('data', {}).get('link_id')
+            payment_status = data.get('data', {}).get('link_status')
+        elif event_type == "PAYMENT_CHARGES_WEBHOOK":
+            order_data = data.get('data', {}).get('order', {})
+            link_id = order_data.get('order_tags', {}).get('link_id')
+        else:
+            link_id = None
+
+        if not link_id:
+            error_msg = 'Missing link_id'
+            log_entry.error_message = error_msg
+            log_entry.response_status = 400
+            log_entry.save()
+            return JsonResponse({'error': error_msg}, status=400)
+
+        payment = Payment.objects.filter(transaction_id=link_id).first()
+        if not payment:
+            error_msg = f'Payment not found for link_id: {link_id}'
+            log_entry.error_message = error_msg
+            log_entry.response_status = 404
+            log_entry.save()
+            return JsonResponse({'error': error_msg}, status=404)
+
+        order = payment.content_object
+        payment.gateway_response = data
+
+        if (
+            (event_type == "PAYMENT_SUCCESS_WEBHOOK" and payment_status == "SUCCESS") or
+            (event_type == "PAYMENT_LINK_EVENT" and payment_status == "PAID")
+        ):
+            payment.status = Payment.Status.COMPLETED
+
+            # Correctly update user package_expiry_date and on_subscription on success!
+            if hasattr(order, 'customer') and isinstance(order, SubscriptionOrder):
+                user = order.customer
+                package = order.package
+                today = timezone.now().date()
+
+                # Smartly handle stacked subscriptions (i.e. if user renewed before expiry)
+                cur_expiry = getattr(user, "package_expiry_date", None)
+                if cur_expiry and cur_expiry >= today:
+                    user.package_expiry_date = cur_expiry + timedelta(days=package.duration_days)
+                else:
+                    user.package_expiry_date = today + timedelta(days=package.duration_days)
+                user.package = package
+                user.on_subscription = True
+                user.save(update_fields=['package_expiry_date', 'package', 'on_subscription'])
+
+                order.start_date = today
+                order.end_date = user.package_expiry_date
+
+                order.status = SubscriptionOrder.Status.ACTIVE
+                order.payment_status = SubscriptionOrder.PaymentStatus.COMPLETED
+                order.save(update_fields=['start_date', 'end_date', 'status', 'payment_status'])
+
+            elif hasattr(order, 'customer') and isinstance(order, Order):
+                # For product or other orders (non-subscription)
+                order.status = Order.Status.PROCESSING
+                order.payment_status = 'completed'
+                order.save(update_fields=['status', 'payment_status'])
+            payment.save(update_fields=['status', 'gateway_response'])
+
+        elif event_type == "PAYMENT_LINK_EVENT" and payment_status in ['EXPIRED', 'FAILED']:
+            payment.status = Payment.Status.FAILED
+            if hasattr(order, 'payment_status'):
+                order.payment_status = 'failed'
+                order.save(update_fields=['payment_status'])
+            payment.save(update_fields=['status'])
+
+        log_entry.response_status = 200
+        log_entry.response_body = json.dumps({
+            'status': 'success',
+            'event_type': event_type
+        })
+        log_entry.link_id = link_id
+        log_entry.save()
+
+        return HttpResponse(status=200)
+
+    except Exception as e:
+        error_msg = str(e)
+        log_entry.error_message = error_msg
+        log_entry.response_status = 500
+        log_entry.save()
+        return HttpResponse(status=200)
