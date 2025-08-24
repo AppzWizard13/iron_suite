@@ -196,21 +196,55 @@ def remove_unscanned_qr_before_end():
                 f"🗑️ Removed {deleted} unscanned QR tokens for: {getattr(schedule, 'name', str(schedule))}"
             )
 
+from django.utils import timezone
+from django.db import transaction
+from django.contrib.auth import get_user_model
+from api_v1.models import Alert  # Import your Alert model
+import logging
+
+logger = logging.getLogger(__name__)
+User = get_user_model()
+
 def expire_user_subscriptions():
     """
     Find all users whose subscription has expired as of today and set their
-    `on_subscription` field to False.
+    `on_subscription` field to False. Also creates alerts for notifications.
 
     This ensures that users with expired `package_expiry_date` are no longer
-    marked as active subscribers.
+    marked as active subscribers and receive push notifications.
     """
     today = timezone.now().date()
-    expired_users = User.objects.filter(
-        on_subscription=True,
-        package_expiry_date__lt=today
-    )
-    count = expired_users.update(on_subscription=False)
+    
+    with transaction.atomic():
+        expired_users = User.objects.filter(
+            on_subscription=True,
+            package_expiry_date__lt=today
+        )
+        
+        # Get the list of expired user IDs before updating
+        expired_user_ids = list(expired_users.values_list('member_id', flat=True))
+        
+        # Update subscription status
+        count = expired_users.update(on_subscription=False)
+        
+        # Create alerts for each expired user to trigger FCM notifications
+        alerts_to_create = []
+        for user_id in expired_user_ids:
+            alerts_to_create.append(Alert(
+                user_id=user_id,
+                alert_type='subscription_expired',
+                message='Your subscription has expired. Please renew to continue using our services.',
+                created_at=timezone.now()
+            ))
+        
+        # Bulk create alerts - this will trigger the post_save signal for each alert
+        if alerts_to_create:
+            Alert.objects.bulk_create(alerts_to_create)
+            logger.info(f"Created {len(alerts_to_create)} alerts for expired subscriptions.")
+    
     logger.info(f"Expired {count} user subscriptions by setting on_subscription to False.")
+    return count
+
 
 
 def remove_unwanted_qr_tokens():
@@ -268,7 +302,7 @@ def start():
     scheduler.add_job(generate_qr_for_live_sessions, IntervalTrigger(minutes=5))
     scheduler.add_job(remove_unscanned_qr_before_end, IntervalTrigger(minutes=5))
     scheduler.add_job(remove_unwanted_qr_tokens, IntervalTrigger(minutes=5))
-    scheduler.add_job(expire_user_subscriptions, IntervalTrigger(hours=1))
+    scheduler.add_job(expire_user_subscriptions, IntervalTrigger(minutes=1))
     scheduler.add_job(update_membership_trends, IntervalTrigger(seconds=30))
     scheduler.add_job(generate_missing_invoices_job, IntervalTrigger(seconds=20))
     # WhatsApp reminders at 7:00 AM and 3:00 PM IST (UTC+5:30)

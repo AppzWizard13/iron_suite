@@ -44,6 +44,5 @@ urlpatterns = [
          views.cashfree_webhook, 
          name='cashfree_webhook'),
 
-
-    
+    path('api/update-fcm-token/', views.UpdateFCMTokenView.as_view(), name='update-fcm-token'),
 ]

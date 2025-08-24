@@ -385,7 +385,6 @@ class UserProfileAPIView(APIView):
             "bmi_value": latest_measurement["bmi"] if latest_measurement else None,
         }
 
-        print("datadatadatadatadata", data)
         return Response(data)
 
 
@@ -1259,3 +1258,47 @@ def cashfree_webhook(request):
         log_entry.response_status = 500
         log_entry.save()
         return HttpResponse(status=200)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from .models import UserFCMToken
+from django.utils import timezone
+import logging
+
+logger = logging.getLogger(__name__)
+
+class UpdateFCMTokenView(APIView):
+    authentication_classes = [TokenAuthentication, JWTAuthentication]  # Support both
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        fcm_token = request.data.get('fcm_token')
+        if not fcm_token:
+            return Response({"error": "FCM token is required"}, status=400)
+
+        try:
+            user_id = getattr(request.user, 'id', None) or getattr(request.user, 'member_id', None) or request.user.pk
+            
+            obj, created = UserFCMToken.objects.update_or_create(
+                user=request.user,
+                defaults={
+                    'fcm_token': fcm_token,
+                    'updated_at': timezone.now()
+                }
+            )
+            
+            action = "created" if created else "updated"
+            logger.info(f"FCM token {action} for user {user_id}")
+            
+            return Response({
+                "status": f"FCM token {action}",
+                "user_id": user_id
+            })
+            
+        except Exception as e:
+            logger.error(f"Error updating FCM token: {str(e)}")
+            return Response({"error": "Failed to update FCM token"}, status=500)

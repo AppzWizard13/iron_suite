@@ -7,6 +7,11 @@ services:
     entrypoint: [ "./entrypoint.sh" ]
     volumes:
       - .:/app
+      # Mount Firebase service account JSON file
+      - type: bind
+        source: ./firebase-service-account.json
+        target: /app/firebase-service-account.json
+        read_only: true
     ports:
       - "8000:8000"
     env_file:

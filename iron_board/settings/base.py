@@ -18,7 +18,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://4df5bec35d65.ngrok-free.app"
+    "https://045dceda821a.ngrok-free.app"
 ]
 
 CORS_ALLOW_METHODS = [
@@ -50,7 +50,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'https://iron-board.onrender.com',
-    'https://4df5bec35d65.ngrok-free.app',
+    'https://045dceda821a.ngrok-free.app',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -282,3 +282,8 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+
+FCM_SERVER_KEY = os.getenv('FCM_SERVER_KEY')
+
+FIREBASE_SERVICE_ACCOUNT_PATH =  os.getenv('FIREBASE_SERVICE_ACCOUNT_PATH')

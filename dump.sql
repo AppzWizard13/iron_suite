@@ -2821,7 +2821,7 @@ COPY public.accounts_customer (id, phone, shipping_address, billing_address, dat
 COPY public.accounts_customuser (password, last_login, is_superuser, first_name, last_name, email, is_staff, is_active, date_joined, phone_number, member_id, join_date, staff_role, address, city, date_of_birth, gender, pincode, state, username, profile_image, package_id, on_subscription, package_expiry_date, gym_id) FROM stdin;
 pbkdf2_sha256$870000$26kALmJYAbCxzAwNrvebQx$wSLPAoe52ogngIhCiGoZtq3t0VplvyJd22dm8yi1A5M=	\N	f	Sudharshan	Sabari	cugec@example.com	t	t	2025-07-28 05:59:29.709297+00	+91 8496583719	5	2025-07-28	Employee	29 White Nobel Street	Sihora	1981-03-08	Male	998841	Debitis aut omnis fugit adipisicing eiusmod aut sunt possimus dolore anim voluptatem	MEMBER00005		\N	f	\N	1
 pbkdf2_sha256$870000$pcSFDfwn63ROkZcgTQ6rFr$kdbe6f2mPHd/OytxnGvLdKwmUYd6bMSBPRlfbbHsvZo=	2025-08-02 16:59:33.493975+00	f	Vijay	Sharif	motyhowaf@example.com	t	t	2025-08-02 15:08:07.509396+00	+91 1712833973	20	2025-08-02	Admin	165 New Street	Asarganj	1985-05-05	Male	268135	Fugit aliquid reprehenderit aut non sit ut aut esse quia aut esse consectetur iure et	ADMIN00020		\N	f	\N	1
-pbkdf2_sha256$870000$DGiRbHidcWBhMfWNoT8mu7$RwWZrfbJITR/YeIs3Zz9jo0QpgOCWrH4d26WQlExyWk=	2025-08-16 08:22:55.49626+00	t	Satheesh A	A	satheeshappz1@gmail.com	t	t	2025-03-29 13:29:21.980931+00	7736500760	2	2025-03-29	Admin	Durga Junction	Palakkad	2025-03-01	Male	640044	Kerala	EMP00002	profile_pics/Satheesh_gCcRJdm.png	5	t	2025-08-09	1
+pbkdf2_sha256$870000$bs70pBv6Rs4QWvV3XJkBWi$5aDY60OIlHCXmtBMSTRXFKkR5jUGDMbRj3foDBroIq0=	2025-08-22 10:54:41.824456+00	f	Yogharaj	Sweety	satheeshappz@gmail.com	f	t	2025-07-28 10:26:01.668072+00	7736500152	10	2025-07-28	Member	643 Rocky New Extension	Gooty	2003-05-26	Male	826569	Dolorem ut qui doloremque itaque consectetur soluta eveniet maiores doloribus non commodi id eius	MEMBER00010		2	t	2025-09-21	1
 pbkdf2_sha256$870000$VtzDT8ZqYUpk9u9NZ8zNRT$L+edCujPWwMylfFe69dWSSDrfEpDpCQi+NXa4MIOlgQ=	\N	f	Swetha	Kumar	vane@example.com	t	t	2025-08-02 17:03:23.981905+00	+91 7669963455	22	2025-08-02	Employee	850 South Old Parkway	Sugauli	2000-07-08	Other	458436	Officiis id aute qui consequat Quia optio qui dolorum	ADMIN00022		\N	f	\N	1
 pbkdf2_sha256$870000$jXjxf8vkBaPHPRdzUyCEyb$H78CfYJf8BrMAbHb0XWHXpkL5PDrZsQo/UcYBZhYRTM=	\N	f	Vijay	Suthan	kovudono@example.com	t	t	2025-08-02 10:20:38.930862+00	+91 6838293683	18	2025-08-02		219 White New Avenue	Cheruthazham	2015-08-06	Other	763180	Anim quis officia itaque qui tempor veniam molestias minima exercitationem est veniam ex assumend	STAFF00018		\N	f	\N	1
 pbkdf2_sha256$870000$CRKuB5hJD1bwjaOYdCmlWN$sqtpM034uGCgC0cCvHIJTa9V0GWjU8xvwH7Jsg4OzII=	2025-07-29 17:10:37.477223+00	f	Jeya	Sweety	duxikike@example.com	t	t	2025-07-28 09:39:17.16131+00	+91 4654542395	8	2025-07-28	Admin	58 New Freeway	Nongstoin	1971-07-19	Other	711249	Similique aliquam id excepturi non consequatur qui delectus sit officia est	MEMBER00008		\N	t	\N	2
@@ -2830,9 +2830,9 @@ pbkdf2_sha256$870000$Gp0ifIBQoFVkJAL5tL07M3$uAFP7AzCRExnbZ5WI+Hz5YYCHS/YtSE5OaRJ
 pbkdf2_sha256$870000$f1r4l6LWgkYgCqsSZC20gH$QxCvaR26fds2NiUSBK/tMzQeqEtryiHR3OsfwMG8E/4=	\N	f	Khaja	Suthan	nubeg@example.com	t	t	2025-08-02 10:20:58.064688+00	+91 4972946643	19	2025-08-02		86 West First Parkway	Shahabad	1999-05-29	Male	987615	Eligendi expedita ratione est inventore est voluptatibus incididunt labore ab adipisci facere adipis	STAFF00019		\N	f	\N	1
 pbkdf2_sha256$870000$lpGgGoCU2VWncE7PmgPZDd$3d7WHGONPvvy0vY/XAZv6/qr+A3fV6KeETlK8LDiWGM=	2025-08-02 17:44:41.280359+00	f	Bearcin	Devi	gidel@example.com	t	t	2025-08-02 17:31:19.844662+00	+91 7622863319	25	2025-08-02	Admin	63 White Second Extension	Godhra	1990-11-14	Female	690613	Consectetur in possimus eum ex laborum consectetur nihil aut est harum fugit illo aut optio comm	ADMIN00025	profile_pics/Study_Abroad_Opportunities_with_Campus_World_ySUDpx8.png	\N	f	\N	2
 pbkdf2_sha256$870000$g4yFDSRl7axJiHxer0P0MT$slkAj3tgEBklccHSJwEPAniJ0aIg8kdMgjwTGOdM8r0=	2025-08-02 17:25:57.586289+00	f	Shajid	Vedhasekaran	myvylyjuv@example.com	t	t	2025-08-02 17:04:16.03173+00	+91 5534474557	23	2025-08-02	Admin	596 Fabien Freeway	Neemuch	1994-08-20	Female	125411	Exercitationem alias minima laboriosam hic modi rerum quod ab quis mollit	ADMIN00023		\N	f	\N	1
+pbkdf2_sha256$870000$DGiRbHidcWBhMfWNoT8mu7$RwWZrfbJITR/YeIs3Zz9jo0QpgOCWrH4d26WQlExyWk=	2025-08-22 21:07:36.275213+00	t	Satheesh A	A	satheeshappz1@gmail.com	t	t	2025-03-29 13:29:21.980931+00	7736500760	2	2025-03-29	Admin	Durga Junction	Palakkad	2025-03-01	Male	640044	Kerala	EMP00002	profile_pics/Satheesh_gCcRJdm.png	5	f	2025-08-09	1
 pbkdf2_sha256$870000$z1MCrmqWAAoL3NyDSLcx7N$Cv7Terw/ng/GMvJGy7UXKJUi2d3bcLgV8BBcQTmyqcc=	\N	f	Muthu	Rosini	kory@example.com	t	t	2025-08-02 17:30:24.795631+00	+91 1577149381	24	2025-08-02	Member	58 Cowley Street	Hardoi	2017-03-30	Other	195134	Atque dolor quasi dolorem asperiores est ut sunt officia aliquam distinctio Voluptatem Expedita u	ADMIN00024		\N	f	\N	1
 pbkdf2_sha256$870000$QeAmxxOqbXkrUIVC2eFOmA$QP/dfKaibQpBxEnirRcb6ve/aiwUoH7LMlcaXgNbHxY=	\N	f	Kishor	Kummar	cydyku@example.com	t	t	2025-08-15 10:18:09.152143+00	+91 5397374211	26	2025-08-15	Trainer	29 North Milton Road	Begusarai	1995-11-01	Male	167186	Qui do omnis hic nisi distinctio Dolorem similique repellendus Nemo reprehenderit autem	MEMBER00026		\N	f	\N	1
-pbkdf2_sha256$870000$bs70pBv6Rs4QWvV3XJkBWi$5aDY60OIlHCXmtBMSTRXFKkR5jUGDMbRj3foDBroIq0=	2025-08-16 21:32:21.988028+00	f	Yogharaj	Sweety	satheeshappz@gmail.com	f	t	2025-07-28 10:26:01.668072+00	+91 4657814393	10	2025-07-28	Member	643 Rocky New Extension	Gooty	2003-05-26	Male	826569	Dolorem ut qui doloremque itaque consectetur soluta eveniet maiores doloribus non commodi id eius	MEMBER00010		5	f	\N	2
 \.
 
 
@@ -2867,6 +2867,8 @@ COPY public.accounts_gym (id, name, location, latitude, longitude, proprietor_na
 --
 
 COPY public.accounts_monthlymembershiptrend (id, year, month, member_count, last_updated, gym_id) FROM stdin;
+8	2025	8	0	2025-08-22 20:13:26.827088+00	1
+9	2025	8	0	2025-08-22 20:13:26.830691+00	2
 1	2025	1	0	2025-08-02 06:09:35.500998+00	1
 2	2025	2	0	2025-08-02 06:09:35.507663+00	1
 3	2025	3	0	2025-08-02 06:09:35.511932+00	1
@@ -2874,8 +2876,6 @@ COPY public.accounts_monthlymembershiptrend (id, year, month, member_count, last
 5	2025	5	0	2025-08-02 06:09:35.51787+00	1
 6	2025	6	0	2025-08-02 06:09:35.521316+00	1
 7	2025	7	1	2025-08-02 06:09:35.527341+00	1
-8	2025	8	2	2025-08-02 07:53:35.21677+00	1
-9	2025	8	0	2025-08-02 07:53:35.221428+00	2
 \.
 
 
@@ -3844,6 +3844,8 @@ y94qkkq9opkr0tb0bc7sp8g1xkcvn68p	.eJxVjMEOgjAQRP-lZ0Pqlm6LN_kRsuxuA5GURNqT8d8Fw0
 8jluml9h2bio3bqryb5w03128h003fnb	.eJxVjEEOwiAURO_C2jTIL1Dc2YuQ4QNpY0MTCyvj3W1NF7qcNzPvJTxanXzb0tPPUdzEVYrLLwzgRypHg2U5cAfmtZXafTdnvXX3PaVSZ0ad1zKerz_VhG3aPUOkzIocCFZrisYZnS0CVE6JgnRSDUH35Ix1kIojgTNcb6KM4IHE-wPldjzY:1ums2O:4wWEvmfZlkvzPxv_rW3K7U87Gf5NbBfdHzmnqhC-4tg	2025-09-14 10:51:56.259889+00
 h614nbwd389nigq2c6kmi5rp07fp0vgh	.eJxVjkEOwiAURO_C2hCE8qFduvcMBPgfixowpU00xrtrTRe6nfdmMk_m_DKPbmk0uYxsYJLtfrPg44XKCvDsy6nyWMs85cBXhW-08WNFuh42929g9G38tPsImiQKLYFsJ1BZkAJBgA22J72PSiRQSQUFpsMkyRuJJlptjMeUvq8atZZrcXS_5enBBvF6A2ULPsM:1unCBj:D5y_UcwAqoEPYD8Sph6umy4sdfN70D9g3Hjc3gKp71c	2025-09-15 08:22:55.508609+00
 q2vwl36p9136abiw9lhp4r5z8n34osqd	.eJxVjEEOwiAURO_C2jTIL1Dc2YuQ4QNpY0MTCyvj3W1NF7qcNzPvJTxanXzb0tPPUdzEVYrLLwzgRypHg2U5cAfmtZXafTdnvXX3PaVSZ0ad1zKerz_VhG3aPUOkzIocCFZrisYZnS0CVE6JgnRSDUH35Ix1kIojgTNcb6KM4IHE-wPldjzY:1unOVh:DheBqoqYamFQZjdTWd6NTPJ67MDr8uiJFB5x4nVzXUs	2025-09-15 21:32:21.993659+00
+q4rywef4ykpllxl4nccn1y97xo4varph	.eJxVjEEOwiAURO_C2jTIL1Dc2YuQ4QNpY0MTCyvj3W1NF7qcNzPvJTxanXzb0tPPUdzEVYrLLwzgRypHg2U5cAfmtZXafTdnvXX3PaVSZ0ad1zKerz_VhG3aPUOkzIocCFZrisYZnS0CVE6JgnRSDUH35Ix1kIojgTNcb6KM4IHE-wPldjzY:1upPPt:7TD4YnF1Jkr6Ch0SqZLsjGzwW1CsffxMuPAjxm_ohDA	2025-09-21 10:54:41.83022+00
+vflc62kqymi7w5663v0woc9xbiu76wi4	.eJxVjkEOwiAURO_C2hCE8qFduvcMBPgfixowpU00xrtrTRe6nfdmMk_m_DKPbmk0uYxsYJLtfrPg44XKCvDsy6nyWMs85cBXhW-08WNFuh42929g9G38tPsImiQKLYFsJ1BZkAJBgA22J72PSiRQSQUFpsMkyRuJJlptjMeUvq8atZZrcXS_5enBBvF6A2ULPsM:1upYz2:HGoYaDaFnM6AKkVgmszb_e0sw3zEsk104c7FmwP9xhw	2025-09-21 21:07:36.277381+00
 \.
 
 
@@ -3878,6 +3880,7 @@ COPY public.google_sso_user (id, google_id, locale, user_id, picture_url) FROM s
 
 COPY public.health_bodymeasurement (id, date, week_of_year, year, week_index_since_join, weight_kg, height_cm, bmi, gym_id, user_id) FROM stdin;
 1	2025-08-17	33	2025	3	71.0	170.0	24.2	2	10
+2	2025-08-22	34	2025	4	55.0	170.0	23.9	2	10
 \.
 
 
@@ -3941,6 +3944,7 @@ COPY public.orders_subscriptionorder (id, order_number, status, payment_status, 
 6	SUB-ORD-DEV-TEST20250729-0004	completed	completed	cashfree	2025-07-29	2026-01-25	10000	18	0	f	f	2025-07-29 16:57:24.776187+00	2025-07-29 19:00:53.65594+00	\N	4	INV-SUB-ORD-DEV-TEST20250729-0004	1
 5	SUB-ORD-DEV-TEST20250729-0003	completed	completed	cashfree	2025-07-29	2026-01-25	10000	18	0	f	f	2025-07-29 16:57:03.431944+00	2025-07-29 19:02:13.642154+00	\N	4	INV-SUB-ORD-DEV-TEST20250729-0003	1
 8	SUB-ORD-DEV-TEST20250729-0005	completed	completed	cashfree	2025-07-29	2025-08-28	1500	18	0	f	f	2025-07-29 17:07:03.805977+00	2025-07-29 18:55:06.903859+00	\N	2	INV-SUB-ORD-DEV-TEST20250729-0005	1
+9	SUB-ORD-DEV-TEST20250822-0001	active	completed	cashfree	2025-08-22	2025-09-21	1500	18	0	f	f	2025-08-22 21:51:05.80049+00	2025-08-22 21:51:05.800519+00	10	2	\N	1
 \.
 
 
@@ -3960,6 +3964,7 @@ COPY public.payments_payment (id, object_id, payment_method, amount, status, tra
 4	5	cashfree	10000	pending		\N	2025-07-29 16:57:03.446861+00	2025-07-29 16:57:03.446877+00	45	\N	1
 5	6	cashfree	10000	pending	SUB-ORD-DEV-TEST20250729-0004	{"entity": "link", "link_id": "SUB-ORD-DEV-TEST20250729-0004", "link_url": "https://payments-test.cashfree.com/links/l8uflu8tij70", "link_meta": {"notify_url": "http://127.0.0.1:8000/payment/cashfree/webhook/", "return_url": "http://127.0.0.1:8000/payment/cashfree/return/?order_id=SUB-ORD-DEV-TEST20250729-0004", "upi_intent": "false", "payment_methods": ""}, "cf_link_id": 6560814, "link_notes": {}, "link_amount": 10000, "link_notify": {"send_sms": true, "send_email": true}, "link_status": "ACTIVE", "link_purpose": "Payment for SubscriptionOrder #SUB-ORD-DEV-TEST20250729-0004", "order_splits": [], "link_currency": "INR", "thank_you_msg": "", "enable_invoice": false, "link_created_at": "2025-07-29T22:27:25+05:30", "customer_details": {"country_code": "+91", "customer_name": "Yogharaj Kumar", "customer_email": "fedubypyg@example.com", "customer_phone": "2313717848"}, "link_amount_paid": 0, "link_expiry_time": "2025-08-28T22:27:25+05:30", "link_auto_reminders": false, "terms_and_conditions": "", "link_partial_payments": false, "link_minimum_partial_amount": null}	2025-07-29 16:57:24.793778+00	2025-07-29 16:57:25.274906+00	45	\N	1
 6	8	cashfree	1500	pending	SUB-ORD-DEV-TEST20250729-0005	{"entity": "link", "link_id": "SUB-ORD-DEV-TEST20250729-0005", "link_url": "https://payments-test.cashfree.com/links/K8ufn1karvlg", "link_meta": {"notify_url": "http://127.0.0.1:8000/payment/cashfree/webhook/", "return_url": "http://127.0.0.1:8000/payment/cashfree/return/?order_id=SUB-ORD-DEV-TEST20250729-0005", "upi_intent": "false", "payment_methods": ""}, "cf_link_id": 6560819, "link_notes": {}, "link_amount": 1500, "link_notify": {"send_sms": true, "send_email": true}, "link_status": "ACTIVE", "link_purpose": "Payment for SubscriptionOrder #SUB-ORD-DEV-TEST20250729-0005", "order_splits": [], "link_currency": "INR", "thank_you_msg": "", "enable_invoice": false, "link_created_at": "2025-07-29T22:37:04+05:30", "customer_details": {"country_code": "+91", "customer_name": "Vasanth Sweety", "customer_email": "tybil@example.com", "customer_phone": "2991944686"}, "link_amount_paid": 0, "link_expiry_time": "2025-08-28T22:37:04+05:30", "link_auto_reminders": false, "terms_and_conditions": "", "link_partial_payments": false, "link_minimum_partial_amount": null}	2025-07-29 17:07:03.81755+00	2025-07-29 17:07:04.559529+00	45	\N	1
+7	9	cashfree	1500	completed	SUB-ORD-DEV-TEST20250822-0001	{"payment_time": "2025-08-23T03:21:19.385590", "cashfree_order_id": "SUB-ORD-DEV-TEST20250822-0001"}	2025-08-22 21:51:05.807188+00	2025-08-22 21:51:05.807206+00	45	10	1
 \.
 
 
@@ -4236,7 +4241,7 @@ COPY public.products_subcategory (id, name, description, category_id) FROM stdin
 --
 
 COPY public.socialaccount_socialaccount (id, provider, uid, last_login, date_joined, extra_data, user_id) FROM stdin;
-2	google	110599449648992844154	2025-08-16 21:32:21.94902+00	2025-08-15 10:51:56.229325+00	{"id": "110599449648992844154", "name": "Satheesh A", "email": "satheeshappz@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocK9tWMMLL0AUikdp2i9TIjZ-fJhk9_0AzR_aUbfvU7FkuUXBjo2=s96-c", "given_name": "Satheesh", "family_name": "A", "verified_email": true}	10
+2	google	110599449648992844154	2025-08-22 10:54:41.791914+00	2025-08-15 10:51:56.229325+00	{"id": "110599449648992844154", "name": "Satheesh A", "email": "satheeshappz@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocK9tWMMLL0AUikdp2i9TIjZ-fJhk9_0AzR_aUbfvU7FkuUXBjo2=s96-c", "given_name": "Satheesh", "family_name": "A", "verified_email": true}	10
 \.
 
 
@@ -4887,7 +4892,7 @@ SELECT pg_catalog.setval('public.google_sso_user_id_seq', 1, true);
 -- Name: health_bodymeasurement_id_seq; Type: SEQUENCE SET; Schema: public; Owner: iron_board_admin
 --
 
-SELECT pg_catalog.setval('public.health_bodymeasurement_id_seq', 1, true);
+SELECT pg_catalog.setval('public.health_bodymeasurement_id_seq', 2, true);
 
 
 --
@@ -4936,7 +4941,7 @@ SELECT pg_catalog.setval('public.orders_orderitem_id_seq', 1, true);
 -- Name: orders_subscriptionorder_id_seq; Type: SEQUENCE SET; Schema: public; Owner: iron_board_admin
 --
 
-SELECT pg_catalog.setval('public.orders_subscriptionorder_id_seq', 8, true);
+SELECT pg_catalog.setval('public.orders_subscriptionorder_id_seq', 9, true);
 
 
 --
@@ -4950,7 +4955,7 @@ SELECT pg_catalog.setval('public.orders_temporder_id_seq', 1, true);
 -- Name: payments_payment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: iron_board_admin
 --
 
-SELECT pg_catalog.setval('public.payments_payment_id_seq', 6, true);
+SELECT pg_catalog.setval('public.payments_payment_id_seq', 7, true);
 
 
 --
