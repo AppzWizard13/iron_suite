@@ -101,7 +101,8 @@ def self_ping():
     ping_urls = [
         'https://xxsapequipments.onrender.com/',
         'https://aspinxp.onrender.com/',
-        'https://sapetindiapvtltd.in/'
+        'https://sapetindiapvtltd.in/',
+        'https://iron-board-1.onrender.com/'
 ,    ]
     for url in ping_urls:
         try:
