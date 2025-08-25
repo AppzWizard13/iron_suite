@@ -1,0 +1,150 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-xxl container-p-y">
+  <h4 class="fw-semi-bold py-3 mb-4">Gym Attendance QR Generator</h4>
+
+  <div class="card">
+    <div class="card-body">
+
+      <!-- QR Generator Form -->
+      <form id="qrForm" class="mb-4">
+        {% csrf_token %}
+        <div class="row g-3 align-items-end">
+          <div class="col-md-5">
+            <label for="gym_select" class="form-label fw-semibold">Select Gym:</label>
+            <select class="form-select" id="gym_select" name="gym_id" required>
+              <option value="">Choose a gym...</option>
+              {% for gym in gyms %}
+                <option value="{{ gym.id }}">{{ gym.name }} - {{ gym.location }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="validity_days" class="form-label fw-semibold">Validity (days):</label>
+            <input type="number" id="validity_days" name="validity_days" class="form-control" placeholder="1" min="1">
+          </div>
+          <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fas fa-magic me-2"></i>Generate QR
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Loading -->
+      <div id="loading" class="text-center py-4" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Generating QR Code...</p>
+      </div>
+
+      <!-- QR Result -->
+      <div id="qrResult" style="display:none;">
+        <div class="text-center py-4">
+          <h5 id="gymName" class="fw-bold"></h5>
+          <div class="d-flex justify-content-center mb-3">
+            <div id="qrCode" class="border rounded p-3 bg-light"></div>
+          </div>
+          <p class="mb-3">
+            <small class="d-block">Scan this QR to mark attendance</small>
+            <small class="text-muted">
+              Valid until: <span id="validUntil"></span>
+              (<span id="validityDays"></span> days)
+            </small>
+          </p>
+          <button type="button" class="btn btn-success me-2" id="downloadBtn">
+            <i class="fas fa-download me-1"></i> Download QR
+          </button>
+          <button type="button" class="btn btn-outline-secondary" id="newBtn">
+            Generate New
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<script>
+(function($) {
+  let currentQRData = null;
+
+  $(function() {
+    $('#qrForm').on('submit', function(e) {
+      e.preventDefault();
+
+      const gymId = $('#gym_select').val();
+      const validityDays = $('#validity_days').val();
+
+      if (!gymId) {
+        alert('Please select a gym first!');
+        return;
+      }
+
+      $('#loading').show();
+      $('#qrResult').hide();
+
+      $.ajax({
+        url: "{% url 'generate_attendance_qr' %}",
+        method: 'POST',
+        data: {
+          'gym_id': gymId,
+          'validity_days': validityDays,
+          'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+          if (response.success) {
+            displayQR(response);
+          } else {
+            alert('Error: ' + response.message);
+          }
+        },
+        error: function() {
+          alert('An error occurred while generating QR code');
+        },
+        complete: function() {
+          $('#loading').hide();
+        }
+      });
+    });
+
+    function displayQR(data) {
+      currentQRData = data;
+
+      const qr = new QRious({
+        element: document.createElement('canvas'),
+        value: data.qr_data,
+        size: 200,
+        level: 'M'
+      });
+
+      $('#qrCode').html(qr.canvas);
+      $('#gymName').text(data.gym_name);
+      $('#validUntil').text(new Date(data.expires_at).toLocaleString());
+      $('#validityDays').text(data.validity_days);
+      $('#qrResult').show();
+    }
+
+    $('#downloadBtn').on('click', function() {
+      if (!currentQRData) return;
+      const canvas = document.querySelector('#qrCode canvas');
+      const link = document.createElement('a');
+      link.download = `${currentQRData.gym_name}_attendance_qr.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+
+    $('#newBtn').on('click', function() {
+      $('#qrResult').hide();
+      $('#gym_select').val('');
+      $('#validity_days').val('');
+    });
+  });
+})(jQuery);
+</script>
+{% endblock %}

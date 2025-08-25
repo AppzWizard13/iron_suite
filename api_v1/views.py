@@ -371,6 +371,7 @@ class UserProfileAPIView(APIView):
             "gender": getattr(user, 'gender', None),
             "phone": getattr(user, 'phone_number', '') or '',
             "gym_name": getattr(gym, 'name', '') or '',
+            'gym_location': gym.location,
             "location": getattr(gym, 'location', '') or '',
             "status": getattr(user, 'on_subscription', ''),
             "package_expiry_date": user.package_expiry_date.isoformat() if getattr(user, 'package_expiry_date', None) else "",
@@ -1302,3 +1303,68 @@ class UpdateFCMTokenView(APIView):
         except Exception as e:
             logger.error(f"Error updating FCM token: {str(e)}")
             return Response({"error": "Failed to update FCM token"}, status=500)
+
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from products.models import Package
+from products.serializers import PackageSerializer
+
+class PackageListAPI(generics.ListAPIView):
+    """
+    API to fetch all packages for the authenticated user's gym
+    ordered by price in ascending order
+    """
+    serializer_class = PackageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Get user's gym - adjust this based on your User-Gym relationship
+        gym = getattr(user, 'gym', None)
+        
+        if not gym:
+            return Package.objects.none()
+        
+        return Package.objects.filter(
+            gym_id=gym.id,
+            is_active=True  # Only return active packages
+        ).order_by('price')  # Ascending order by price
+
+    def list(self, request, *args, **kwargs):
+        """
+        Override list method to add custom response format
+        """
+        queryset = self.get_queryset()
+        
+        # Check if user has gym
+        user = request.user
+        gym = getattr(user, 'gym', None)
+        
+        if not gym:
+            return Response(
+                {'detail': 'User is not associated with any gym'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Apply pagination if configured
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            # Add custom fields to paginated response
+            result.data['gym_name'] = gym.name
+            result.data['gym_id'] = gym.id
+            return result
+
+        # Non-paginated response
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'count': queryset.count(),
+            'gym_name': gym.name,
+            'gym_location': gym.location,
+            'gym_id': gym.id,
+            'packages': serializer.data
+        })

@@ -434,3 +434,228 @@ class AttendanceListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Attendance.objects.filter(user=self.request.user)
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.utils import timezone
+from django.conf import settings
+from datetime import timedelta
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from accounts.models import Gym
+from .models import Schedule, QRToken, Attendance, CheckInLog
+import json
+
+class QRGeneratorView(View):
+    def get(self, request):
+        gyms = Gym.objects.all()
+        return render(request, 'advadmin/qr_generator.html', {'gyms': gyms})
+
+    def post(self, request):
+        try:
+            gym_id = request.POST.get('gym_id')
+            validity_days = request.POST.get('validity_days')
+
+            if not gym_id:
+                return JsonResponse({'success': False, 'message': 'Gym ID is required'})
+
+            gym = get_object_or_404(Gym, id=gym_id)
+
+            # Use entered validity days, fallback to 1 day if not provided
+            try:
+                validity_days = int(validity_days) if validity_days else 1
+            except ValueError:
+                validity_days = 1
+
+            expires_at = timezone.now() + timedelta(days=validity_days)
+
+            today = timezone.now().date()
+            schedule, created = Schedule.objects.get_or_create(
+                gym=gym,
+                schedule_date=today,
+                defaults={
+                    'name': f'General Attendance - {today.strftime("%d %b %Y")}',
+                    'start_time': timezone.now().time(),
+                    'end_time': (timezone.now() + timedelta(hours=12)).time(),
+                    'capacity': 1000,
+                    'status': 'live'
+                }
+            )
+
+            qr_token = QRToken.objects.create(
+                schedule=schedule,
+                gym=gym,
+                expires_at=expires_at
+            )
+
+            qr_data_url = request.build_absolute_uri(f'/api/attendance/scan/{qr_token.token}/')
+
+            return JsonResponse({
+                'success': True,
+                'qr_data': qr_data_url,
+                'gym_name': gym.name,
+                'token': qr_token.token,
+                'expires_at': qr_token.expires_at.isoformat(),
+                'schedule_id': schedule.id,
+                'validity_days': validity_days
+            })
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+
+# **Main API for Mobile App** - Returns JSON only
+class AttendanceScanAPI(APIView):
+    """
+    API endpoint for mobile app to scan QR and mark attendance
+    Returns JSON responses only - no HTML templates
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, token):
+        try:
+            # Get QR token
+            qr_token = get_object_or_404(QRToken, token=token)
+            
+            # Validate token
+            if not qr_token.is_valid():
+                return Response({
+                    'success': False,
+                    'message': 'QR code expired or invalid',
+                    'error_code': 'INVALID_TOKEN'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            user = request.user
+            schedule = qr_token.schedule
+            today = timezone.now().date()
+            current_time = timezone.now()
+
+            # Check if user already has attendance today
+            existing_attendance = Attendance.objects.filter(
+                user=user,
+                schedule=schedule,
+                date=today
+            ).first()
+
+            if existing_attendance:
+                # Check if it's within 15 minutes (prevent duplicate check-in)
+                time_diff = current_time - existing_attendance.check_in_time
+                
+                if time_diff.total_seconds() < 900:  # 15 minutes = 900 seconds
+                    return Response({
+                        'success': False,
+                        'message': f'Attendance already marked at {existing_attendance.check_in_time.strftime("%I:%M %p")}',
+                        'check_in_time': existing_attendance.check_in_time.strftime("%I:%M %p"),
+                        'status': 'already_marked',
+                        'error_code': 'ALREADY_MARKED'
+                    }, status=status.HTTP_200_OK)
+                
+                # After 15 minutes, consider it as checkout
+                elif not existing_attendance.check_out_time:
+                    existing_attendance.mark_checkout()
+                    
+                    # Log the checkout
+                    CheckInLog.objects.create(
+                        user=user,
+                        token=qr_token,
+                        attendance=existing_attendance,
+                        gym=qr_token.gym,
+                        ip_address=self.get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                        gps_lat=request.data.get('latitude'),
+                        gps_lng=request.data.get('longitude')
+                    )
+
+                    return Response({
+                        'success': True,
+                        'message': 'Successfully checked out!',
+                        'check_in_time': existing_attendance.check_in_time.strftime("%I:%M %p"),
+                        'check_out_time': existing_attendance.check_out_time.strftime("%I:%M %p"),
+                        'duration': str(existing_attendance.duration).split('.')[0],
+                        'status': 'checked_out',
+                        'gym_name': qr_token.gym.name
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        'success': False,
+                        'message': 'You have already completed attendance for today',
+                        'status': 'completed',
+                        'error_code': 'ALREADY_COMPLETED'
+                    }, status=status.HTTP_200_OK)
+
+            # Create new attendance (check-in)
+            attendance = Attendance.objects.create(
+                user=user,
+                schedule=schedule,
+                gym=qr_token.gym,
+                date=today,
+                status='checked_in'
+            )
+
+            # Log the check-in
+            CheckInLog.objects.create(
+                user=user,
+                token=qr_token,
+                attendance=attendance,
+                gym=qr_token.gym,
+                ip_address=self.get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                gps_lat=request.data.get('latitude'),
+                gps_lng=request.data.get('longitude')
+            )
+
+            return Response({
+                'success': True,
+                'message': 'Attendance marked successfully!',
+                'check_in_time': attendance.check_in_time.strftime("%I:%M %p"),
+                'gym_name': qr_token.gym.name,
+                'status': 'checked_in',
+                'user_name': user.get_full_name() or user.username
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': f'Error marking attendance: {str(e)}',
+                'error_code': 'SERVER_ERROR'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+# Optional: Get QR info without marking attendance (for preview)
+class QRInfoAPI(APIView):
+    """
+    Get QR code information without marking attendance
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, token):
+        try:
+            qr_token = get_object_or_404(QRToken, token=token)
+            
+            return Response({
+                'success': True,
+                'gym_name': qr_token.gym.name,
+                'schedule_name': qr_token.schedule.name,
+                'valid_until': qr_token.expires_at.isoformat(),
+                'is_valid': qr_token.is_valid(),
+                'status': qr_token.schedule.status
+            })
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': str(e)
+            }, status=status.HTTP_404_NOT_FOUND)
