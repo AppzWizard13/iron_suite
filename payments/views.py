@@ -268,7 +268,9 @@ def cashfree_webhook(request):
     Ensures subscription renewal updates: User's `on_subscription` and `package_expiry_date`
     are updated as per prepaid-recharge rule.
     """
+    payment = Payment.objects.filter(transaction_id=link_id).first()
     log_entry = PaymentAPILog.objects.create(
+        gym=payment.gym,
         action='WEBHOOK',
         request_url=request.path,
         response_body=request.body.decode('utf-8') if request.body else None,
