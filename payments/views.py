@@ -268,21 +268,6 @@ def cashfree_webhook(request):
     Ensures subscription renewal updates: User's `on_subscription` and `package_expiry_date`
     are updated as per prepaid-recharge rule.
     """
-    payment = Payment.objects.filter(transaction_id=link_id).first()
-    log_entry = PaymentAPILog.objects.create(
-        gym=payment.gym,
-        action='WEBHOOK',
-        request_url=request.path,
-        response_body=request.body.decode('utf-8') if request.body else None,
-        response_status=0
-    )
-
-    if request.method != 'POST':
-        log_entry.error_message = "Invalid method"
-        log_entry.response_status = 405
-        log_entry.save()
-        return JsonResponse({'error': 'Invalid method'}, status=405)
-
     try:
         data = json.loads(request.body)
         event_type = data.get("type")
@@ -303,6 +288,22 @@ def cashfree_webhook(request):
             link_id = order_data.get('order_tags', {}).get('link_id')
         else:
             link_id = None
+
+        payment = Payment.objects.filter(transaction_id=link_id).first()
+        log_entry = PaymentAPILog.objects.create(
+            gym=payment.gym,
+            action='WEBHOOK',
+            request_url=request.path,
+            response_body=request.body.decode('utf-8') if request.body else None,
+            response_status=0
+        )
+
+        if request.method != 'POST':
+            log_entry.error_message = "Invalid method"
+            log_entry.response_status = 405
+            log_entry.save()
+            return JsonResponse({'error': 'Invalid method'}, status=405)
+
 
         if not link_id:
             error_msg = 'Missing link_id'
