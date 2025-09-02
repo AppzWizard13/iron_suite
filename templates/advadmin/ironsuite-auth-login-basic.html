@@ -48,13 +48,13 @@
                             <div class="col-12 text-center">
                                 <button class="btn btn-primary-gradient rounded-pill py-3 px-5 w-100" type="submit">Login</button>
                             </div>
-                            <div class="col-12 text-center">
+                            {% comment %} <div class="col-12 text-center">
                                 <div class="my-3 text-muted">or</div>
                                 <a href="{% url 'login_with_otp' %}" class="btn btn-primary-gradient rounded-pill py-3 px-5 w-100 my-1" >Login With OTP</a>
                                 <a href="{% url 'account_login' %}" class="btn btn-primary-gradient rounded-pill py-3 px-5 w-100 my-1" >Login With Google</a>
                                 <p class="mt-3 mb-0"><a href="{% url 'password_reset_request' %}">Forgot Password?</a></p>
                                 <p class="mt-1">New here? <a href="{% url 'user_registration' %}">Create an account</a></p>
-                            </div>
+                            </div> {% endcomment %}
                         </div>
                     </form>
                 </div>
