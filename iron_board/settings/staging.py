@@ -15,14 +15,14 @@ ENABLE_QR_SCHEDULER = True  # Set to False to disable
 # Add other production-specific security settings as needed.
 
 # Optionally, configure production database here
-# DATABASES['default'] = {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': os.getenv('DB_NAME'),
-#     'USER': os.getenv('DB_USER'),
-#     'PASSWORD': os.getenv('DB_PASSWORD'),
-#     'HOST': os.getenv('DB_HOST'),
-#     'PORT': os.getenv('DB_PORT'),
-# }
+DATABASES['default'] = {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.getenv('DB_NAME'),
+    'USER': os.getenv('DB_USER'),
+    'PASSWORD': os.getenv('DB_PASSWORD'),
+    'HOST': os.getenv('DB_HOST'),
+    'PORT': os.getenv('DB_PORT'),
+}
 
 USERNAME_PREFIX = "MEMBER-STAG"
 SUBSCRIPTION_ORDER_PREFIX = "SUB-ORD-STAG"

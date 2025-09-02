@@ -59,7 +59,7 @@
                 <td>{{ user.username }}</td>
                 <td>{{ user.get_full_name }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.package_expiry_date|date:"M d, Y H:i" }}</td>
+                <td>{{ user.package_expiry_date|date:"Y-m-d" }}</td>
                 <td class="text-center">
                     {% if not user.on_subscription %}
                       <a href="{% url 'choose_package' member_id=user.member_id %}" class="btn btn-icon btn-primary">

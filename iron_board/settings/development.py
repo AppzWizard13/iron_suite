@@ -40,3 +40,17 @@ SUBSCRIPTION_ORDER_PREFIX = "SUB-ORD-DEV-TEST"
 #     print(f"Alert created with ID: {alert.id}")
 # else:
 #     print("No users found. Create a user first.")
+
+
+# Database configuration for local development
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'iron_board_db',
+        'USER': 'iron_board_admin',
+        'PASSWORD': 'xPL7y6qe1gLHAg2B9SWvW06vXSC8lxSe',
+        'HOST': 'db',  # or 'iron_board_db' if your Django app runs in Docker
+        'PORT': '5432',
+
+    }
+}

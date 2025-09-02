@@ -3,9 +3,6 @@ import atexit
 from datetime import timedelta, time
 import calendar
 
-
-
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
@@ -317,12 +314,12 @@ def start():
         CronTrigger(hour=15, minute=0, timezone='Asia/Kolkata'),
         name='Evening WhatsApp Reminders'
     )
-    # scheduler.add_job(
-    #     generate_missing_invoices_job,
-    #     CronTrigger(hour=0, minute=1, timezone='Asia/Kolkata'),
-    #     name='Generate PDF Invoices',
-    #     replace_existing=True
-    # )
+    scheduler.add_job(
+        generate_missing_invoices_job,
+        CronTrigger(hour=0, minute=1, timezone='Asia/Kolkata'),
+        name='Generate PDF Invoices',
+        replace_existing=True
+    )
     scheduler.start()
     logger.info("Scheduler started.")
     atexit.register(lambda: scheduler.shutdown())

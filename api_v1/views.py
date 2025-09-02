@@ -1,5 +1,6 @@
 from datetime import timedelta
 import random
+from attendance.models import Attendance
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
@@ -336,10 +337,17 @@ class GoogleLogin(SocialLoginView):
 
 
 
+from datetime import date
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
 class UserProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Get today's date inside the method
+        today = date.today()
         user = request.user  # The authenticated user
         gym = getattr(user, 'gym', None)
 
@@ -350,6 +358,9 @@ class UserProfileAPIView(APIView):
             .order_by('-date', '-id')
             .first()
         )
+
+        # Fixed: Use the local 'today' variable
+        log_status = Attendance.objects.filter(user=user, date=today).exists()
 
         latest_measurement = None
         if latest:
@@ -371,9 +382,9 @@ class UserProfileAPIView(APIView):
             "gender": getattr(user, 'gender', None),
             "phone": getattr(user, 'phone_number', '') or '',
             "gym_name": getattr(gym, 'name', '') or '',
-            'gym_location': gym.location,
             "location": getattr(gym, 'location', '') or '',
             "status": getattr(user, 'on_subscription', ''),
+            "log_status": log_status,  # Fixed: Use actual log_status variable
             "package_expiry_date": user.package_expiry_date.isoformat() if getattr(user, 'package_expiry_date', None) else "",
             "package": getattr(getattr(user, 'package', None), 'name', '') or "",
 

@@ -20,10 +20,9 @@
 
   <div class="card">
     <div class="card-body">
-
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h5 class="mb-0">QR Tokens</h5>
-        <a href="{% url 'qr_token_create' %}" class="btn btn-primary">
+        <a href="{% url 'qr_generator' %}" class="btn btn-primary">
           <i class="bx bx-qr"></i> Generate QR Token
         </a>
       </div>
@@ -35,6 +34,7 @@
               <th>Schedule</th>
               <th>Token</th>
               <th>Generated</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody class="table-border-bottom-0">
@@ -43,10 +43,20 @@
               <td>{{ token.schedule.name }}</td>
               <td>{{ token.token }}</td>
               <td>{{ token.generated_at|date:"d M Y, H:i" }}</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#qrModal" 
+                        onclick="showQR('{{ token.token }}', '{{ token.schedule.name }}', '{{ token.id }}')">
+                  <i class="bx bx-show"></i> View QR
+                </button>
+                <button type="button" class="btn btn-sm btn-success" 
+                        onclick="downloadA4QR('{{ token.token }}', '{{ token.schedule.name }}', '{{ token.id }}')">
+                  <i class="bx bx-printer"></i> Print A4
+                </button>
+              </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="3" class="text-center">No QR tokens found</td>
+              <td colspan="4" class="text-center">No QR tokens found</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -56,4 +66,490 @@
     </div>
   </div>
 </div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="qrModalLabel">QR Code - <span id="scheduleNameModal"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div id="qrCodeContainer" class="mb-3">
+          <!-- QR code will be generated here -->
+        </div>
+        <p class="text-muted small mb-0">Token: <span id="tokenModal"></span></p>
+      </div>
+      <div class="modal-footer d-flex justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary me-2" onclick="downloadQR()">
+          <i class="bx bx-download"></i> Download QR
+        </button>
+        <button type="button" class="btn btn-success" onclick="downloadA4QRFromModal()">
+          <i class="bx bx-printer"></i> Download A4 Print
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dynamic QR Code Library Loading Script -->
+<script>
+let QRCodeLibraryLoaded = false;
+let currentQRCode = null;
+let currentScheduleName = '';
+let currentToken = '';
+
+function loadQRCodeLibrary() {
+  return new Promise((resolve, reject) => {
+    if (QRCodeLibraryLoaded && typeof QRCode !== 'undefined') {
+      resolve();
+      return;
+    }
+    
+    console.log('Loading QRCode library...');
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    
+    script.onload = () => {
+      QRCodeLibraryLoaded = true;
+      console.log('QRCode library loaded dynamically');
+      resolve();
+    };
+    
+    script.onerror = () => {
+      console.error('Failed to load QRCode library');
+      reject(new Error('Failed to load QRCode library'));
+    };
+    
+    document.head.appendChild(script);
+  });
+}
+
+async function showQR(token, scheduleName, tokenId) {
+  currentToken = token;
+  currentScheduleName = scheduleName;
+  
+  // Update modal content
+  document.getElementById('scheduleNameModal').textContent = scheduleName;
+  document.getElementById('tokenModal').textContent = token;
+  
+  const qrContainer = document.getElementById('qrCodeContainer');
+  
+  // Show loading state
+  qrContainer.innerHTML = `
+    <div class="text-center">
+      <div class="qr-loading"></div>
+      <p class="mt-2 text-muted">Loading QR Code...</p>
+    </div>
+  `;
+  
+  try {
+    // Load QR Code library dynamically
+    await loadQRCodeLibrary();
+    
+    // Clear loading state
+    qrContainer.innerHTML = '';
+    
+    // Generate QR code
+    currentQRCode = new QRCode(qrContainer, {
+      text: token,
+      width: 300,
+      height: 300,
+      colorDark: '#000000',
+      colorLight: '#FFFFFF',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    
+    console.log('QR Code generated successfully for token:', token.substring(0, 8) + '...');
+    
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    qrContainer.innerHTML = `
+      <div class="alert alert-danger" role="alert">
+        <i class="bx bx-error-circle"></i> 
+        Failed to load QR code library. Please check your internet connection and try again.
+      </div>
+    `;
+  }
+}
+
+async function generateA4QR(token, scheduleName) {
+  try {
+    await loadQRCodeLibrary();
+    
+    // Create a larger QR code for A4 printing
+    const tempContainer = document.createElement('div');
+    const qrCode = new QRCode(tempContainer, {
+      text: token,
+      width: 600, // Larger size for A4
+      height: 600,
+      colorDark: '#000000',
+      colorLight: '#FFFFFF',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    
+    // Wait for QR code to be generated
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return { qrCode, container: tempContainer };
+  } catch (error) {
+    console.error('Error generating A4 QR code:', error);
+    throw error;
+  }
+}
+
+async function downloadA4QR(token, scheduleName, tokenId) {
+  try {
+    console.log('Generating A4 QR code for:', scheduleName);
+    
+    const { qrCode, container } = await generateA4QR(token, scheduleName);
+    
+    // Create A4 canvas (210mm x 297mm at 300 DPI = 2480 x 3508 pixels)
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 2480;
+    canvas.height = 3508;
+    
+    // Fill with white background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Get QR code image
+    const qrImg = container.querySelector('canvas') || container.querySelector('img');
+    
+    if (qrImg) {
+      // Calculate center position for QR code
+      const qrSize = 1800; // Large QR code size
+      const qrX = (canvas.width - qrSize) / 2;
+      const qrY = (canvas.height - qrSize) / 2 - 200; // Slightly above center
+      
+      // Draw QR code
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+      
+      // Add title text
+      ctx.fillStyle = '#000000';
+      ctx.font = 'bold 120px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(scheduleName, canvas.width / 2, qrY - 150);
+      
+      // Add instruction text
+      ctx.font = '80px Arial';
+      ctx.fillText('Scan QR Code to Access', canvas.width / 2, qrY + qrSize + 150);
+      
+      // Add token info
+      ctx.font = '60px Arial';
+      ctx.fillStyle = '#666666';
+      ctx.fillText(`Token: ${token.substring(0, 16)}...`, canvas.width / 2, qrY + qrSize + 250);
+      
+      // Add date
+      const currentDate = new Date().toLocaleDateString();
+      ctx.fillText(`Generated: ${currentDate}`, canvas.width / 2, qrY + qrSize + 330);
+      
+      // Download
+      const link = document.createElement('a');
+      link.download = `QR_A4_${scheduleName.replace(/[^a-z0-9]/gi, '_')}_${token.substring(0, 8)}.png`;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log('A4 QR code downloaded successfully');
+    } else {
+      alert('Failed to generate QR code for A4 download');
+    }
+  } catch (error) {
+    console.error('Error creating A4 QR code:', error);
+    alert('Error creating A4 QR code. Please try again.');
+  }
+}
+
+async function downloadA4QRFromModal() {
+  if (!currentToken || !currentScheduleName) {
+    alert('No QR code data available');
+    return;
+  }
+  await downloadA4QR(currentToken, currentScheduleName, '');
+}
+
+function downloadQR() {
+  if (!currentQRCode) {
+    alert('No QR code available for download');
+    return;
+  }
+  
+  try {
+    const qrContainer = document.getElementById('qrCodeContainer');
+    const canvas = qrContainer.querySelector('canvas');
+    const img = qrContainer.querySelector('img');
+    
+    let dataUrl = '';
+    
+    if (canvas) {
+      dataUrl = canvas.toDataURL('image/png');
+    } else if (img) {
+      const tempCanvas = document.createElement('canvas');
+      const ctx = tempCanvas.getContext('2d');
+      tempCanvas.width = img.naturalWidth || img.width;
+      tempCanvas.height = img.naturalHeight || img.height;
+      
+      if (img.complete) {
+        ctx.drawImage(img, 0, 0);
+        dataUrl = tempCanvas.toDataURL('image/png');
+      } else {
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0);
+          dataUrl = tempCanvas.toDataURL('image/png');
+          triggerDownload(dataUrl);
+        };
+        return;
+      }
+    }
+    
+    if (dataUrl) {
+      triggerDownload(dataUrl);
+    } else {
+      alert('Unable to download QR code. No image data found.');
+    }
+    
+  } catch (error) {
+    console.error('Error downloading QR code:', error);
+    alert('Error downloading QR code. Please try again.');
+  }
+}
+
+function triggerDownload(dataUrl) {
+  const link = document.createElement('a');
+  const fileName = `QR_${currentScheduleName.replace(/[^a-z0-9]/gi, '_')}_${currentToken.substring(0, 8)}.png`;
+  link.download = fileName;
+  link.href = dataUrl;
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  console.log('QR code downloaded:', fileName);
+}
+
+// Auto-dismiss toasts and initialize
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Page loaded, QR Token manager ready');
+  
+  const toasts = document.querySelectorAll('.toast');
+  toasts.forEach(toast => {
+    setTimeout(() => {
+      if (toast.classList.contains('show')) {
+        toast.classList.remove('show');
+      }
+    }, 5000);
+  });
+  
+  setTimeout(() => {
+    loadQRCodeLibrary().catch(error => {
+      console.warn('Failed to preload QR library:', error);
+    });
+  }, 1000);
+});
+
+// Handle modal events
+document.getElementById('qrModal').addEventListener('hidden.bs.modal', function () {
+  document.getElementById('qrCodeContainer').innerHTML = '';
+  currentQRCode = null;
+  console.log('QR Modal closed, cleanup completed');
+});
+
+document.getElementById('qrModal').addEventListener('show.bs.modal', function () {
+  console.log('QR Modal opening...');
+});
+</script>
+
+<style>
+/* QR Code Container Styling */
+#qrCodeContainer {
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+/* QR Code Canvas/Image Styling */
+#qrCodeContainer canvas,
+#qrCodeContainer img {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-width: 100%;
+  height: auto;
+}
+
+/* Loading Animation */
+.qr-loading {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Toast Styling */
+.toast {
+  min-width: 300px;
+  margin-bottom: 10px;
+}
+
+/* Alert in QR Container */
+#qrCodeContainer .alert {
+  margin: 0;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Button Hover Effects */
+.btn-outline-primary:hover,
+.btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+/* A4 Print Button Styling */
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 1rem;
+  }
+  
+  #qrCodeContainer {
+    min-height: 280px;
+  }
+  
+  #qrCodeContainer canvas,
+  #qrCodeContainer img {
+    max-width: 250px;
+    max-height: 250px;
+    padding: 10px;
+  }
+  
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Stack buttons vertically on mobile */
+  .btn-sm.me-2 {
+    margin-right: 0 !important;
+    margin-bottom: 0.25rem;
+    display: block;
+    width: 100%;
+  }
+  
+  .btn-sm:last-child {
+    display: block;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
+  
+  .d-flex.justify-content-between .btn {
+    align-self: stretch;
+    text-align: center;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+  
+  .modal-footer .me-2 {
+    margin-right: 0 !important;
+  }
+}
+
+/* Print styles for A4 */
+@media print {
+  .modal {
+    display: block !important;
+    position: static !important;
+  }
+  
+  .modal-dialog {
+    margin: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    display: none !important;
+  }
+}
+
+/* Gym-specific styling */
+.gym-qr-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #28a745;
+}
+
+/* Loading state for A4 generation */
+.a4-generating {
+  position: relative;
+}
+
+.a4-generating::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
 {% endblock %}

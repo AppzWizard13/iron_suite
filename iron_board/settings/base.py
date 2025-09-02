@@ -18,8 +18,8 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://f609e4f20e93.ngrok-free.app",
-    "https://iron-board-1.onrender.com",
+    "https://e22489cd7b58.ngrok-free.app",
+    "https://iron-board-1zi5.onrender.com",
 ]
 
 CORS_ALLOW_METHODS = [
@@ -50,9 +50,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:3000',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    'https://iron-board.onrender.com',
-    'https://iron-board-1.onrender.com',
-    'https://f609e4f20e93.ngrok-free.app',
+    'https://iron-board-1zi5.onrender.com',
+    'https://e22489cd7b58.ngrok-free.app',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
