@@ -36,94 +36,162 @@ class GymForm(forms.ModelForm):
         self.fields['admin'].queryset = CustomUser.objects.filter(staff_role='Admin')
 
 
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.db.models import Max
+from accounts.models import CustomUser
+
+# Manual country choices list
+COUNTRY_CHOICES = [
+    ("", "--- Select Country ---"),
+    ("AF", "Afghanistan"),
+    ("AL", "Albania"),
+    ("DZ", "Algeria"),
+    ("AR", "Argentina"),
+    ("AU", "Australia"),
+    ("AT", "Austria"),
+    ("BD", "Bangladesh"),
+    ("BE", "Belgium"),
+    ("BR", "Brazil"),
+    ("CA", "Canada"),
+    ("CN", "China"),
+    ("CO", "Colombia"),
+    ("DK", "Denmark"),
+    ("EG", "Egypt"),
+    ("FI", "Finland"),
+    ("FR", "France"),
+    ("DE", "Germany"),
+    ("GH", "Ghana"),
+    ("GR", "Greece"),
+    ("IN", "India"),
+    ("ID", "Indonesia"),
+    ("IE", "Ireland"),
+    ("IT", "Italy"),
+    ("JP", "Japan"),
+    ("KE", "Kenya"),
+    ("MY", "Malaysia"),
+    ("MX", "Mexico"),
+    ("NL", "Netherlands"),
+    ("NG", "Nigeria"),
+    ("NO", "Norway"),
+    ("PK", "Pakistan"),
+    ("PH", "Philippines"),
+    ("PL", "Poland"),
+    ("PT", "Portugal"),
+    ("RU", "Russia"),
+    ("SA", "Saudi Arabia"),
+    ("SG", "Singapore"),
+    ("ZA", "South Africa"),
+    ("KR", "South Korea"),
+    ("ES", "Spain"),
+    ("LK", "Sri Lanka"),
+    ("SE", "Sweden"),
+    ("CH", "Switzerland"),
+    ("TH", "Thailand"),
+    ("TR", "Turkey"),
+    ("UA", "Ukraine"),
+    ("AE", "United Arab Emirates"),
+    ("GB", "United Kingdom"),
+    ("US", "United States"),
+    ("VN", "Vietnam"),
+]
+
 class CustomUserForm(UserCreationForm):
+    # Convert country_code to ChoiceField
+    country_code = forms.ChoiceField(
+        choices=COUNTRY_CHOICES,
+        widget=forms.Select(attrs={"class": "form-control"}),
+        label="Country",
+        required=True
+    )
+    
     password1 = forms.CharField(
         required=False,  # password optional
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter Password'}),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Enter Password"}),
         label="Password"
     )
     password2 = forms.CharField(
         required=False,
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm Password'}),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Confirm Password"}),
         label="Confirm Password"
     )
 
     class Meta:
         model = CustomUser
         fields = [
-            'first_name', 'last_name', 'phone_number', 'email', 'staff_role',
-            'address', 'city', 'state', 'pincode', 'date_of_birth', 'gender',
-            'password1', 'password2', 'is_active', 'is_staff',
+            "first_name", "last_name", "country_code", "phone_number", "email", "staff_role",
+            "address", "city", "state", "pincode", "date_of_birth", "gender",
+            "password1", "password2", "is_active", "is_staff",
         ]
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter First Name'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Last Name'}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Phone Number'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter Email'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter Address', 'rows': 2}),
-            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter City'}),
-            'state': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter State'}),
-            'pincode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Pincode'}),
-            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'gender': forms.Select(attrs={'class': 'form-control'}, choices=[
-                ('Male', 'Male'),
-                ('Female', 'Female'),
-                ('Other', 'Other')
+            "first_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter First Name"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter Last Name"}),
+            "phone_number": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter Phone Number"}),
+            "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter Email"}),
+            "address": forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter Address", "rows": 2}),
+            "city": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter City"}),
+            "state": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter State"}),
+            "pincode": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter Pincode"}),
+            "date_of_birth": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "gender": forms.Select(attrs={"class": "form-control"}, choices=[
+                ("Male", "Male"),
+                ("Female", "Female"),
+                ("Other", "Other")
             ]),
-            'staff_role': forms.Select(attrs={'class': 'form-control'}, choices=[
-                ('Admin', 'Admin'), 
-                ('Manager', 'Manager'), 
-                ('Employee', 'Employee'),
-                ('Trainer', 'Trainer')  # Make sure to include Trainer option if needed
+            "staff_role": forms.Select(attrs={"class": "form-control"}, choices=[
+                ("Admin", "Admin"), 
+                ("Manager", "Manager"), 
+                ("Employee", "Employee"),
+                ("Trainer", "Trainer")
             ]),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'is_staff': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
     def __init__(self, *args, **kwargs):
         print("kwargskwargskwargskwargskwargskwargskwargskwargskwargs", kwargs)
-        self.hide_staff_role = kwargs.pop('hide_staff_role', False)
-        self.default_staff_role = kwargs.pop('default_staff_role', None)
-        is_superuser = kwargs.pop('is_superuser', False)  # Pop is_superuser flag
+        self.hide_staff_role = kwargs.pop("hide_staff_role", False)
+        self.default_staff_role = kwargs.pop("default_staff_role", None)
+        is_superuser = kwargs.pop("is_superuser", False)
         super().__init__(*args, **kwargs)
 
         # Dynamically set staff_role choices based on is_superuser
-        print("self.fields", )
-        if 'staff_role' in self.fields:
+        print("self.fields")
+        if "staff_role" in self.fields:
             if is_superuser:
-                self.fields['staff_role'].choices = [
-                    ('Admin', 'Admin'),
-                    ('Manager', 'Manager'), 
-                    ('Employee', 'Employee'),
-                    ('Member', 'Member'),
-                    ('Trainer', 'Trainer')
+                self.fields["staff_role"].choices = [
+                    ("Admin", "Admin"),
+                    ("Manager", "Manager"), 
+                    ("Employee", "Employee"),
+                    ("Member", "Member"),
+                    ("Trainer", "Trainer")
                 ]
             else:
                 # Exclude 'Admin'
-                self.fields['staff_role'].choices = [
-                    ('Manager', 'Manager'), 
-                    ('Employee', 'Employee'),
-                    ('Member', 'Member'),
-                    ('Trainer', 'Trainer')
+                self.fields["staff_role"].choices = [
+                    ("Manager", "Manager"), 
+                    ("Employee", "Employee"),
+                    ("Member", "Member"),
+                    ("Trainer", "Trainer")
                 ]
 
         if self.hide_staff_role:
-            self.fields.pop('staff_role', None)  # Remove staff_role field if hiding
+            self.fields.pop("staff_role", None)
 
         if self.default_staff_role:
-            self.initial['staff_role'] = self.default_staff_role
+            self.initial["staff_role"] = self.default_staff_role
 
         # Make password fields optional when editing
         if self.instance and self.instance.pk:
-            self.fields['password1'].required = False
-            self.fields['password2'].required = False
+            self.fields["password1"].required = False
+            self.fields["password2"].required = False
 
     def save(self, commit=True):
         instance = super().save(commit=False)
 
         # Auto-assign member_id if missing
         if not instance.member_id:
-            max_member_id = CustomUser.objects.aggregate(Max('member_id'))['member_id__max'] or 0
+            max_member_id = CustomUser.objects.aggregate(Max("member_id"))["member_id__max"] or 0
             instance.member_id = max_member_id + 1
 
         # Auto-generate username
@@ -134,8 +202,8 @@ class CustomUserForm(UserCreationForm):
             instance.staff_role = self.default_staff_role
 
         # Set password if provided
-        if self.cleaned_data.get('password1'):
-            instance.set_password(self.cleaned_data['password1'])
+        if self.cleaned_data.get("password1"):
+            instance.set_password(self.cleaned_data["password1"])
 
         if commit:
             instance.save()

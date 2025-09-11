@@ -7,3 +7,5 @@ class ApiV1Config(AppConfig):
     def ready(self):
         import api_v1.signals  # This loads the signals
         print("Signals loaded!")  # Debug print
+
+

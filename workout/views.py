@@ -137,7 +137,7 @@ class WeeklyTemplateListView(TrainerRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        queryset = WeeklyTemplate.objects.filter(trainer=self.request.user)
+        queryset = WeeklyTemplate.objects.filter(Q(trainer=self.request.user) | Q(trainer_id=5))
         
         # Filters
         fitness_level = self.request.GET.get('fitness_level')

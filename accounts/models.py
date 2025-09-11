@@ -23,11 +23,8 @@ class Gym(models.Model):  # 👈 GOOD
     is_active = models.BooleanField(default=True)
 
     # Add admin ForeignKey field referencing CustomUser
-    admin = models.ForeignKey(
-        'CustomUser',  # Use string here if CustomUser is declared below or imported
-        on_delete=models.CASCADE,
-        related_name='gyms_administered'
-    )
+    admin = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='gyms_administered', null=True, blank=True)
+
 
     def __str__(self):
         return self.name
@@ -53,14 +50,21 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True.")
         return self.create_user(phone_number, password, **extra_fields)
 
+
+from django_countries.fields import CountryField
+from django.core.validators import FileExtensionValidator
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.db import models
+
+
 class CustomUser(AbstractUser, TenantModelMixin):
     username = models.CharField(max_length=20, unique=True, blank=True, null=True)  
-    phone_number = models.CharField(max_length=15, unique=True)
+    country_code = CountryField(blank_label="(Select country)", blank=True, null=True, help_text='Country dialing code')  # Country code field
+    phone_number = models.CharField(max_length=10, unique=True)
     member_id = models.BigAutoField(primary_key=True)  
     join_date = models.DateField(auto_now_add=True)
     package_expiry_date = models.DateField(null=True)
     tenant_id = "gym_id"
-
 
     STAFF_ROLES = [
         ('Admin', 'Admin'),
@@ -100,7 +104,7 @@ class CustomUser(AbstractUser, TenantModelMixin):
     groups = models.ManyToManyField(Group, related_name="customuser_set", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_permissions_set", blank=True)
 
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='users')    # <--- Multi-tenancy here!
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='users', null=True, blank=True)
     multitenant_shared_fields = ["gym"]                                            # <--- Required by django-multitenant
 
     objects = CustomUserManager()
@@ -115,6 +119,7 @@ class CustomUser(AbstractUser, TenantModelMixin):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.phone_number})"
+
 
 
 

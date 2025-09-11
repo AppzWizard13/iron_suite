@@ -1,0 +1,681 @@
+# Complete Updated Fitness Programming Guide
+
+**Important notes:**
+- Warm-up: 5–10min before every session (mobility + light cardio).
+- Cool-down: 5–10min after every session (stretching/breathing).
+- Progressive overload: increase weight 2.5–5% or add 1–2 reps weekly if RPE ≤7.
+- RPE guidance: aim RPE 6–7 (Beginner), 7–8 (Medium), 8–9 (Advanced/Master).
+- Safety: Stop if sharp pain, prioritize form, adjust load for recovery and sleep.
+
+## 1) Beginner Level
+
+### 1.1 Weight Loss (Beginner)
+**Goal:** Build habit, full-body circuits, high NEAT, moderate cardio.
+**Weekly structure:** 4 full-body strength + 2 cardio sessions.
+
+**Monday (Full-Body Circuit A)** — 45–55min
+- Goblet Squat — 3×10–12 — Keep chest up, full depth — 12–15min
+- Incline Push-up — 3×8–12 — Use bench to scale — 10min
+- Seated Row (Machine/Band) — 3×10–12 — Squeeze scapula — 10min
+- Hip Hinge (DB RDL) — 3×10 — Neutral spine — 10min
+- Plank — 3×30–45s — Brace core — 8min
+
+**Tuesday (Cardio Intervals, Low Impact)** — 30–40min
+- Treadmill incline walk or cycle — 5min warm-up
+- 10×1min brisk/1min easy
+- 5–10min cool-down
+
+**Wednesday (Full-Body Circuit B)** — 45–55min
+- Step-ups — 3×10/leg — Knee tracks toes — 12min
+- Lat Pulldown — 3×10–12 — Control down — 10min
+- DB Shoulder Press — 3×8–10 — No arch — 10min
+- Glute Bridge — 3×12–15 — Pause at top — 8min
+- Dead Bug — 3×10/side — Low back down — 8min
+
+**Thursday (Full-Body Circuit C)** — 45–55min
+- Leg Press — 3×10–12 — Full ROM — 10min
+- Chest Press (Machine/DB) — 3×8–10 — Tempo 2-1-2 — 10min
+- Cable Row — 3×10–12 — Neutral wrist — 10min
+- Back Extension or Bird Dog — 3×12 — Controlled — 8min
+- Farmer Carry — 4×30m — Upright posture — 8min
+
+**Friday (Full-Body Circuit D)** — 40–50min
+- Wall Sit — 3×45–60s — Back flat against wall — 8min
+- Modified Push-ups — 3×10–12 — Focus on form — 10min
+- Assisted Pull-ups/Lat Pulldown — 3×8–10 — 10min
+- Single-leg Glute Bridge — 3×10/leg — 8min
+- Side Plank — 3×20–30s/side — 8min
+
+**Saturday (Steady-State Cardio)** — 35–45min
+- Choose: cycle, elliptical, row, or swim at conversational pace
+
+**Sunday:** Rest
+
+### 1.2 Weight Gain (Beginner)
+**Goal:** Hypertrophy foundation, increased training frequency, adequate calories/protein.
+**Weekly structure:** 4 full-body + 2 light cardio/recovery sessions.
+
+**Monday (Full-Body A)** — 50–60min
+- Back Squat (or Goblet) — 4×8 — 12–15min
+- Bench Press (or DB) — 4×8 — 12–15min
+- Lat Pulldown — 3×10 — 10min
+- DB RDL — 3×10 — 10min
+- Seated Calf Raise — 3×12–15 — 5–8min
+- Plank — 3×45s — 5min
+
+**Tuesday (Active Recovery + Light Strength)** — 40–50min
+- 20min easy cardio (walking/cycling)
+- Bodyweight movements: 3×15 Bodyweight Squats
+- 3×10 Push-ups (modified if needed)
+- 3×30s Plank variations
+- Mobility work — 15min
+
+**Wednesday (Full-Body B)** — 50–60min
+- Leg Press — 4×10 — 12–15min
+- Incline DB Press — 4×8–10 — 12–15min
+- One-arm DB Row — 3×10/side — 10min
+- Hip Thrust — 3×10 — 10min
+- Lateral Raise — 3×12–15 — 5–8min
+
+**Thursday (Full-Body C)** — 50–60min
+- Split Squat — 3×10/leg — 12–15min
+- Machine Chest Press — 3×10 — 10min
+- Cable Row — 3×10 — 10min
+- Hamstring Curl — 3×12 — 8–10min
+- Face Pull — 3×12–15 — 5–8min
+
+**Friday (Full-Body D)** — 45–55min
+- Goblet Squat — 3×12 — 10min
+- Dumbbell Press — 3×10 — 10min
+- Assisted Pull-ups — 3×8–10 — 10min
+- Glute Bridge — 3×15 — 8min
+- Triceps/Biceps superset — 2×12 each — 10min
+
+**Saturday (Easy Cardio + Core)** — 30–40min
+- 20–25min easy cardio
+- Core circuit: 3×10 each (Dead Bug, Bird Dog, Modified Plank)
+
+**Sunday:** Rest
+
+### 1.3 Competition (Beginner)
+**Goal:** Technique-first, mock attempts light, basic strength skill development.
+**Weekly:** 4 technique days + 2 GPP sessions.
+
+**Monday (Squat Focus + Bench)** — 60min
+- Back Squat — 5×3 @RPE6 — 15min
+- Bench Press — 4×3 @RPE6 — 12min
+- Paused Squat — 3×3 — 10min
+- Close-grip Bench — 3×5 — 10min
+- Core (Pallof press) — 3×12 — 10min
+
+**Tuesday (GPP/Conditioning)** — 30–40min
+- 20–25min brisk walk/sled drag/light cardio
+- Movement prep and mobility — 15min
+
+**Wednesday (Deadlift Focus + Upper)** — 60min
+- Deadlift — 5×2 @RPE6 — 15min
+- Bench — 4×4 @RPE6 — 12min
+- RDL — 3×5 — 10min
+- Row — 3×8–10 — 10min
+- Back/hip mobility — 10min
+
+**Thursday (Technique Refinement)** — 50–60min
+- Competition commands practice (all three lifts light)
+- Squat — 4×2 @RPE5-6 — 15min
+- Bench — 4×2 @RPE5-6 — 12min  
+- Deadlift — 4×1 @RPE5-6 — 15min
+- Mobility and activation — 10min
+
+**Friday (Hypertrophy Accessories)** — 55–65min
+- Front Squat or Leg Press — 3×8–10 — 12min
+- DB Press — 3×8–10 — 10min
+- Pulldown — 3×10–12 — 10min
+- Ham Curl — 3×12 — 8min
+- Triceps/Biceps — 2×12–15 each — 10min
+
+**Saturday (GPP + Mobility)** — 35–45min
+- Light conditioning (bike/walk) — 20min
+- Mobility class/stretching routine — 20min
+
+**Sunday:** Rest
+
+### 1.4 Basic Maintenance (Beginner)
+**Goal:** Health, posture, consistency, low soreness.
+**Weekly:** 4 strength + 2 light cardio sessions.
+
+**Monday (Strength A)** — 45–55min
+- Goblet Squat — 3×10
+- Push-up (incline) — 3×8–10
+- Seated Row — 3×10–12
+- Glute Bridge — 3×12–15
+- Plank — 3×45s
+
+**Tuesday (Light Cardio)** — 25–35min
+- Easy walk/cycle/swim
+
+**Wednesday (Strength B)** — 45–55min
+- Leg Press — 3×10–12
+- DB Bench — 3×10
+- Lat Pulldown — 3×10–12
+- Back Extension — 3×12
+- Side Plank — 3×30s/side
+
+**Thursday (Light Cardio + Mobility)** — 30–40min
+- 20min easy cardio
+- 15min mobility/stretching
+
+**Friday (Strength C)** — 45–55min
+- Step-ups — 3×10/leg
+- Cable Row — 3×10–12
+- DB Shoulder Press — 3×8–10
+- Ham Curl — 3×12
+- Farmer Carry — 4×30m
+
+**Saturday (Strength D)** — 40–50min
+- Bodyweight circuit — 3 rounds
+- Squats, Push-ups, Lunges, Planks
+- Light resistance band work
+
+**Sunday:** Rest
+
+## 2) Medium Level
+
+### 2.1 Weight Loss (Medium)
+**Goal:** Calorie burn with quality lifts, mixed intervals, higher training frequency.
+**Weekly:** 4 strength + 2 conditioning sessions.
+
+**Monday (Lower Power)** — 60–70min
+- Back Squat — 4×6–8
+- RDL — 4×8
+- Walking Lunge — 3×10/leg
+- Leg Curl — 3×12
+- Calf Raise — 3×15
+
+**Tuesday (Upper Power)** — 60–70min
+- Bench Press — 4×6–8
+- Chest-supported Row — 4×8–10
+- Overhead Press — 3×6–8
+- Lat Pulldown — 3×10–12
+- Face Pull + Triceps Rope — 2×12–15 each
+
+**Wednesday (HIIT)** — 30–40min
+- Bike/Row: 12×40s hard/80s easy
+- Core finisher: 3×30s each (Mountain climbers, Plank ups)
+
+**Thursday (Lower Volume)** — 60–70min
+- Deadlift — 4×4–6
+- Front Squat or Leg Press — 3×8–10
+- Bulgarian Split Squat — 3×8/leg
+- Back Extension — 3×12
+- Ab Wheel — 3×8–10
+
+**Friday (Upper Volume)** — 60–70min
+- Incline Bench — 4×6–8
+- Pull-ups/Assisted — 4×6–8
+- DB Shoulder Press — 3×8–10
+- Cable Row — 3×10–12
+- Biceps/Triceps — 2×12–15
+
+**Saturday (HIIT + Cardio)** — 35–45min
+- 15min HIIT intervals (various equipment)
+- 20min steady cardio
+- 10min stretching
+
+**Sunday:** Rest
+
+### 2.2 Weight Gain (Medium)
+**Goal:** Hypertrophy emphasis, push/pull/legs twice weekly.
+**Weekly:** PPL×2 format.
+
+**Monday (Push)** — 60–70min
+- Bench Press — 4×6–8
+- Incline DB Press — 3×8–10
+- Overhead Press — 3×6–8
+- Lateral Raise — 3×15
+- Triceps Pushdown — 3×12–15
+
+**Tuesday (Pull)** — 60–70min
+- Weighted Pull-up or Pulldown — 4×6–8
+- Barbell Row — 4×6–8
+- Seated Cable Row — 3×10–12
+- Rear Delt Fly — 3×15
+- Hammer Curl — 3×10–12
+
+**Wednesday (Legs)** — 60–70min
+- Back Squat — 4×6–8
+- RDL — 3×8–10
+- Leg Press — 3×10–12
+- Leg Curl — 3×12–15
+- Calf Raise — 4×12–15
+
+**Thursday (Push 2)** — 60–70min
+- Close-grip Bench — 4×6–8
+- Machine Press — 3×8–10
+- Arnold Press — 3×8–10
+- Cable Fly — 3×12–15
+- Overhead Triceps — 3×12–15
+
+**Friday (Pull 2)** — 60–70min
+- Chest-supported Row — 4×8–10
+- Lat Pulldown — 3×10–12
+- Cable Pullover — 3×12–15
+- EZ Curl — 3×10–12
+- Face Pull — 3×15
+
+**Saturday (Legs 2)** — 60–70min
+- Front Squat — 4×6–8
+- Hip Thrust — 3×8–10
+- Bulgarian Split Squat — 3×8–10/leg
+- Leg Extension — 3×12–15
+- Seated Calf — 4×12–15
+
+**Sunday:** Rest
+
+### 2.3 Competition (Medium; Powerlifting focus)
+**Weekly:** 5 days — Heavy/Volume split with accessory focus.
+
+**Monday (Squat Focus)** — 70–80min
+- Back Squat — 5×3 @75–80%
+- Paused Squat — 3×3 @65–70%
+- Ham Curl — 3×10–12
+- Core — 3×12
+
+**Tuesday (Bench Volume)** — 70–80min
+- Bench — 5×5 @70–75%
+- Close-grip — 3×5 @70%
+- Row — 4×8–10
+- Triceps — 3×12–15
+
+**Wednesday (Deadlift Focus)** — 70–80min
+- Deadlift — 4×3 @75–80%
+- Deficit or Pause DL — 3×3 @65–70%
+- Back Extension — 3×10–12
+- Lats — 3×10–12
+
+**Thursday (Bench Intensity + Secondary Squat)** — 70–80min
+- Bench — 5×2 @80–85%
+- Spoto or Paused — 3×3 @70%
+- Front Squat/Leg Press — 3×6–8
+- Shoulders — 3×10–12
+
+**Friday (Competition Practice)** — 60–70min
+- All three lifts opener practice
+- Squat — 3×1 @opener weight
+- Bench — 3×1 @opener weight  
+- Deadlift — 3×1 @opener weight
+- Light accessories
+
+**Saturday (GPP + Weak Points)** — 40–50min
+- 20min conditioning
+- Weak point accessories — 3×12–15
+- Mobility work
+
+**Sunday:** Rest
+
+### 2.4 Basic Maintenance (Medium)
+**Weekly:** 4 strength + 2 light sessions.
+
+**Monday (Upper)** — 55–65min
+- Bench Press — 4×6–8
+- Row — 4×8–10
+- Overhead Press — 3×8
+- Pulldown — 3×10–12
+- Plank — 3×60s
+
+**Tuesday (Light Cardio + Core)** — 30–40min
+- 25min easy cardio
+- Core circuit — 15min
+
+**Wednesday (Lower)** — 55–65min
+- Squat — 4×6–8
+- RDL — 3×8–10
+- Lunge — 3×10/leg
+- Calf — 3×15
+- Side Plank — 3×30s/side
+
+**Thursday (Upper 2)** — 50–60min
+- Incline Press — 3×8–10
+- Cable Row — 3×10–12
+- DB Press — 3×10–12
+- Arm superset — 2×12–15
+
+**Friday (Full Body)** — 55–65min
+- Deadlift — 3×5
+- Incline Press — 3×8–10
+- Cable Row — 3×10–12
+- Leg Press — 3×10–12
+- Carry — 4×30m
+
+**Saturday (Light Activity)** — 25–35min
+- Easy cardio or sports activity
+
+**Sunday:** Rest
+
+## 3) Advanced Level
+
+### 3.1 Weight Loss (Advanced)
+**Goal:** Preserve strength, increase intensity via density and intervals.
+**Weekly:** 4 strength + 2 high-intensity conditioning.
+
+**Monday (Lower Strength)** — 65–75min
+- Back Squat — 5×4 @75–80%
+- RDL — 4×6–8
+- Split Squat — 3×8/leg
+- Leg Curl — 3×12
+- Ab Wheel — 3×10
+
+**Tuesday (Upper Strength)** — 65–75min
+- Bench — 5×4 @75–80%
+- Weighted Pull-up — 4×5–6
+- OHP — 4×6
+- Chest-supported Row — 3×8–10
+- Dips — 3×8–10
+
+**Wednesday (HIIT + Accessories)** — 40–50min
+- 15×30s hard/60s easy (air bike/rower)
+- Light upper accessories — 3×12–15
+- Core finisher
+
+**Thursday (Lower Volume)** — 65–75min
+- Deadlift — 4×3 @80%
+- Front Squat — 4×6–8
+- Hip Thrust — 3×8–10
+- Back Extension — 3×12
+- Calf — 3×15
+
+**Friday (Upper Volume)** — 65–75min
+- Incline Bench — 4×6–8
+- Pull-ups — 4×AMRAP
+- DB Press — 3×10–12
+- Cable Row — 3×10–12
+- Arms superset — 2×12–15
+
+**Saturday (Metabolic + Zone 2)** — 50–60min
+- 20min metabolic circuit (compound movements)
+- 25min Zone 2 cardio
+- Mobility work
+
+**Sunday:** Rest
+
+### 3.2 Weight Gain (Advanced; Hypertrophy specialization)
+**Weekly:** 6 days, specialization focus with higher volume.
+
+**Monday (Chest/Triceps)** — 65–75min
+- Bench — 4×5–6
+- Incline DB — 4×8–10
+- Machine Press — 3×10–12
+- Cable Fly — 3×12–15
+- Triceps extensions — 3×12–15
+
+**Tuesday (Back/Biceps)** — 65–75min
+- Weighted Pull-up — 4×5–6
+- Barbell Row — 4×6–8
+- Pullover — 3×10–12
+- Rear Delt — 3×15
+- Curl variations — 4×8–12
+
+**Wednesday (Legs — Quad bias)** — 70–80min
+- High-bar Squat — 5×5
+- Leg Press — 4×10–12
+- Leg Extension — 3×12–15
+- Calf — 4×12–15
+
+**Thursday (Shoulders/Arms)** — 65–75min
+- OHP — 4×6–8
+- Lateral Raise — 4×15–20
+- Rear Delt Row — 3×12–15
+- Arm giant sets — 3×10–15
+
+**Friday (Legs — Ham/Glute bias)** — 70–80min
+- Deadlift — 4×3–5
+- Hip Thrust — 4×8–10
+- Ham Curl — 4×10–12
+- Back Extension — 3×12
+
+**Saturday (Pump/Weak-point)** — 55–65min
+- High-rep circuits for lagging parts
+- Drop sets and intensity techniques
+- Recovery-focused exercises
+
+**Sunday:** Rest
+
+### 3.3 Competition (Advanced; Powerlifting)
+**Weekly:** 5–6 days, periodized intensities with competition prep.
+
+**Monday (Squat Intensity + Bench Volume)** — 75–85min
+- Squat — work to 1×1 @85–90%, then 3×3 @75%
+- Bench — 5×5 @72–77%
+- Accessories: Hamstrings/Lats — 3×10–12
+
+**Tuesday (Deadlift Volume + Bench Variations)** — 75–85min
+- Deadlift — 5×3 @72–77%
+- Paused/Spoto Bench — 4×4 @72–75%
+- Rows — 4×8–10
+- Core — 3×10–12
+
+**Wednesday (Technical Practice + Light Accessories)** — 60–70min
+- All three lifts at opener weights
+- Form cues and competition commands
+- Light pump work
+- Mobility and activation
+
+**Thursday (Squat Volume + Bench Intensity)** — 75–85min
+- Squat — 5×4 @72–77%
+- Bench — work to 1×1 @85–90%, then 3×3 @75%
+- Single-leg — 3×8–10
+
+**Friday (Deadlift Intensity + Upper Accessories)** — 75–85min
+- Deadlift — 1×1 @85–90%, then 3×3 @75%
+- Pull-ups — 4×AMRAP
+- Shoulders/Arms — 3×10–12
+
+**Saturday (GPP/Recovery)** — 30–40min
+- Light conditioning
+- Mobility and soft tissue work
+- Weak point accessories
+
+**Sunday:** Rest
+
+### 3.4 Basic Maintenance (Advanced)
+**Weekly:** 4 efficient training days + 2 light activity days.
+
+**Monday (Full A)** — 55–65min
+- Squat — 4×5
+- Bench — 4×5
+- Row — 3×8–10
+- Ham Curl — 3×12
+- Core — 3×10–12
+
+**Tuesday (Active Recovery)** — 30–40min
+- Light cardio
+- Mobility work
+- Light calisthenics
+
+**Wednesday (Full B)** — 55–65min
+- Deadlift — 3×5
+- Incline Press — 3×8–10
+- Pull-ups — 3×AMRAP
+- Lunge — 3×8–10/leg
+- Calf — 3×15
+
+**Thursday (Upper Focus)** — 50–60min
+- OHP — 3×6–8
+- Cable Row — 3×10–12
+- DB Press — 3×10–12
+- Arm superset — 2×12–15
+
+**Friday (Full C)** — 55–65min
+- Front Squat or Leg Press — 3×6–8
+- Bench variations — 3×8–10
+- Pull-ups/Rows — 3×10–12
+- Hip Thrust — 3×8–10
+- Carry — 4×30m
+
+**Saturday (Zone 2 + Flexibility)** — 35–45min
+- 30min Zone 2 cardio
+- 15min mobility/yoga
+
+**Sunday:** Rest
+
+## 4) Master Level
+
+### 4.1 Weight Loss (Master)
+**Weekly:** 5 high-intensity lifts + 1 metabolic session; maximum efficiency.
+
+**Monday (Lower Power)** — 70–80min
+- Squat — 6×3 @80–85%
+- RDL — 4×5–6
+- Split Squat — 3×8
+- Ab Wheel — 3×10
+
+**Tuesday (Upper Power)** — 70–80min
+- Bench — 6×3 @80–85%
+- Weighted Pull-up — 5×4–6
+- OHP — 4×5–6
+- Dips — 3×8–10
+
+**Wednesday (Metabolic/HIIT)** — 35–45min
+- 18×20s hard/70s easy (bike/row)
+- Metabolic finisher circuit
+- Recovery protocols
+
+**Thursday (Lower Volume)** — 70–80min
+- Deadlift — 5×2–3 @82–87%
+- Front Squat — 4×6–8
+- Hip Thrust — 4×8–10
+
+**Friday (Upper Volume)** — 70–80min
+- Incline Bench — 4×6–8
+- Row variations — 4×8–10
+- DB Press — 3×10–12
+- Arms — 2×12–15
+
+**Saturday (Power Endurance + Zone 2)** — 50–60min
+- 20min power circuits
+- 30min Zone 2 cardio
+
+**Sunday:** Rest
+
+### 4.2 Weight Gain (Master; Advanced Hypertrophy)
+**Split by body-part priority; high-volume microperiodization.**
+
+**Monday (Chest Specialization)** — 70–80min
+- Bench — 5×4–6
+- Incline Smith — 4×8–10
+- Machine Press — 4×10–12
+- Fly variants — 4×12–15
+- Triceps heavy — 3×8–10
+
+**Tuesday (Back Specialization)** — 70–80min
+- Weighted Pull-ups — 5×4–6
+- T-bar Row — 4×6–8
+- Chest-supported Row — 4×8–10
+- Pullover — 3×10–12
+- Biceps heavy — 3×8–10
+
+**Wednesday (Legs 1 — Quad bias)** — 75–85min
+- High-bar Squat — 5×5
+- Hack/Leg Press — 4×8–12
+- Extension — 3×12–15
+- Calf — 4×12–15
+
+**Thursday (Shoulders/Arms Specialization)** — 65–75min
+- OHP — 4×6–8
+- Lateral Raise — 5×15–20
+- Rear Delt — 4×15
+- Arm specialization circuits — 4×10–15
+
+**Friday (Legs 2 — Ham/Glute bias)** — 75–85min
+- Deadlift — 4×3–5
+- Hip Thrust — 4×8–10
+- Ham Curl — 4×10–12
+- Back Extension — 3×12
+
+**Saturday (Weak-point/Intensity)** — 55–65min
+- Specialization work for lagging body parts
+- Advanced intensity techniques
+- Drop sets, rest-pause, cluster sets
+
+**Sunday:** Rest
+
+### 4.3 Competition (Master; Peaking-aware Powerlifting)
+**Weekly:** 6 days, elite-level competition preparation.**
+
+**Monday (Squat Mastery)** — 80–90min
+- Squat — single @85–95%, 4×3 @75–80%
+- Pause Squat — 3×2 @70%
+- Competition timing practice
+- Accessories: 2×10–12
+
+**Tuesday (Bench Mastery)** — 80–90min
+- Bench — single @85–95%, 5×3 @75–80%
+- Competition commands practice
+- Close-grip — 3×4–5 @75%
+- Rows — 4×8–10
+
+**Wednesday (Deadlift Mastery)** — 80–90min
+- Deadlift — single @85–95%, 4×2–3 @75–80%
+- Competition setup and timing
+- RDL — 3×5–6
+- Lats/Core — 3×10–12
+
+**Thursday (Competition Simulation)** — 90–100min
+- Full competition simulation
+- 3 attempts each lift at competition timing
+- Mental preparation protocols
+- Recovery strategies
+
+**Friday (Squat/Bench Volume)** — 80–90min
+- Squat — 5×4 @72–78%
+- Bench — 5×4 @72–78%
+- Single-leg/Shoulders — 3×10–12
+
+**Saturday (Technical + Recovery)** — 60–70min
+- Light technical work all lifts
+- Mobility and recovery protocols
+- Mental preparation
+- Equipment check
+
+**Sunday:** Rest
+
+### 4.4 Basic Maintenance (Master)
+**Weekly:** 4 high-quality training days + 2 active recovery sessions.**
+
+**Monday (Power Focus)** — 60–70min
+- Squat — 4×4–5 @75–80%
+- Bench — 4×4–5 @75–80%
+- Row — 3×8–10
+- Ham Curl — 3×12
+
+**Tuesday (Active Recovery)** — 30–40min
+- Light movement prep
+- Zone 1-2 cardio
+- Mobility and soft tissue work
+
+**Wednesday (Strength Focus)** — 60–70min
+- Deadlift — 3×3–4 @75–80%
+- Incline Press — 3×8–10
+- Pull-ups — 3×AMRAP
+- Lunge — 3×8–10/leg
+
+**Thursday (Volume Focus)** — 50–60min
+- High-rep compound movements
+- Time-efficient circuits
+- Metabolic conditioning
+
+**Friday (Technical Focus)** — 60–70min
+- Front Squat/Leg Press — 3×6–8
+- OHP — 3×6–8
+- Cable Row — 3×10–12
+- Carry variations — 4×30m
+
+**Saturday (Recovery + Conditioning)** — 40–50min
+- Zone 2 cardio
+- Flexibility and mobility work
+- Light recreational activity
+
+**Sunday:** Rest
+
+***
+
+**Note:** All programs follow world-class training frequency standards with 6 training days per week, ensuring optimal adaptation while maintaining proper recovery through intelligent exercise selection and periodization. Adjust intensity and volume based on individual recovery capacity and training goals.

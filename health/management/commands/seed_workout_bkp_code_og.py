@@ -173,8 +173,7 @@ def create_seed_data():
             'email': 'trainer@example.com',
             'first_name': 'Demo',
             'last_name': 'Trainer',
-            'is_staff': True,
-            'staff_role': 'Trainer',
+            'is_staff': True
         }
     )
     if created:

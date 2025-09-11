@@ -392,6 +392,8 @@ class CustomLoginView(LoginView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
+from django.db.models import Q
+
 class UserListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'admin_panel/user_list.html'
@@ -400,14 +402,19 @@ class UserListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
+
+        # Base queryset
         queryset = super().get_queryset().filter(
-            staff_role__iexact='Member',
-            gym=user.gym  # Filter users by the same gym as the logged-in user
+            staff_role__iexact='Member'
         )
 
+        # Apply gym filtering only for non-superusers
+        if not user.is_superuser:
+            queryset = queryset.filter(gym=user.gym)
+
+        # Search
         search_query = self.request.GET.get('q')
         sort_param = self.request.GET.get('sort')
-
         if search_query:
             queryset = queryset.filter(
                 Q(username__icontains=search_query) |
@@ -428,18 +435,13 @@ class UserListView(LoginRequiredMixin, ListView):
         elif sort_param == '-member_id':
             queryset = queryset.order_by('-member_id')
         else:
-            queryset = queryset.order_by('-date_joined')  # default sort
+            queryset = queryset.order_by('-date_joined')
 
         return queryset
 
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-
-        if admin_mode == 'advanced':
-            return ['advadmin/manage_user.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/manage_user.html']
-        return ['admin_panel/manage_user.html']
+        return ['advadmin/manage_user.html'] if admin_mode == 'advanced' else ['admin_panel/manage_user.html']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -457,14 +459,15 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
         role = self.kwargs.get('role')
         user = self.request.user
 
-        queryset = User.objects.filter(
-            staff_role__iexact=role,
-            gym=user.gym  # Filter by the current user's gym
-        )
+        queryset = User.objects.filter(staff_role__iexact=role)
 
+        # Apply gym filtering only for non-superusers
+        if not user.is_superuser:
+            queryset = queryset.filter(gym=user.gym)
+
+        # Search
         search_query = self.request.GET.get('q')
         sort_param = self.request.GET.get('sort')
-
         if search_query:
             queryset = queryset.filter(
                 Q(username__icontains=search_query) |
@@ -475,6 +478,7 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
                 Q(email__icontains=search_query)
             )
 
+        # Sorting
         if sort_param == 'name':
             queryset = queryset.order_by('first_name', 'last_name')
         elif sort_param == '-name':
@@ -490,11 +494,7 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
 
     def get_template_names(self):
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        if admin_mode == 'advanced':
-            return ['advadmin/manage_user.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/manage_user.html']
-        return ['admin_panel/manage_user.html']
+        return ['advadmin/manage_user.html'] if admin_mode == 'advanced' else ['admin_panel/manage_user.html']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -4,7 +4,7 @@ services:
   web:
     build: .
     container_name: iron_board_web
-    entrypoint: [ "./entrypoint.sh" ]
+    entrypoint: ["/app/entrypoint.sh"]  # Use absolute path inside container
     volumes:
       - .:/app
     ports:
@@ -13,6 +13,9 @@ services:
       - .env
     depends_on:
       - db
+    restart: unless-stopped  # Auto-restart on failure
+    environment:
+      - DEBUG=1  # Add if needed for development
 
   db:
     image: postgres:14
@@ -25,6 +28,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    restart: unless-stopped  # Auto-restart on failure
 
   adminer:
     image: adminer

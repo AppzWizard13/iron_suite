@@ -21,8 +21,14 @@ RUN pip install -r requirements.txt
 # Copy project files
 COPY . /app/
 
+# Make entrypoint executable
+RUN chmod +x /app/entrypoint.sh
+
 # Expose port 8000
 EXPOSE 8000
 
-# Default command (can be overridden in docker-compose)
+# Set entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# Default command
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
