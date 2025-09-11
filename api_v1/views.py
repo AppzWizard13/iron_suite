@@ -329,30 +329,11 @@ class SignOutAPIView(APIView):
 
 
 
-class CustomGoogleLogin(SocialLoginView):
+class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
     callback_url = "http://localhost:8000/accounts/google/login/callback/"
 
-    def post(self, request, *args, **kwargs):
-        # Call the default login logic
-        response = super().post(request, *args, **kwargs)
-
-        if response.status_code == status.HTTP_200_OK:
-            user = self.user  # The authenticated user
-            # Append extra fields
-            data = response.data
-            data['staff_role'] = getattr(user, 'staff_role', None)
-            data['user'] = {
-                "id": user.id,
-                "email": user.email,
-                "staff_role": getattr(user, 'staff_role', None),
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-            }
-            return Response(data, status=status.HTTP_200_OK)
-
-        return response
 
 
 
