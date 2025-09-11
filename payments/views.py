@@ -35,20 +35,21 @@ def initiate_cashfree_payment(request, obj):
     Returns:
         HttpResponseRedirect: Redirects to the Cashfree payment link or error page.
     """
+    amount = round(float(obj.total), 2)
     payment, created = Payment.objects.get_or_create(
         content_type=ContentType.objects.get_for_model(obj),
         object_id=obj.id,
         gym = request.user.gym,
         defaults={
             'payment_method': 'cashfree',
-            'amount': obj.total,
+            'amount': amount,
             'status': Payment.Status.PENDING,
         }
     )
 
     if not created:
         payment.payment_method = 'cashfree'
-        payment.amount = obj.total
+        payment.amount = amount
         payment.status = Payment.Status.PENDING
         payment.customer = obj.customer
         payment.save()
@@ -60,6 +61,7 @@ def initiate_cashfree_payment(request, obj):
     customer_email = customer.email
     customer_name = customer.get_full_name() or customer.username
     customer_phone = getattr(customer, 'phone_number', '')
+    
 
     payload = {
         "customer_details": {
@@ -67,7 +69,7 @@ def initiate_cashfree_payment(request, obj):
             "customer_name": customer_name,
             "customer_phone": customer_phone,
         },
-        "link_amount": float(obj.total),
+        "link_amount": float(amount),
         "link_currency": "INR",
         "link_id": obj.order_number,
         "link_meta": {
@@ -89,6 +91,8 @@ def initiate_cashfree_payment(request, obj):
         "Content-Type": "application/json",
     }
 
+    print("Cashfree Payload :::::::::::::::::::", payload)
+
     try:
         response = requests.post(
             "https://sandbox.cashfree.com/pg/links",
@@ -96,6 +100,8 @@ def initiate_cashfree_payment(request, obj):
             headers=headers
         )
         res_data = response.json()
+
+        print("Cashfree Response :::::::::::::::::::", res_data)
 
         PaymentAPILog.objects.create(
             content_type=ContentType.objects.get_for_model(obj),
@@ -253,9 +259,10 @@ def buy_subscription_package(request):
 
     # Set these right-away for pending payment - will confirm on webhook success
     user.package = package
-    user.on_subscription = True
-    user.package_expiry_date = new_expiry
-    user.save(update_fields=['package', 'on_subscription', 'package_expiry_date'])
+    # user.on_subscription = True
+    # user.package_expiry_date = new_expiry
+    user.save(update_fields=['package'])
+    # user.save(update_fields=['package', 'on_subscription', 'package_expiry_date'])
 
     return initiate_cashfree_payment(request, subscription_order)
 
@@ -387,26 +394,19 @@ def cashfree_webhook(request):
 def cashfree_return(request):
     """
     Handles user return from Cashfree payment gateway after payment.
-
-    Args:
-        request (HttpRequest): Django HttpRequest object.
-
-    Returns:
-        HttpResponse or HttpResponseRedirect: Renders success or failure template, or redirects.
     """
     order_id = request.GET.get('order_id')
     payment = None
     order = None
 
     if not order_id:
-        return render(
-            request,
-            'advadmin/payment_failed.html',
-            {'message': 'Missing order ID'}
-        )
+        # Redirect to failure view with a dummy pk=0 for missing ID
+        return redirect('payment_subscription_failure', pk=0)
 
     payment = Payment.objects.filter(transaction_id=order_id).first()
-    order = SubscriptionOrder.objects.filter(order_number=order_id).select_related('customer').first()
+    order = SubscriptionOrder.objects.filter(
+        order_number=order_id
+    ).select_related('customer').first()
 
     if order and payment:
         user = order.customer
@@ -415,11 +415,8 @@ def cashfree_return(request):
             payment.save(update_fields=['customer'])
 
     if not payment:
-        return render(
-            request,
-            'advadmin/payment_failed.html',
-            {'message': 'Payment not found'}
-        )
+        # Redirect to failure view with pk=order.pk or 0 if order is None
+        return redirect('payment_subscription_failure', pk=order.pk if order else 0)
 
     if payment.status == Payment.Status.COMPLETED:
         order = payment.content_object
@@ -427,29 +424,20 @@ def cashfree_return(request):
 
         if hasattr(order, 'customer'):
             if isinstance(order, Order):
-                # Mark any related TempOrder as processed
-                TempOrder.objects.filter(user=order.customer, processed=False).update(
-                    processed=True
-                )
+                TempOrder.objects.filter(
+                    user=order.customer, processed=False
+                ).update(processed=True)
                 return redirect('payment_order_success', pk=order.id)
+
             if isinstance(order, SubscriptionOrder):
                 return redirect('payment_subscription_success', pk=order.id)
-            return render(
-                request,
-                'advadmin/payment_failed.html',
-                {'message': 'Unknown order type'}
-            )
-        return render(
-            request,
-            'advadmin/payment_failed.html',
-            {'message': 'Invalid order data'}
-        )
-    else:
-        return render(
-            request,
-            'advadmin/payment_failed.html',
-            {'message': 'Payment was not successful'}
-        )
+
+            return redirect('payment_subscription_failure', pk=order.pk if order else 0)
+
+        return redirect('payment_subscription_failure', pk=order.pk if order else 0)
+
+    # Payment not successful
+    return redirect('payment_subscription_failure', pk=order.pk if order else 0)
 
 
 def payment_failed(request):

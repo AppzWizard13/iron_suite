@@ -1,0 +1,73 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-semi-bold py-3 mb-4">
+      <span class="text-muted fw-light">Membership /</span> Subscription Failed
+    </h4>
+
+    <div class="card mb-4 border-warning">
+      <div class="card-header bg-warning text-white">
+        <h5 class="mb-0">❌ Payment Failed</h5>
+      </div>
+      <div class="card-body mt-3">
+        <p>
+          Unfortunately, we couldn’t process your subscription for 
+          <strong>{{ site_name }}</strong>.  
+          Please review the details below or try again.
+        </p>
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-1"><strong>Order Number:</strong> {{ subscription_order.order_number }}</p>
+            <p class="mb-1"><strong>Date:</strong> {{ subscription_order.created_at }}</p>
+            <p class="mb-1"><strong>Invoice:</strong> {{ subscription_order.invoice_number|default:"Not Generated" }}</p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1"><strong>Member:</strong> {{ subscription_order.customer.get_full_name|default:"Unknown" }}</p>
+            <p class="mb-1"><strong>Package:</strong> 
+              {{ subscription_order.package.name|default:"N/A" }} 
+              ({{ subscription_order.package.type|capfirst|default:"-" }})
+            </p>
+            <p class="mb-1"><strong>Status:</strong> 
+              <span class="badge bg-warning">Failed</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Payment Summary</h5>
+      </div>
+      <div class="card-body">
+        <p class="mb-1"><strong>Total Attempted:</strong> ₹{{ subscription_order.total|default:"0.00" }}</p>
+        <p class="mb-1"><strong>Method:</strong> Cashfree</p>
+        <p class="mb-1"><strong>Payment Status:</strong> 
+          <span class="badge bg-warning">{{ subscription_order.get_payment_status_display|default:"Failed" }}</span>
+        </p>
+        <div class="mt-3 d-flex gap-2">
+          <a href="{% url 'home' %}" class="btn btn-primary">
+            <i class="bx bx-home"></i> Back to Home
+          </a>
+          {% comment %} <a href="{% url 'retry-subscription-payment' subscription_order.id %}" class="btn btn-outline-warning">
+            <i class="bx bx-refresh"></i> Try Again
+          </a> {% endcomment %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Prevent back navigation to payment pages
+    history.replaceState(null, null, window.location.pathname);
+    window.onpopstate = function () {
+      window.location.href = "{% url 'home' %}";
+    };
+  });
+</script>
+{% endblock %}

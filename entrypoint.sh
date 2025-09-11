@@ -11,7 +11,12 @@ echo "Applying migrations..."
 python manage.py migrate
 
 echo "Creating default gym and admin users..."
-python manage.py init_gym_admins
+if [ ! -f .init_gym_admins ]; then
+    python manage.py init_gym_admins && touch .init_gym_admins
+    echo "✅ Fitness data seeded successfully"
+else
+    echo "ℹ️ Fitness data already seeded, skipping..."
+fi
 
 echo "Seeding fitness data..."
 if [ ! -f .seeded_fitness_data ]; then
@@ -19,6 +24,14 @@ if [ ! -f .seeded_fitness_data ]; then
     echo "✅ Fitness data seeded successfully"
 else
     echo "ℹ️ Fitness data already seeded, skipping..."
+fi
+
+echo "Seeding configuration values..."
+if [ ! -f .seeded_config ]; then
+    python manage.py seed_config && touch .seeded_config
+    echo "✅ Configuration values seeded successfully"
+else
+    echo "ℹ️ Configuration values already seeded, skipping..."
 fi
 
 echo "Collecting static files..."

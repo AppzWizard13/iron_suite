@@ -548,7 +548,26 @@ class SubscriptionOrderSuccessView(LoginRequiredMixin, DetailView):
         context['site_name'] = "Your Gym Name"
         return context
 
+class SubscriptionOrderFailureView(LoginRequiredMixin, DetailView):
+    model = SubscriptionOrder
+    template_name = 'advadmin/payment_subscription_failure.html'
+    context_object_name = 'subscription_order'
+    pk_url_kwarg = 'pk'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_paginated'] = True
+        context['query'] = self.request.GET.get('q', '')
+
+        # Only add order_items if it exists
+        if hasattr(self.object, 'items'):
+            context['order_items'] = self.object.items.all()
+        else:
+            context['order_items'] = []  # or omit this entirely
+
+        return context
+
+    
 class PaymentOrderFailView(LoginRequiredMixin, DetailView):
     """
     Displays failed payment (decline) page for an order.

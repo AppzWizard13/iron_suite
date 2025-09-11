@@ -1036,6 +1036,36 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         return context
 
+
+
+# views.py
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+class DashboardAPIView(LoginRequiredMixin, APIView):
+    """
+    Mobile API for Dashboard data.
+    Returns the same statistics and charts as DashboardView for mobile clients.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        # Reuse DashboardView logic to avoid code duplication
+        dashboard_view = DashboardView()
+        dashboard_view.request = request
+        dashboard_view.args = args
+        dashboard_view.kwargs = kwargs
+
+        context = dashboard_view.get_context_data()
+        # Remove unnecessary template-specific data if needed
+        context.pop('page_name', None)
+        context.pop('pages_group', None)
+
+        return Response(context)
+
+
+
 class DashboardSearchView(LoginRequiredMixin, TemplateView):
     template_name = 'admin_panel/index.html'
 

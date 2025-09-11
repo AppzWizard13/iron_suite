@@ -17,7 +17,7 @@ ENABLE_QR_SCHEDULER = False   # Set to False to disable
 
 
 USERNAME_PREFIX = "MEMBER-DEV-TEST"
-SUBSCRIPTION_ORDER_PREFIX = "SUB-ORD-DEV-TEST"
+SUBSCRIPTION_ORDER_PREFIX = "SUB-ORDER-DEV-TEST"
 
 # Alert testing code 
 # from django.contrib.auth import get_user_model

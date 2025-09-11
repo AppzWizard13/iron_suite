@@ -1,8 +1,10 @@
 # urls.py
 
 from django.urls import path, include
+
+from accounts.views import DashboardAPIView
 from . import views
-from .views import MeasurementTodayView, SendOTPAPIView, VerifyOTPAPIView, LoginAPIView, SignOutAPIView, GoogleLogin, MeasurementProgressView
+from .views import CustomGoogleLogin, MeasurementTodayView, SendOTPAPIView, VerifyOTPAPIView, LoginAPIView, SignOutAPIView, MeasurementProgressView
 from .views import UserProfileAPIView, TodayWorkoutAPIView, UpcomingWorkoutsAPIView, WeeklyWorkoutScheduleAPIView
 
 urlpatterns = [
@@ -14,7 +16,8 @@ urlpatterns = [
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
     path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
     path('accounts/', include('allauth.urls')),  # for Oauth2 flows
-    path('dj-rest-auth/google/', GoogleLogin.as_view(), name='google_login'),
+#     path('dj-rest-auth/google/', GoogleLogin.as_view(), name='google_login'),
+    path('dj-rest-auth/google/', CustomGoogleLogin.as_view(), name='google_login'),
     path('api/user/profile/', UserProfileAPIView.as_view(), name='user_profile'),
 
 
@@ -47,6 +50,8 @@ urlpatterns = [
     path('api/update-fcm-token/', views.UpdateFCMTokenView.as_view(), name='update-fcm-token'),
 
     path('api/packages/', views.PackageListAPI.as_view(), name='package-list'),
+
+    path('api/dashboard/', DashboardAPIView.as_view(), name='mobile-dashboard'),
 
 
 ]

@@ -137,7 +137,7 @@ class SubscriptionOrder(models.Model, TenantModelMixin):
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='subscription_orders')
     tenant_id = 'gym_id'
 
-    order_number = models.CharField(max_length=20, unique=True)
+    order_number = models.CharField(max_length=40, unique=True)  
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='subscription_orders')
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, related_name='orders')
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
