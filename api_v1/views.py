@@ -1,5 +1,6 @@
 from datetime import timedelta
 import random
+from accounts.views import DashboardView
 from attendance.models import Attendance
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -336,6 +337,41 @@ class GoogleLogin(SocialLoginView):
 
 
 
+from dj_rest_auth.registration.views import SocialLoginView
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+
+class CustomGoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+
+    def get_response(self):
+        response = super().get_response()
+        user = self.user
+
+        # Generate JWT tokens for the user
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        # Add extra data to the response JSON
+        extra_data = {
+            "access": access_token,
+            "refresh": refresh_token,
+            "user": {
+                "id": user.pk,
+                "email": user.email,
+                "name": user.get_full_name() or user.username,
+                "staff_role": getattr(user, "staff_role", None),
+                "is_staff": user.is_staff,
+                "is_superuser": user.is_superuser,
+            },
+        }
+
+        response.data.update(extra_data)
+        return response
+
+
 
 from datetime import date
 from rest_framework.views import APIView
@@ -384,6 +420,7 @@ class UserProfileAPIView(APIView):
             "gym_name": getattr(gym, 'name', '') or '',
             "location": getattr(gym, 'location', '') or '',
             "status": getattr(user, 'on_subscription', ''),
+            "is_active": getattr(user, 'is_active', ''),
             "log_status": log_status,  # Fixed: Use actual log_status variable
             "package_expiry_date": user.package_expiry_date.isoformat() if getattr(user, 'package_expiry_date', None) else "",
             "package": getattr(getattr(user, 'package', None), 'name', '') or "",
@@ -1379,3 +1416,60 @@ class PackageListAPI(generics.ListAPIView):
             'gym_id': gym.id,
             'packages': serializer.data
         })
+
+
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.db.models.query import QuerySet
+# from django.utils.timezone import datetime, date
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+
+class DashboardAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def _make_serializable(self, value):
+        """
+        Convert complex Django objects in context to JSON serializable formats.
+        """
+        if isinstance(value, QuerySet):
+            # Convert QuerySet to list of dicts
+            return list(value.values())
+        if isinstance(value, (datetime, date)):
+            return value.isoformat()
+        if isinstance(value, dict):
+            # Recursively convert dict values
+            return {k: self._make_serializable(v) for k, v in value.items()}
+        if isinstance(value, list):
+            return [self._make_serializable(v) for v in value]
+        # Add other conversions if needed (e.g., model instances)
+        # Fallback: try JSON serialization via DjangoJSONEncoder
+        try:
+            json.dumps(value, cls=DjangoJSONEncoder)
+            return value
+        except TypeError:
+            return str(value)  # fallback to string
+        return value
+
+    def get(self, request, *args, **kwargs):
+        dashboard_view = DashboardView()
+        dashboard_view.request = request
+        dashboard_view.args = args
+        dashboard_view.kwargs = kwargs
+
+        context = dashboard_view.get_context_data()
+
+        # Remove irrelevant template keys
+        context.pop('page_name', None)
+        context.pop('pages_group', None)
+
+        # Clean context to make everything JSON serializable
+        serializable_context = {}
+        for key, value in context.items():
+            serializable_context[key] = self._make_serializable(value)
+
+
+        print("Dashboard context data:----------------", serializable_context)
+
+        return Response(serializable_context)
