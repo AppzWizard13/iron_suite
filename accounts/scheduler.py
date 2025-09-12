@@ -280,15 +280,16 @@ def update_membership_trends():
             gym_id=gym_id
         ).count()
 
+        lookup = {
+            'gym_id': gym_id,
+            'year': year,
+            'month': month,
+        }
         obj, created = MonthlyMembershipTrend.objects.update_or_create(
-            gym_id=gym_id,
-            year=year,
-            month=month,
-            defaults={'member_count': count}
+            defaults={'member_count': count},
+            **lookup
         )
         logger.info(f"Updated membership trend for gym {gym_id} — {year}-{month}: {count}")
-
-
 
 def start():
     if not getattr(settings, 'ENABLE_QR_SCHEDULER', True):
