@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
         # STEP 1: Create developer admin user with unique username
         dev_phone = '7736500760'
-        dev_email = 'devadmin@example.com'
+        dev_email = 'satheeshappzdev@gmail.com'
         dev_password = 'devadminpassword'
         
         dev_user, created = User.objects.get_or_create(

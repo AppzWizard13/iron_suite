@@ -24,31 +24,323 @@
     </div>
     {% endif %}
 
-    <!-- Transaction Detail -->
+    <!-- Transaction Overview Card -->
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Transaction Details</h5>
-        <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Back to Transactions</a>
+        <h5 class="mb-0">
+          <i class="bx bx-receipt me-2"></i>Transaction Overview
+        </h5>
+        <div>
+          <a href="{% url 'transaction_list' %}" class="btn btn-secondary">
+            <i class="bx bx-arrow-back me-1"></i>Back to Transactions
+          </a>
+        </div>
       </div>
       <div class="card-body">
         <div class="row">
           <div class="col-md-6">
-            <p><strong>Reference:</strong> {{ transaction.reference }}</p>
-            <p><strong>Type:</strong> {{ transaction.get_transaction_type_display }}</p>
-            <p><strong>Category:</strong> {{ transaction.get_category_display }}</p>
-            <p><strong>Status:</strong> 
-              <span class="badge bg-label-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'refunded' %}danger{% else %}primary{% endif %}">
-                {{ transaction.get_status_display }}
-              </span>
-            </p>
-            <p><strong>Amount:</strong> ${{ transaction.amount }}</p>
-            <p><strong>Date:</strong> {{ transaction.date }}</p>
-            <p><strong>Description:</strong> {{ transaction.description }}</p>
+            <div class="mb-3">
+              <label class="form-label text-muted">Transaction ID</label>
+              <p class="fw-bold fs-5">#{{ transaction.id }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Reference</label>
+              <p class="fw-bold">{{ transaction.reference|default:"N/A" }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Type</label>
+              <p>
+                <span class="badge bg-{% if transaction.transaction_type == 'income' %}success{% else %}danger{% endif %} fs-6">
+                  <i class="bx bx-{% if transaction.transaction_type == 'income' %}plus{% else %}minus{% endif %}-circle me-1"></i>
+                  {{ transaction.get_transaction_type_display }}
+                </span>
+              </p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Status</label>
+              <p>
+                <span class="badge bg-label-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'refunded' %}danger{% elif transaction.status == 'pending' %}warning{% else %}primary{% endif %} fs-6">
+                  <i class="bx bx-{% if transaction.status == 'completed' %}check-circle{% elif transaction.status == 'refunded' %}x-circle{% elif transaction.status == 'pending' %}time{% else %}info-circle{% endif %} me-1"></i>
+                  {{ transaction.get_status_display }}
+                </span>
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label text-muted">Amount</label>
+              <p class="fw-bold fs-3 text-{% if transaction.transaction_type == 'income' %}success{% else %}danger{% endif %}">
+                ₹{{ transaction.amount|floatformat:2 }}
+              </p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Category</label>
+              <p>
+                <span class="badge bg-info fs-6">
+                  <i class="bx bx-category me-1"></i>
+                  {{ transaction.get_category_display }}
+                </span>
+              </p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Transaction Date</label>
+              <p class="fw-semibold">{{ transaction.date|date:"F d, Y" }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Gym</label>
+              <p class="fw-semibold">{{ transaction.gym.name }}</p>
+            </div>
+          </div>
+        </div>
+
+        {% if transaction.description %}
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="alert alert-info">
+              <i class="bx bx-info-circle me-2"></i>
+              <strong>Description:</strong> {{ transaction.description }}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Customer Information Card -->
+    {% if transaction.customer_name or transaction.customer_email or transaction.customer_phone %}
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="bx bx-user me-2"></i>Customer Information
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label class="form-label text-muted">Customer Name</label>
+              <p class="fw-semibold">
+                <i class="bx bx-user-circle me-2 text-primary"></i>
+                {{ transaction.customer_name|default:"N/A" }}
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label class="form-label text-muted">Email Address</label>
+              <p class="fw-semibold">
+                <i class="bx bx-envelope me-2 text-info"></i>
+                {% if transaction.customer_email %}
+                  <a href="mailto:{{ transaction.customer_email }}">{{ transaction.customer_email }}</a>
+                {% else %}
+                  N/A
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label class="form-label text-muted">Phone Number</label>
+              <p class="fw-semibold">
+                <i class="bx bx-phone me-2 text-success"></i>
+                {% if transaction.customer_phone %}
+                  <a href="tel:{{ transaction.customer_phone }}">{{ transaction.customer_phone }}</a>
+                {% else %}
+                  N/A
+                {% endif %}
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    {% endif %}
+
+    <!-- Related Order/Content Information -->
+    {% if transaction.content_object %}
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="bx bx-package me-2"></i>Related Order Information
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label text-muted">Order Type</label>
+              <p class="fw-semibold">{{ transaction.content_type.name|capfirst }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Order ID</label>
+              <p class="fw-semibold">#{{ transaction.content_object.id }}</p>
+            </div>
+            {% if transaction.content_object.order_number %}
+            <div class="mb-3">
+              <label class="form-label text-muted">Order Number</label>
+              <p class="fw-semibold">{{ transaction.content_object.order_number }}</p>
+            </div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            {% if transaction.content_object.package %}
+            <div class="mb-3">
+              <label class="form-label text-muted">Package</label>
+              <p class="fw-semibold">
+                <span class="badge bg-primary">{{ transaction.content_object.package.name }}</span>
+              </p>
+            </div>
+            {% endif %}
+            {% if transaction.content_object.status %}
+            <div class="mb-3">
+              <label class="form-label text-muted">Order Status</label>
+              <p>
+                <span class="badge bg-label-info">{{ transaction.content_object.get_status_display|default:transaction.content_object.status }}</span>
+              </p>
+            </div>
+            {% endif %}
+            {% if transaction.content_object.total %}
+            <div class="mb-3">
+              <label class="form-label text-muted">Order Total</label>
+              <p class="fw-bold text-primary">₹{{ transaction.content_object.total|floatformat:2 }}</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Transaction Timeline -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="bx bx-time me-2"></i>Transaction Timeline
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-marker bg-primary"></div>
+            <div class="timeline-content">
+              <h6 class="mb-1">Transaction Created</h6>
+              <p class="mb-0 text-muted">{{ transaction.created_at|date:"F d, Y g:i A" }}</p>
+            </div>
+          </div>
+          
+          {% if transaction.status == 'completed' %}
+          <div class="timeline-item">
+            <div class="timeline-marker bg-success"></div>
+            <div class="timeline-content">
+              <h6 class="mb-1">Payment Completed</h6>
+              <p class="mb-0 text-muted">{{ transaction.updated_at|date:"F d, Y g:i A" }}</p>
+            </div>
+          </div>
+          {% elif transaction.status == 'refunded' %}
+          <div class="timeline-item">
+            <div class="timeline-marker bg-danger"></div>
+            <div class="timeline-content">
+              <h6 class="mb-1">Payment Refunded</h6>
+              <p class="mb-0 text-muted">{{ transaction.updated_at|date:"F d, Y g:i A" }}</p>
+            </div>
+          </div>
+          {% elif transaction.status == 'pending' %}
+          <div class="timeline-item">
+            <div class="timeline-marker bg-warning"></div>
+            <div class="timeline-content">
+              <h6 class="mb-1">Payment Pending</h6>
+              <p class="mb-0 text-muted">Waiting for payment confirmation</p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Card -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="bx bx-cog me-2"></i>Actions
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          {% if transaction.customer_email %}
+          <a href="mailto:{{ transaction.customer_email }}?subject=Regarding Transaction #{{ transaction.id }}" 
+             class="btn btn-outline-primary">
+            <i class="bx bx-envelope me-1"></i>Email Customer
+          </a>
+          {% endif %}
+          
+          {% if transaction.customer_phone %}
+          <a href="tel:{{ transaction.customer_phone }}" class="btn btn-outline-success">
+            <i class="bx bx-phone me-1"></i>Call Customer
+          </a>
+          {% endif %}
+          
+          <button class="btn btn-outline-info" onclick="window.print()">
+            <i class="bx bx-printer me-1"></i>Print Receipt
+          </button>
+          
+          <a href="{% url 'transaction_list' %}" class="btn btn-secondary">
+            <i class="bx bx-list-ul me-1"></i>View All Transactions
+          </a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.timeline-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 20px;
+  height: calc(100% - 10px);
+  width: 2px;
+  background-color: #e9ecef;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -26px;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timeline-content h6 {
+  font-weight: 600;
+  color: #495057;
+}
+
+@media print {
+  .btn, .card-header, .toast {
+    display: none !important;
+  }
+  
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+</style>
 
 {% endblock %}

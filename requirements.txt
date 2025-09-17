@@ -35,6 +35,7 @@ django-countries==7.6.1
 django-crispy-forms==2.0
 django-decouple==2.1
 django-extensions==3.2.3
+django-filter==25.1
 django-markdownx==4.0.7
 django-multitenant==4.1.1
 django-user-agents==0.4.0

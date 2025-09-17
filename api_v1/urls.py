@@ -3,7 +3,7 @@
 from django.urls import path, include
 
 from . import views
-from .views import MeasurementTodayView, SendOTPAPIView, VerifyOTPAPIView, LoginAPIView, SignOutAPIView, GoogleLogin, MeasurementProgressView
+from .views import MeasurementTodayView, SendOTPAPIView, TransactionListAPIView, VerifyOTPAPIView, LoginAPIView, SignOutAPIView, GoogleLogin, MeasurementProgressView
 from .views import UserProfileAPIView, TodayWorkoutAPIView, UpcomingWorkoutsAPIView, WeeklyWorkoutScheduleAPIView, CustomGoogleLogin, DashboardAPIView
 
 urlpatterns = [
@@ -51,6 +51,8 @@ urlpatterns = [
     path('api/packages/', views.PackageListAPI.as_view(), name='package-list'),
 
     path('api/dashboard/', DashboardAPIView.as_view(), name='mobile-dashboard'),
+
+    path('api/transactions/', TransactionListAPIView.as_view(), name='transaction-list'),
 
 
 ]

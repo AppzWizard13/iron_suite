@@ -18,7 +18,7 @@ from django.views.generic import ListView
 
 from accounts.models import User
 from orders.models import Order, SubscriptionOrder, TempOrder
-from payments.models import Payment, PaymentAPILog
+from payments.models import Payment, PaymentAPILog, Transaction
 from products.models import Package
 
 User = get_user_model()
@@ -27,6 +27,7 @@ User = get_user_model()
 def initiate_cashfree_payment(request, obj):
     """
     Initiates a Cashfree payment link for an order or subscription order.
+    Creates a pending Transaction entry for tracking.
 
     Args:
         request (HttpRequest): Django HttpRequest object.
@@ -35,11 +36,16 @@ def initiate_cashfree_payment(request, obj):
     Returns:
         HttpResponseRedirect: Redirects to the Cashfree payment link or error page.
     """
+    from payments.models import Transaction  # Import the Transaction model
+    from django.utils import timezone
+    
     amount = round(float(obj.total), 2)
+    
+    # Create or update Payment record
     payment, created = Payment.objects.get_or_create(
         content_type=ContentType.objects.get_for_model(obj),
         object_id=obj.id,
-        gym = request.user.gym,
+        gym=request.user.gym,
         defaults={
             'payment_method': 'cashfree',
             'amount': amount,
@@ -54,20 +60,59 @@ def initiate_cashfree_payment(request, obj):
         payment.customer = obj.customer
         payment.save()
 
-    return_url = request.build_absolute_uri(reverse('cashfree_return')) + f"?order_id={obj.order_number}"
-    webhook_url = request.build_absolute_uri(reverse('cashfree_webhook'))
-
+    # Extract customer information
     customer = obj.customer
     customer_email = customer.email
     customer_name = customer.get_full_name() or customer.username
-    customer_phone = getattr(customer, 'phone_number', '')
-    
+    customer_phone = getattr(customer, 'phone_number', '') or getattr(customer, 'phone', '')
+
+    # Create Transaction entry with PENDING status
+    try:
+        # Check if transaction already exists
+        transaction, trans_created = Transaction.objects.get_or_create(
+            content_type=ContentType.objects.get_for_model(obj),
+            object_id=obj.id,
+            gym=request.user.gym,
+            defaults={
+                'transaction_type': Transaction.Type.INCOME,  # Assuming payment is income
+                'category': Transaction.Category.SALES if isinstance(obj, SubscriptionOrder) else Transaction.Category.OTHER,
+                'status': Transaction.Status.PENDING,  # Set to PENDING initially
+                'amount': amount,
+                'description': f"Payment initiated for {obj.__class__.__name__} #{obj.order_number}",
+                'reference': obj.order_number,
+                'date': timezone.now().date(),
+                # Customer information
+                'customer_name': customer_name,
+                'customer_email': customer_email,
+                'customer_phone': str(customer_phone) if customer_phone else '',
+            }
+        )
+        
+        if not trans_created:
+            # Update existing transaction
+            transaction.status = Transaction.Status.PENDING
+            transaction.amount = amount
+            transaction.customer_name = customer_name
+            transaction.customer_email = customer_email
+            transaction.customer_phone = str(customer_phone) if customer_phone else ''
+            transaction.description = f"Payment re-initiated for {obj.__class__.__name__} #{obj.order_number}"
+            transaction.save()
+            
+        print(f"Transaction entry created/updated: {transaction.id} with status PENDING")
+        
+    except Exception as e:
+        print(f"Error creating transaction entry: {str(e)}")
+        # Continue with payment process even if transaction creation fails
+
+    # Prepare Cashfree payment payload
+    return_url = request.build_absolute_uri(reverse('cashfree_return')) + f"?order_id={obj.order_number}"
+    webhook_url = request.build_absolute_uri(reverse('cashfree_webhook'))
 
     payload = {
         "customer_details": {
             "customer_email": customer_email,
             "customer_name": customer_name,
-            "customer_phone": customer_phone,
+            "customer_phone": str(customer_phone) if customer_phone else '',
         },
         "link_amount": float(amount),
         "link_currency": "INR",
@@ -81,7 +126,12 @@ def initiate_cashfree_payment(request, obj):
             "send_email": True,
             "send_sms": True,
         },
-        "link_purpose": f"Payment for {obj.__class__.__name__} #{obj.order_number}"
+        "link_purpose": f"Payment for {obj.__class__.__name__} #{obj.order_number}",
+        "link_tags": {
+            "transaction_id": transaction.id if 'transaction' in locals() else None,
+            "gym_id": request.user.gym.id,
+            "customer_id": customer.member_id,
+        }
     }
 
     headers = {
@@ -112,16 +162,24 @@ def initiate_cashfree_payment(request, obj):
             response_status=response.status_code,
             response_body=json.dumps(res_data),
             link_id=res_data.get("link_id"),
-            gym = request.user.gym,
+            gym=request.user.gym,
         )
+        
     except Exception as e:
+        # Update transaction status to failed if API call fails
+        if 'transaction' in locals():
+            transaction.status = Transaction.Status.INITIATED  # Keep as initiated since payment link creation failed
+            transaction.description += f" - API Error: {str(e)}"
+            transaction.save()
+            
         PaymentAPILog.objects.create(
             content_type=ContentType.objects.get_for_model(obj),
             object_id=obj.id,
             action='ERROR',
             request_url="https://sandbox.cashfree.com/pg/links",
             request_payload=json.dumps(payload),
-            error_message=str(e)
+            error_message=str(e),
+            gym=request.user.gym,
         )
         return redirect('payment_failed')
 
@@ -129,6 +187,13 @@ def initiate_cashfree_payment(request, obj):
         payment.transaction_id = res_data.get("link_id")
         payment.gateway_response = res_data
         payment.save()
+        
+        # Update transaction with link_id reference
+        if 'transaction' in locals():
+            transaction.reference = res_data.get("link_id", obj.order_number)
+            transaction.description = f"Payment link created for {obj.__class__.__name__} #{obj.order_number}"
+            transaction.save()
+        
         return redirect(res_data["link_url"])
 
     if res_data.get("message") == "Link ID already exists":
@@ -138,9 +203,22 @@ def initiate_cashfree_payment(request, obj):
         ).first()
         if payment_log:
             response_data = json.loads(payment_log.response_body)
+            
+            # Update transaction status since link already exists
+            if 'transaction' in locals():
+                transaction.description += " - Link already exists, redirecting to existing link"
+                transaction.save()
+                
             return redirect(response_data["link_url"])
 
+    # If we reach here, something went wrong
+    if 'transaction' in locals():
+        transaction.status = Transaction.Status.INITIATED
+        transaction.description += f" - Payment link creation failed: {res_data.get('message', 'Unknown error')}"
+        transaction.save()
+
     return redirect('payment_failed')
+
 
 
 def get_active_subscription_order(user):
@@ -267,20 +345,25 @@ def buy_subscription_package(request):
     return initiate_cashfree_payment(request, subscription_order)
 
 
+
+from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
+
 @csrf_exempt
 def cashfree_webhook(request):
     """
     Handles Cashfree webhook events for payment and refund status updates.
-
-    Ensures subscription renewal updates: User's `on_subscription` and `package_expiry_date`
-    are updated as per prepaid-recharge rule.
+    Updates both Payment and Transaction records.
     """
+    from payments.models import Transaction
+    
     try:
         data = json.loads(request.body)
         event_type = data.get("type")
         link_id = None
         payment_status = None
 
+        # Extract link_id and payment_status based on event type
         if event_type == "PAYMENT_SUCCESS_WEBHOOK":
             order_data = data.get('data', {}).get('order', {})
             payment_data = data.get('data', {}).get('payment', {})
@@ -298,7 +381,7 @@ def cashfree_webhook(request):
 
         payment = Payment.objects.filter(transaction_id=link_id).first()
         log_entry = PaymentAPILog.objects.create(
-            gym=payment.gym,
+            gym=payment.gym if payment else None,
             action='WEBHOOK',
             request_url=request.path,
             response_body=request.body.decode('utf-8') if request.body else None,
@@ -310,7 +393,6 @@ def cashfree_webhook(request):
             log_entry.response_status = 405
             log_entry.save()
             return JsonResponse({'error': 'Invalid method'}, status=405)
-
 
         if not link_id:
             error_msg = 'Missing link_id'
@@ -330,19 +412,36 @@ def cashfree_webhook(request):
         order = payment.content_object
         payment.gateway_response = data
 
+        # Get related transaction
+        transaction = Transaction.objects.filter(
+            content_type=payment.content_type,
+            object_id=payment.object_id,
+            gym=payment.gym
+        ).first()
+
+        print("transactioncustomer_name", transaction.customer_name)
+
         if (
             (event_type == "PAYMENT_SUCCESS_WEBHOOK" and payment_status == "SUCCESS") or
             (event_type == "PAYMENT_LINK_EVENT" and payment_status == "PAID")
         ):
             payment.status = Payment.Status.COMPLETED
 
-            # Correctly update user package_expiry_date and on_subscription on success!
+            # Update Transaction status to COMPLETED
+            if transaction:
+                transaction.status = Transaction.Status.COMPLETED
+                print("Transaction.Status.COMPLETED>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", Transaction.Status.COMPLETED)
+                print("updateddddddddddddddddddddddd", transaction.status)
+                transaction.description = f"Payment completed for {order.__class__.__name__} #{order.order_number if hasattr(order, 'order_number') else order.id}"
+                transaction.save()
+                print(f"Transaction {transaction.id} updated to COMPLETED")
+
+            # Update user subscription and order status
             if hasattr(order, 'customer') and isinstance(order, SubscriptionOrder):
                 user = order.customer
                 package = order.package
                 today = timezone.now().date()
 
-                # Smartly handle stacked subscriptions (i.e. if user renewed before expiry)
                 cur_expiry = getattr(user, "package_expiry_date", None)
                 if cur_expiry and cur_expiry >= today:
                     user.package_expiry_date = cur_expiry + timedelta(days=package.duration_days)
@@ -354,20 +453,27 @@ def cashfree_webhook(request):
 
                 order.start_date = today
                 order.end_date = user.package_expiry_date
-
                 order.status = SubscriptionOrder.Status.ACTIVE
                 order.payment_status = SubscriptionOrder.PaymentStatus.COMPLETED
                 order.save(update_fields=['start_date', 'end_date', 'status', 'payment_status'])
 
             elif hasattr(order, 'customer') and isinstance(order, Order):
-                # For product or other orders (non-subscription)
                 order.status = Order.Status.PROCESSING
                 order.payment_status = 'completed'
                 order.save(update_fields=['status', 'payment_status'])
+
             payment.save(update_fields=['status', 'gateway_response'])
 
         elif event_type == "PAYMENT_LINK_EVENT" and payment_status in ['EXPIRED', 'FAILED']:
             payment.status = Payment.Status.FAILED
+            
+            # Update Transaction status to FAILED (you might want to add this status to your choices)
+            if transaction:
+                transaction.status = Transaction.Status.INITIATED  # or add FAILED status
+                transaction.description = f"Payment failed for {order.__class__.__name__} #{order.order_number if hasattr(order, 'order_number') else order.id} - Status: {payment_status}"
+                transaction.save()
+                print(f"Transaction {transaction.id} updated to FAILED")
+                
             if hasattr(order, 'payment_status'):
                 order.payment_status = 'failed'
                 order.save(update_fields=['payment_status'])
@@ -385,10 +491,12 @@ def cashfree_webhook(request):
 
     except Exception as e:
         error_msg = str(e)
-        log_entry.error_message = error_msg
-        log_entry.response_status = 500
-        log_entry.save()
+        if 'log_entry' in locals():
+            log_entry.error_message = error_msg
+            log_entry.response_status = 500
+            log_entry.save()
         return HttpResponse(status=200)
+
 
 
 def cashfree_return(request):

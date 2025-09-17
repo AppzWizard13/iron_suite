@@ -792,6 +792,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         total_sales_amount = transactions.filter(
             category=Transaction.Category.SALES,
             transaction_type=Transaction.Type.INCOME,
+            status=Transaction.Status.COMPLETED
         ).aggregate(total=Sum('amount'))['total'] or 0
 
         total_completed_amount = transactions.filter(
@@ -803,11 +804,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         )['total'] or 0
 
         total_income = transactions.filter(
-            transaction_type=Transaction.Type.INCOME
+            transaction_type=Transaction.Type.INCOME,
+            status=Transaction.Status.COMPLETED
         ).aggregate(total=Sum('amount'))['total'] or 0
 
         total_expense = transactions.filter(
-            transaction_type=Transaction.Type.EXPENSE
+            transaction_type=Transaction.Type.EXPENSE,
+            status=Transaction.Status.COMPLETED
         ).aggregate(total=Sum('amount'))['total'] or 0
 
         profit = total_income - total_expense

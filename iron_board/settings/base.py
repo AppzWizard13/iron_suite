@@ -18,7 +18,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://3ee35fe9924f.ngrok-free.app",
+    "https://5e6da7bc1ad4.ngrok-free.app",
     "https://iron-board-1zi5.onrender.com",
 ]
 
@@ -27,7 +27,7 @@ CORS_ALLOW_METHODS = [
     "GET",
     "OPTIONS",
     "PATCH",
-    "POST",
+    "POST"
     "PUT",
 ]
 
@@ -51,7 +51,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'https://iron-board-1zi5.onrender.com',
-    'https://3ee35fe9924f.ngrok-free.app',
+    'https://5e6da7bc1ad4.ngrok-free.app',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'django_filters',
 
     # JWT, etc.
     'rest_framework_simplejwt',
@@ -107,6 +108,24 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour'
+    },
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20
 }
 
 MIDDLEWARE = [

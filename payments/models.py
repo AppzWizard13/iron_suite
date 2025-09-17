@@ -108,9 +108,15 @@ class Payment(models.Model):
         return f"Payment #{self.id} - {self.get_status_display()} ({self.content_object})"
 
 
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.core.validators import RegexValidator
+
 class Transaction(models.Model):
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='transaction')
     tenant_id = 'gym_id'
+    
     class Type(models.TextChoices):
         INCOME = 'income', 'Income'
         EXPENSE = 'expense', 'Expense'
@@ -134,7 +140,7 @@ class Transaction(models.Model):
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        related_name='payments_transaction_content_types',  # <--- ADDED
+        related_name='payments_transaction_content_types',
     )
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -146,25 +152,76 @@ class Transaction(models.Model):
     description = models.TextField(blank=True)
     reference = models.CharField(max_length=100, blank=True)
     date = models.DateField()
+    
+    # Customer Information Fields
+    customer_name = models.CharField(max_length=200, blank=True, help_text="Customer's full name")
+    customer_email = models.EmailField(blank=True, help_text="Customer's email address")
+    customer_phone = models.CharField(
+        max_length=20, 
+        blank=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?1?\d{9,15}$',
+                message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
+            )
+        ],
+        help_text="Customer's phone number with country code"
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        if hasattr(self, 'content_object') and hasattr(self.content_object, 'status'):
-            payment_status = getattr(self.content_object, 'status', None)
-            if payment_status == 'completed':
-                self.transaction_type = self.Type.INCOME
-                self.category = self.Category.SALES
-                self.status = self.Status.COMPLETED
-            elif payment_status == 'refunded':
-                self.transaction_type = self.Type.EXPENSE
-                self.category = self.Category.REFUND
-                self.status = self.Status.REFUNDED
-            elif payment_status == 'pending':
-                self.status = self.Status.PENDING
-            elif payment_status == 'initiated':
-                self.status = self.Status.INITIATED
+        # Check if this is being called from webhook/manual update
+        skip_auto_status = kwargs.pop('skip_auto_status', False)
+        
+        # Auto-populate customer fields from content_object if available and not already set
+        if hasattr(self, 'content_object') and self.content_object:
+            # Extract customer info from related object
+            if hasattr(self.content_object, 'customer'):
+                customer = self.content_object.customer
+                if not self.customer_name and hasattr(customer, 'name'):
+                    self.customer_name = customer.name
+                elif not self.customer_name and hasattr(customer, 'get_full_name'):
+                    self.customer_name = customer.get_full_name()
+                elif not self.customer_name and hasattr(customer, 'username'):
+                    self.customer_name = customer.username
+                
+                if not self.customer_email and hasattr(customer, 'email'):
+                    self.customer_email = customer.email
+                
+                if not self.customer_phone and hasattr(customer, 'phone'):
+                    self.customer_phone = customer.phone
+                elif not self.customer_phone and hasattr(customer, 'phone_number'):
+                    self.customer_phone = str(customer.phone_number)
+            
+            # Only auto-set transaction properties if not skipping and this is a new record
+            if not skip_auto_status and not self.pk and hasattr(self.content_object, 'status'):
+                payment_status = getattr(self.content_object, 'status', None)
+                if payment_status == 'completed':
+                    self.transaction_type = self.Type.INCOME
+                    self.category = self.Category.SALES
+                    self.status = self.Status.COMPLETED
+                elif payment_status == 'refunded':
+                    self.transaction_type = self.Type.EXPENSE
+                    self.category = self.Category.REFUND
+                    self.status = self.Status.REFUNDED
+                elif payment_status == 'pending':
+                    self.status = self.Status.PENDING
+                elif payment_status == 'initiated':
+                    self.status = self.Status.INITIATED
+        
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.get_transaction_type_display()} - {self.get_category_display()} - ${self.amount}"
+        customer_info = f" - {self.customer_name}" if self.customer_name else ""
+        return f"{self.get_transaction_type_display()} - {self.get_category_display()} - ₹{self.amount}{customer_info}"
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['gym', 'date']),
+            models.Index(fields=['customer_email']),
+            models.Index(fields=['transaction_type', 'status']),
+            models.Index(fields=['created_at']),
+        ]

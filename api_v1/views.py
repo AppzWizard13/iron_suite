@@ -1,5 +1,6 @@
 from datetime import timedelta
 import random
+from accounts import models
 from accounts.views import DashboardView
 from attendance.models import Attendance
 from dj_rest_auth.registration.views import SocialLoginView
@@ -1189,32 +1190,24 @@ def get_payment_status_api(request, order_id):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+from django.contrib.contenttypes.models import ContentType
+from payments.models import Transaction  # Add this import
+
 @csrf_exempt
 def cashfree_webhook(request):
     """
     Handles Cashfree webhook events for payment and refund status updates.
-    Ensures subscription renewal updates: User's `on_subscription` and `package_expiry_date`
-    are updated as per prepaid-recharge rule.
+    Updates both Payment and Transaction records.
     """
-    log_entry = PaymentAPILog.objects.create(
-        action='WEBHOOK',
-        request_url=request.path,
-        response_body=request.body.decode('utf-8') if request.body else None,
-        response_status=0
-    )
-
-    if request.method != 'POST':
-        log_entry.error_message = "Invalid method"
-        log_entry.response_status = 405
-        log_entry.save()
-        return JsonResponse({'error': 'Invalid method'}, status=405)
-
+    from payments.models import Transaction
+    
     try:
         data = json.loads(request.body)
         event_type = data.get("type")
         link_id = None
         payment_status = None
 
+        # Extract link_id and payment_status based on event type
         if event_type == "PAYMENT_SUCCESS_WEBHOOK":
             order_data = data.get('data', {}).get('order', {})
             payment_data = data.get('data', {}).get('payment', {})
@@ -1229,6 +1222,21 @@ def cashfree_webhook(request):
             link_id = order_data.get('order_tags', {}).get('link_id')
         else:
             link_id = None
+
+        payment = Payment.objects.filter(transaction_id=link_id).first()
+        log_entry = PaymentAPILog.objects.create(
+            gym=payment.gym if payment else None,
+            action='WEBHOOK',
+            request_url=request.path,
+            response_body=request.body.decode('utf-8') if request.body else None,
+            response_status=0
+        )
+
+        if request.method != 'POST':
+            log_entry.error_message = "Invalid method"
+            log_entry.response_status = 405
+            log_entry.save()
+            return JsonResponse({'error': 'Invalid method'}, status=405)
 
         if not link_id:
             error_msg = 'Missing link_id'
@@ -1248,19 +1256,33 @@ def cashfree_webhook(request):
         order = payment.content_object
         payment.gateway_response = data
 
+        # Get related transaction
+        transaction = Transaction.objects.filter(
+            content_type=payment.content_type,
+            object_id=payment.object_id,
+            gym=payment.gym
+        ).first()
+
         if (
             (event_type == "PAYMENT_SUCCESS_WEBHOOK" and payment_status == "SUCCESS") or
             (event_type == "PAYMENT_LINK_EVENT" and payment_status == "PAID")
         ):
             payment.status = Payment.Status.COMPLETED
 
-            # Correctly update user package_expiry_date and on_subscription on success!
+            # Update Transaction status to COMPLETED
+            if transaction:
+                transaction.status = Transaction.Status.COMPLETED
+                transaction.description = f"Payment completed for {order.__class__.__name__} #{order.order_number if hasattr(order, 'order_number') else order.id}"
+                transaction.save(skip_auto_status=True)  # Skip automatic status setting
+                print(f"Transaction {transaction.id} updated to COMPLETED")
+
+
+            # Update user subscription and order status
             if hasattr(order, 'customer') and isinstance(order, SubscriptionOrder):
                 user = order.customer
                 package = order.package
                 today = timezone.now().date()
 
-                # Smartly handle stacked subscriptions (i.e. if user renewed before expiry)
                 cur_expiry = getattr(user, "package_expiry_date", None)
                 if cur_expiry and cur_expiry >= today:
                     user.package_expiry_date = cur_expiry + timedelta(days=package.duration_days)
@@ -1272,20 +1294,27 @@ def cashfree_webhook(request):
 
                 order.start_date = today
                 order.end_date = user.package_expiry_date
-
                 order.status = SubscriptionOrder.Status.ACTIVE
                 order.payment_status = SubscriptionOrder.PaymentStatus.COMPLETED
                 order.save(update_fields=['start_date', 'end_date', 'status', 'payment_status'])
 
             elif hasattr(order, 'customer') and isinstance(order, Order):
-                # For product or other orders (non-subscription)
                 order.status = Order.Status.PROCESSING
                 order.payment_status = 'completed'
                 order.save(update_fields=['status', 'payment_status'])
+
             payment.save(update_fields=['status', 'gateway_response'])
 
         elif event_type == "PAYMENT_LINK_EVENT" and payment_status in ['EXPIRED', 'FAILED']:
             payment.status = Payment.Status.FAILED
+            
+            # Update Transaction status to FAILED (you might want to add this status to your choices)
+            if transaction:
+                transaction.status = Transaction.Status.INITIATED  # or add FAILED status
+                transaction.description = f"Payment failed for {order.__class__.__name__} #{order.order_number if hasattr(order, 'order_number') else order.id} - Status: {payment_status}"
+                transaction.save()
+                print(f"Transaction {transaction.id} updated to FAILED")
+                
             if hasattr(order, 'payment_status'):
                 order.payment_status = 'failed'
                 order.save(update_fields=['payment_status'])
@@ -1303,10 +1332,13 @@ def cashfree_webhook(request):
 
     except Exception as e:
         error_msg = str(e)
-        log_entry.error_message = error_msg
-        log_entry.response_status = 500
-        log_entry.save()
+        if 'log_entry' in locals():
+            log_entry.error_message = error_msg
+            log_entry.response_status = 500
+            log_entry.save()
         return HttpResponse(status=200)
+
+
 
 
 from rest_framework.views import APIView
@@ -1473,3 +1505,202 @@ class DashboardAPIView(APIView):
         print("Dashboard context data:----------------", serializable_context)
 
         return Response(serializable_context)
+
+# views.py
+from rest_framework import generics, filters
+from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, DateFromToRangeFilter
+from django_filters import CharFilter, ChoiceFilter, NumberFilter
+from django.db.models import Q, Sum
+from payments.models import Transaction
+from .serializers import TransactionSerializer
+from .permissions import IsAdminStaff
+
+class TransactionFilter(FilterSet):
+    """Custom filter class for Transaction model"""
+    
+    date_range = DateFromToRangeFilter(field_name='date')
+    transaction_type = ChoiceFilter(choices=Transaction.Type.choices)
+    category = ChoiceFilter(choices=Transaction.Category.choices)
+    status = ChoiceFilter(choices=Transaction.Status.choices)
+    amount_min = NumberFilter(field_name='amount', lookup_expr='gte')
+    amount_max = NumberFilter(field_name='amount', lookup_expr='lte')
+    reference = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+    
+    # Customer Information Filters
+    customer_name = CharFilter(lookup_expr='icontains', help_text="Filter by customer name")
+    customer_email = CharFilter(lookup_expr='icontains', help_text="Filter by customer email")
+    customer_phone = CharFilter(lookup_expr='icontains', help_text="Filter by customer phone")
+    
+    class Meta:
+        model = Transaction
+        fields = [
+            'transaction_type', 'category', 'status', 'date_range', 
+            'reference', 'description', 'customer_name', 'customer_email', 'customer_phone'
+        ]
+
+class TransactionPagination(PageNumberPagination):
+    """Custom pagination for transactions"""
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class TransactionListAPIView(generics.ListAPIView):
+    """
+    API endpoint for fetching transactions with filtering and search.
+    Only accessible by Admin staff users.
+    """
+    
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAdminStaff]
+    pagination_class = TransactionPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = TransactionFilter
+    
+    # Fixed search fields - removed GenericForeignKey references
+    search_fields = [
+        'description', 'reference', 'customer_name', 'customer_email', 'customer_phone'
+    ]
+    
+    # Updated ordering fields to include customer fields
+    ordering_fields = [
+        'date', 'created_at', 'amount', 'transaction_type', 'category', 'status',
+        'customer_name', 'customer_email'
+    ]
+    ordering = ['-created_at']  # Default ordering by latest first
+    
+    def get_queryset(self):
+        """
+        Filter transactions by user's gym and optimize queries
+        """
+        user = self.request.user
+        
+        # Get gym from user (adjust field name as per your User model)
+        gym = None
+        if hasattr(user, 'gym'):
+            gym = user.gym
+        elif hasattr(user, 'gym_id'):
+            gym_id = user.gym_id
+            return Transaction.objects.filter(gym_id=gym_id).select_related('gym', 'content_type').prefetch_related('content_object')
+        
+        if not gym:
+            # Return empty queryset if no gym found
+            return Transaction.objects.none()
+        
+        return Transaction.objects.filter(gym=gym).select_related('gym', 'content_type').prefetch_related('content_object')
+    
+    def filter_queryset(self, queryset):
+        """
+        Override to add custom search logic for GenericForeignKey content
+        """
+        queryset = super().filter_queryset(queryset)
+        
+        # Handle search parameter manually to include content_object fields
+        search_param = self.request.query_params.get('search', None)
+        if search_param:
+            # Create Q object for searching across multiple fields including content_object
+            search_query = Q(
+                Q(description__icontains=search_param) |
+                Q(reference__icontains=search_param) |
+                Q(customer_name__icontains=search_param) |
+                Q(customer_email__icontains=search_param) |
+                Q(customer_phone__icontains=search_param)
+            )
+            
+            # Search in related objects manually
+            from subscriptions.models import SubscriptionOrder  # Import your models
+            from orders.models import Order  # Import your models
+            
+            # Get IDs of subscription orders that match search
+            try:
+                subscription_order_ids = SubscriptionOrder.objects.filter(
+                    Q(customer__name__icontains=search_param) |
+                    Q(customer__email__icontains=search_param) |
+                    Q(customer__username__icontains=search_param) |
+                    Q(order_number__icontains=search_param)
+                ).values_list('id', flat=True)
+                
+                if subscription_order_ids:
+                    from django.contrib.contenttypes.models import ContentType
+                    subscription_ct = ContentType.objects.get_for_model(SubscriptionOrder)
+                    search_query |= Q(
+                        content_type=subscription_ct,
+                        object_id__in=subscription_order_ids
+                    )
+            except Exception as e:
+                print(f"Error searching subscription orders: {e}")
+            
+            # Get IDs of orders that match search (if you have Order model)
+            try:
+                order_ids = Order.objects.filter(
+                    Q(customer__name__icontains=search_param) |
+                    Q(customer__email__icontains=search_param) |
+                    Q(customer__username__icontains=search_param) |
+                    Q(order_number__icontains=search_param)
+                ).values_list('id', flat=True)
+                
+                if order_ids:
+                    from django.contrib.contenttypes.models import ContentType
+                    order_ct = ContentType.objects.get_for_model(Order)
+                    search_query |= Q(
+                        content_type=order_ct,
+                        object_id__in=order_ids
+                    )
+            except Exception as e:
+                print(f"Error searching orders: {e}")
+            
+            queryset = queryset.filter(search_query)
+        
+        return queryset
+    
+    def list(self, request, *args, **kwargs):
+        """
+        Override list method to add additional response data
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # Add summary statistics
+        total_income = queryset.filter(
+            transaction_type=Transaction.Type.INCOME,
+            status=Transaction.Status.COMPLETED
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        total_expense = queryset.filter(
+            transaction_type=Transaction.Type.EXPENSE
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Customer statistics
+        unique_customers = queryset.exclude(
+            customer_email__isnull=True
+        ).exclude(
+            customer_email__exact=''
+        ).values('customer_email').distinct().count()
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response = self.get_paginated_response(serializer.data)
+            
+            # Add summary to paginated response
+            response.data['summary'] = {
+                'total_income': float(total_income),
+                'total_expense': float(total_expense),
+                'net_amount': float(total_income - total_expense),
+                'total_transactions': queryset.count(),
+                'unique_customers': unique_customers
+            }
+            return response
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'results': serializer.data,
+            'summary': {
+                'total_income': float(total_income),
+                'total_expense': float(total_expense),
+                'net_amount': float(total_income - total_expense),
+                'total_transactions': queryset.count(),
+                'unique_customers': unique_customers
+            }
+        })
