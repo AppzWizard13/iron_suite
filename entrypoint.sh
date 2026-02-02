@@ -1,6 +1,10 @@
 #!/bin/sh
 
+# Exit immediately if a command exits with a non-zero status
 set -e
+
+# Set Django Settings here so manage.py knows what to load
+export DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-iron_board.settings.development}
 
 echo "=== Iron Board Setup Started ==="
 
@@ -13,9 +17,9 @@ python manage.py migrate
 echo "Creating default gym and admin users..."
 if [ ! -f .init_gym_admins ]; then
     python manage.py init_gym_admins && touch .init_gym_admins
-    echo "✅ Fitness data seeded successfully"
+    echo "✅ Admin data seeded successfully"
 else
-    echo "ℹ️ Fitness data already seeded, skipping..."
+    echo "ℹ️ Admin data already seeded, skipping..."
 fi
 
 echo "Seeding fitness data..."
@@ -39,4 +43,3 @@ python manage.py collectstatic --noinput
 
 echo "=== Starting Django Development Server ==="
 exec python manage.py runserver 0.0.0.0:8000
-# Note: For production, use entrypoint-prod.sh with Gunicorn

@@ -9,28 +9,36 @@ from products.models import Package  # Fix the NameError issue
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.db import models
 from django.core.validators import FileExtensionValidator
-from django_multitenant.models import TenantModelMixin       # Import the Gym (tenant) model
+from django_multitenant.models import TenantModelMixin       # Import the Vendor (tenant) model
 from products.models import Package
 from django.db import models
 
 
-class Gym(models.Model):  # 👈 GOOD
+from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
+from django.core.validators import FileExtensionValidator
+from django_countries.fields import CountryField
+
+# Multitenant Imports
+from django_multitenant.mixins import TenantModelMixin
+from django_multitenant.models import TenantManager
+from django_multitenant.fields import TenantForeignKey
+
+class Vendor(models.Model):
     name = models.CharField(max_length=255, unique=True)
     location = models.TextField()
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     proprietor_name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
-
-    # Add admin ForeignKey field referencing CustomUser
-    admin = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='gyms_administered', null=True, blank=True)
-
+    
+    # FK to CustomUser (using string to avoid circular import)
+    admin = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='vendors_administered', null=True, blank=True)
 
     def __str__(self):
         return self.name
 
-
-class CustomUserManager(BaseUserManager):
+class CustomUserManager(TenantManager, BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
             raise ValueError("The Phone Number field must be set")
@@ -44,68 +52,52 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, phone_number, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
         return self.create_user(phone_number, password, **extra_fields)
 
-
-from django_countries.fields import CountryField
-from django.core.validators import FileExtensionValidator
-from django.contrib.auth.models import AbstractUser, Group, Permission
-from django.db import models
-
-
 class CustomUser(AbstractUser, TenantModelMixin):
+    # Multitenant Configuration
+    # 1. tenant_id must match the field name + _id
+    tenant_id = "vendor_id" 
+    
     username = models.CharField(max_length=20, unique=True, blank=True, null=True)  
-    country_code = CountryField(blank_label="(Select country)", blank=True, null=True, help_text='Country dialing code')  # Country code field
+    country_code = CountryField(blank_label="(Select country)", blank=True, null=True)
     phone_number = models.CharField(max_length=10, unique=True)
     member_id = models.BigAutoField(primary_key=True)  
     join_date = models.DateField(auto_now_add=True)
     package_expiry_date = models.DateField(null=True)
-    tenant_id = "gym_id"
 
     STAFF_ROLES = [
-        ('Admin', 'Admin'),
-        ('Manager', 'Manager'),
-        ('Employee', 'Employee'),
-        ('Customer', 'Customer'),
-        ('Member', 'Member'),
-        ('Trainer', 'Trainer'),
+        ('Admin', 'Admin'), ('Manager', 'Manager'), ('Employee', 'Employee'),
+        ('Customer', 'Customer'), ('Member', 'Member'), ('Trainer', 'Trainer'),
     ]
     staff_role = models.CharField(max_length=100, choices=STAFF_ROLES)
-
     email = models.EmailField(unique=True)
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
     pincode = models.CharField(max_length=10, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
-
-    GENDER_CHOICES = [
-        ('Male', 'Male'),
-        ('Female', 'Female'),
-        ('Other', 'Other'),
-    ]
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
+    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], blank=True, null=True)
 
     profile_image = models.ImageField(
         upload_to='profile_pics/', 
-        blank=True, 
-        null=True,
+        blank=True, null=True,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
     )
-    package = models.ForeignKey(Package, null=True, blank=True, on_delete=models.SET_NULL)
+    
+    # 2. Changed 'Vendor' to 'vendor' (Lowercase) to satisfy django-multitenant scan
+    vendor = TenantForeignKey(Vendor, on_delete=models.CASCADE, related_name='users', null=True, blank=True)
+    
+    # 3. Reference the lowercase field name here
+    multitenant_shared_fields = ["vendor"]
+
+    package = models.ForeignKey('products.Package', null=True, blank=True, on_delete=models.SET_NULL)
     is_active = models.BooleanField(default=True)
     on_subscription = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
     groups = models.ManyToManyField(Group, related_name="customuser_set", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_permissions_set", blank=True)
-
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='users', null=True, blank=True)
-    multitenant_shared_fields = ["gym"]                                            # <--- Required by django-multitenant
 
     objects = CustomUserManager()
 
@@ -114,7 +106,10 @@ class CustomUser(AbstractUser, TenantModelMixin):
 
     def save(self, *args, **kwargs):
         if not self.username:
+            # Note: member_id is None before first save if using BigAutoField
+            super().save(*args, **kwargs)
             self.username = f"MEMBER{str(self.member_id).zfill(5)}"
+            kwargs['force_insert'] = False # Ensure we update on the second save call
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -269,15 +264,15 @@ class Customer(models.Model):
         return f"{self.first_name} {self.last_name} ({self.user.email})"
     
 class MonthlyMembershipTrend(models.Model):
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='membership_trends')
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='membership_trends')
     year = models.PositiveIntegerField()
     month = models.PositiveIntegerField()
     member_count = models.PositiveIntegerField()
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('gym', 'year', 'month')
+        unique_together = ('Vendor', 'year', 'month')
         ordering = ['-year', '-month']
 
     def __str__(self):
-        return f"{self.gym} {self.year}-{self.month}: {self.member_count}"
+        return f"{self.Vendor} {self.year}-{self.month}: {self.member_count}"

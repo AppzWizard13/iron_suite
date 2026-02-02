@@ -388,8 +388,8 @@ class PackageListView(LoginRequiredMixin, ListView):
         user = self.request.user
         query = self.request.GET.get('search', '')
 
-        # Only fetch packages belonging to the user's gym
-        qs = Package.objects.filter(gym=user.gym)
+        # Only fetch packages belonging to the user's Vendor
+        qs = Package.objects.filter(Vendor=user.Vendor)
 
         if query:
             qs = qs.filter(name__icontains=query)
@@ -419,13 +419,13 @@ class PackageCreateView(LoginRequiredMixin,CreateView):
     success_url = reverse_lazy('package_list')
 
     def form_valid(self, form):
-        user_gym = getattr(self.request.user, 'gym', None)
+        user_vendor = getattr(self.request.user, 'Vendor', None)
 
-        if not user_gym:
-            messages.error(self.request, "User is not associated with any gym.")
-            return self.form_invalid(form)  # fail early if gym is missing
+        if not user_vendor:
+            messages.error(self.request, "User is not associated with any Vendor.")
+            return self.form_invalid(form)  # fail early if Vendor is missing
 
-        form.instance.gym = user_gym  # ✅ assign gym before saving
+        form.instance.Vendor = user_vendor  # ✅ assign Vendor before saving
         response = super().form_valid(form)
         messages.success(self.request, "Package added successfully!")
         return response

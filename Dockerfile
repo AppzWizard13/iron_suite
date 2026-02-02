@@ -4,6 +4,8 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+# Set a default settings module so management commands don't crash
+ENV DJANGO_SETTINGS_MODULE=iron_board.settings 
 
 # Set working directory
 WORKDIR /app
@@ -21,8 +23,9 @@ RUN pip install -r requirements.txt
 # Copy project files
 COPY . /app/
 
-# Make entrypoint executable
-RUN chmod +x /app/entrypoint.sh
+# Fix line endings (crucial if editing on Windows) and make entrypoint executable
+RUN sed -i 's/\r$//g' /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
 
 # Expose port 8000
 EXPOSE 8000

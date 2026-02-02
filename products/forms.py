@@ -57,7 +57,7 @@ class ProductForm(forms.ModelForm):
 class PackageForm(forms.ModelForm):
     class Meta:
         model = Package
-        exclude = ['gym']  # ✅ exclude gym so it doesn't expect user input
+        exclude = ['Vendor']  # ✅ exclude Vendor so it doesn't expect user input
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),

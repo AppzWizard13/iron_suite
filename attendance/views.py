@@ -29,7 +29,7 @@ CustomUser = get_user_model()
 
 class AttendanceAdminView(LoginRequiredMixin, ListView):
     """
-    Admin view for listing attendance with filters, scoped to gym.
+    Admin view for listing attendance with filters, scoped to Vendor.
     """
     model = Attendance
     template_name = 'attendance/view_attendance.html'
@@ -41,7 +41,7 @@ class AttendanceAdminView(LoginRequiredMixin, ListView):
         Optionally filter attendance by user, date, or status.
         """
         queryset = super().get_queryset().select_related('user', 'schedule')
-        queryset = queryset.filter(schedule__gym=self.request.user.gym)  # Multi-tenant filter
+        queryset = queryset.filter(schedule__vendor=self.request.user.Vendor)  # Multi-tenant filter
 
         q = self.request.GET.get('q')
         date = self.request.GET.get('date')
@@ -68,7 +68,7 @@ class AttendanceAdminView(LoginRequiredMixin, ListView):
 
 class AttendanceReportView(LoginRequiredMixin, ListView):
     """
-    View for generating filtered attendance reports, scoped to gym.
+    View for generating filtered attendance reports, scoped to Vendor.
     """
     model = Attendance
     template_name = 'attendance/attendance_report.html'
@@ -80,7 +80,7 @@ class AttendanceReportView(LoginRequiredMixin, ListView):
         Optionally filter attendance by user, date, or status.
         """
         queryset = super().get_queryset().select_related('user', 'schedule')
-        queryset = queryset.filter(schedule__gym=self.request.user.gym)  # Multi-tenant filter
+        queryset = queryset.filter(schedule__vendor=self.request.user.Vendor)  # Multi-tenant filter
 
         q = self.request.GET.get('q')
         date = self.request.GET.get('date')
@@ -114,7 +114,7 @@ class AttendanceReportView(LoginRequiredMixin, ListView):
 
 class ScheduleListView(LoginRequiredMixin, ListView):
     """
-    ListView for all schedules filtered by tenant (gym).
+    ListView for all schedules filtered by tenant (Vendor).
     """
     model = Schedule
     template_name = 'attendance/schedule_list.html'
@@ -123,10 +123,10 @@ class ScheduleListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """
-        Filter schedules by the logged-in user's gym.
+        Filter schedules by the logged-in user's Vendor.
         """
         user = self.request.user
-        return super().get_queryset().filter(gym=user.gym)
+        return super().get_queryset().filter(Vendor=user.Vendor)
 
     def get_context_data(self, **kwargs):
         """
@@ -147,8 +147,8 @@ class ScheduleCreateView(LoginRequiredMixin,CreateView):
     success_url = reverse_lazy('schedule_list')
 
     def form_valid(self, form):
-        # Automatically set the gym from the current user
-        form.instance.gym = self.request.user.gym
+        # Automatically set the Vendor from the current user
+        form.instance.Vendor = self.request.user.Vendor
         return super().form_valid(form)
 
 
@@ -184,7 +184,7 @@ def schedule_delete(request, pk):
     
 class EnrollmentListView(LoginRequiredMixin, ListView):
     """
-    ListView for class enrollments filtered by tenant (gym).
+    ListView for class enrollments filtered by tenant (Vendor).
     """
     model = ClassEnrollment
     template_name = 'attendance/enrollment_list.html'
@@ -193,10 +193,10 @@ class EnrollmentListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """
-        Prefetch user and schedule, and filter enrollments by gym.
+        Prefetch user and schedule, and filter enrollments by Vendor.
         """
         return super().get_queryset().select_related('user', 'schedule').filter(
-            schedule__gym=self.request.user.gym
+            schedule__vendor=self.request.user.Vendor
         )
 
     def get_context_data(self, **kwargs):
@@ -217,13 +217,13 @@ class EnrollmentCreateView(LoginRequiredMixin,CreateView):
 
     def form_valid(self, form):
         instance = form.save(commit=False)
-        instance.gym = instance.schedule.gym  # Ensure gym is set before saving
+        instance.Vendor = instance.schedule.Vendor  # Ensure Vendor is set before saving
         return super().form_valid(form)
 
 
 class QRTokenListView(LoginRequiredMixin, ListView):
     """
-    ListView for QR tokens filtered by tenant (gym).
+    ListView for QR tokens filtered by tenant (Vendor).
     """
     model = QRToken
     template_name = 'attendance/qr_token_list.html'
@@ -232,10 +232,10 @@ class QRTokenListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """
-        Filter QR tokens by the logged-in user's gym via schedule.
+        Filter QR tokens by the logged-in user's Vendor via schedule.
         """
         user = self.request.user
-        return super().get_queryset().select_related('schedule').filter(schedule__gym=user.gym)
+        return super().get_queryset().select_related('schedule').filter(schedule__vendor=user.Vendor)
 
     def get_context_data(self, **kwargs):
         """
@@ -448,24 +448,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from accounts.models import Gym
+from accounts.models import Vendor
 from .models import Schedule, QRToken, Attendance, CheckInLog
 import json
 
 class QRGeneratorView(View):
     def get(self, request):
-        gyms = Gym.objects.all()
-        return render(request, 'advadmin/qr_generator.html', {'gyms': gyms})
+        vendors = Vendor.objects.all()
+        return render(request, 'advadmin/qr_generator.html', {'vendors': vendors})
 
     def post(self, request):
         try:
-            gym_id = request.POST.get('gym_id')
+            vendor_id = request.POST.get('vendor_id')
             validity_days = request.POST.get('validity_days')
 
-            if not gym_id:
-                return JsonResponse({'success': False, 'message': 'Gym ID is required'})
+            if not vendor_id:
+                return JsonResponse({'success': False, 'message': 'Vendor ID is required'})
 
-            gym = get_object_or_404(Gym, id=gym_id)
+            Vendor = get_object_or_404(Vendor, id=vendor_id)
 
             # Use entered validity days, fallback to 1 day if not provided
             try:
@@ -477,7 +477,7 @@ class QRGeneratorView(View):
 
             today = timezone.now().date()
             schedule, created = Schedule.objects.get_or_create(
-                gym=gym,
+                Vendor=Vendor,
                 schedule_date=today,
                 defaults={
                     'name': f'General Attendance - {today.strftime("%d %b %Y")}',
@@ -490,7 +490,7 @@ class QRGeneratorView(View):
 
             qr_token = QRToken.objects.create(
                 schedule=schedule,
-                gym=gym,
+                Vendor=Vendor,
                 expires_at=expires_at
             )
 
@@ -499,7 +499,7 @@ class QRGeneratorView(View):
             return JsonResponse({
                 'success': True,
                 'qr_data': qr_data_url,
-                'gym_name': gym.name,
+                'vendor_name': Vendor.name,
                 'token': qr_token.token,
                 'expires_at': qr_token.expires_at.isoformat(),
                 'schedule_id': schedule.id,
@@ -565,7 +565,7 @@ class AttendanceScanAPI(APIView):
                         user=user,
                         token=qr_token,
                         attendance=existing_attendance,
-                        gym=qr_token.gym,
+                        Vendor=qr_token.Vendor,
                         ip_address=self.get_client_ip(request),
                         user_agent=request.META.get('HTTP_USER_AGENT', ''),
                         gps_lat=request.data.get('latitude'),
@@ -579,7 +579,7 @@ class AttendanceScanAPI(APIView):
                         'check_out_time': existing_attendance.check_out_time.strftime("%I:%M %p"),
                         'duration': str(existing_attendance.duration).split('.')[0],
                         'status': 'checked_out',
-                        'gym_name': qr_token.gym.name
+                        'vendor_name': qr_token.Vendor.name
                     }, status=status.HTTP_200_OK)
                 else:
                     return Response({
@@ -593,7 +593,7 @@ class AttendanceScanAPI(APIView):
             attendance = Attendance.objects.create(
                 user=user,
                 schedule=schedule,
-                gym=qr_token.gym,
+                Vendor=qr_token.Vendor,
                 date=today,
                 status='checked_in'
             )
@@ -603,7 +603,7 @@ class AttendanceScanAPI(APIView):
                 user=user,
                 token=qr_token,
                 attendance=attendance,
-                gym=qr_token.gym,
+                Vendor=qr_token.Vendor,
                 ip_address=self.get_client_ip(request),
                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
                 gps_lat=request.data.get('latitude'),
@@ -614,7 +614,7 @@ class AttendanceScanAPI(APIView):
                 'success': True,
                 'message': 'Attendance marked successfully!',
                 'check_in_time': attendance.check_in_time.strftime("%I:%M %p"),
-                'gym_name': qr_token.gym.name,
+                'vendor_name': qr_token.Vendor.name,
                 'status': 'checked_in',
                 'user_name': user.get_full_name() or user.username
             }, status=status.HTTP_201_CREATED)
@@ -647,7 +647,7 @@ class QRInfoAPI(APIView):
             
             return Response({
                 'success': True,
-                'gym_name': qr_token.gym.name,
+                'vendor_name': qr_token.Vendor.name,
                 'schedule_name': qr_token.schedule.name,
                 'valid_until': qr_token.expires_at.isoformat(),
                 'is_valid': qr_token.is_valid(),

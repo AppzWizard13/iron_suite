@@ -48,11 +48,11 @@ def generate_invoice_pdf(order, output_dir='invoices'):
         c.setFillColor(colors.white)
         c.drawString(42, PAGE_HEIGHT - 65, "INVOICE")
 
-        # --- Gym Details (right-aligned) ---
-        gym = order.gym
+        # --- Vendor Details (right-aligned) ---
+        Vendor = order.Vendor
         c.setFont("Helvetica", 10)
         y_shop = PAGE_HEIGHT - 55
-        header_details = [gym.name, gym.location, getattr(gym, 'proprietor_name', '')]
+        header_details = [Vendor.name, Vendor.location, getattr(Vendor, 'proprietor_name', '')]
         for detail in header_details:
             c.drawRightString(PAGE_WIDTH - 42, y_shop, detail)
             y_shop -= 13

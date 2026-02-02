@@ -31,10 +31,10 @@ urlpatterns = [
     path('password-reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset/verify/<str:user_username>/', PasswordResetVerifyView.as_view(), name='password_reset_verify'),
 
-    path('gyms/', GymListView.as_view(), name='gym_list'),
-    path('gyms/add/', GymCreateView.as_view(), name='gym_add'),
-    path('gyms/edit/<int:pk>/', GymUpdateView.as_view(), name='gym_edit'),
-    path('gyms/delete/<int:pk>/', GymDeleteView.as_view(), name='gym_delete'),
+    path('vendors/', GymListView.as_view(), name='vendor_list'),
+    path('vendors/add/', GymCreateView.as_view(), name='vendor_add'),
+    path('vendors/edit/<int:pk>/', GymUpdateView.as_view(), name='vendor_edit'),
+    path('vendors/delete/<int:pk>/', GymDeleteView.as_view(), name='vendor_delete'),
 
     # Dashboard search
     path('dashboard/search/', DashboardSearchView.as_view(), name='dashboard_search_list'),

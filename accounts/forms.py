@@ -15,10 +15,10 @@ from .models import CustomUser, SocialMedia
 
 from django.core.exceptions import ValidationError
 from django import forms
-from .models import Gym
+from .models import Vendor
 class GymForm(forms.ModelForm):
     class Meta:
-        model = Gym
+        model = Vendor
         fields = '__all__'
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -209,32 +209,32 @@ class CustomUserForm(UserCreationForm):
             instance.save()
         return instance
 
-
 User = get_user_model()
 
 class UserLoginForm(AuthenticationForm):
+    # We name this 'username' so AuthenticationForm.clean() can find it
     username = forms.CharField(
         label="Phone Number",
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter phone number"}),
+        widget=forms.TextInput(attrs={
+            "class": "form-control", 
+            "placeholder": "Enter mobile number",
+            "id": "phone_number"
+        }),
     )
     password = forms.CharField(
         label="Password",
-        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Enter password"}),
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control", 
+            "placeholder": "Password",
+            "id": "password"
+        }),
     )
 
-    class Meta:
-        model = User
-        fields = ["username", "password"]
-
     def clean(self):
-        cleaned_data = super().clean()
-        phone_number = cleaned_data.get("username")
-
-        # Ensure phone number exists
-        if phone_number and not User.objects.filter(phone_number=phone_number).exists():
-            raise forms.ValidationError("Phone number not found.")
-
-        return cleaned_data
+        # The parent AuthenticationForm handles authentication using 'username' 
+        # and 'password'. Since your model's USERNAME_FIELD is 'phone_number', 
+        # it will automatically check the phone_number column.
+        return super().clean()
 
 from django import forms
 from .models import Review

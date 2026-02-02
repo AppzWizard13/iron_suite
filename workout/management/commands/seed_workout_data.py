@@ -141,7 +141,7 @@ TEMPLATES = [
     # 3. Home Bodyweight Only (5-Day)
     {
         "name": "Home Bodyweight Only (5-Day)",
-        "description": "Perfect when you can't access a gym; zero equipment, effective training.",
+        "description": "Perfect when you can't access a Vendor; zero equipment, effective training.",
         "fitness_level": "beginner",
         "goal": "basic_maintenance",
         "days": [
@@ -309,9 +309,9 @@ class Command(BaseCommand):
             except Equipment.DoesNotExist:
                 self.stdout.write(self.style.WARNING(f"❌ Equipment '{equipment_name}' not found for exercise '{name}'. Skipping."))
 
-        # Create default trainer user with gym_id = 1
+        # Create default trainer user with vendor_id = 1
         try:
-            # Try to create trainer with gym_id = 1
+            # Try to create trainer with vendor_id = 1
             trainer, created = User.objects.get_or_create(
                 username='trainer_demo',
                 defaults={
@@ -319,13 +319,13 @@ class Command(BaseCommand):
                     'first_name': 'Demo',
                     'last_name': 'Trainer',
                     'is_staff': True,
-                    'gym_id': 1,  # Use default gym_id = 1
+                    'vendor_id': 1,  # Use default vendor_id = 1
                 }
             )
             if created:
                 trainer.set_password('password123')
                 trainer.save()
-                self.stdout.write("✅ Created demo trainer user with gym_id = 1")
+                self.stdout.write("✅ Created demo trainer user with vendor_id = 1")
             else:
                 self.stdout.write("📋 Using existing trainer user")
         except Exception as e:

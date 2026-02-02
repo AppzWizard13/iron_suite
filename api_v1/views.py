@@ -386,7 +386,7 @@ class UserProfileAPIView(APIView):
         # Get today's date inside the method
         today = date.today()
         user = request.user  # The authenticated user
-        gym = getattr(user, 'gym', None)
+        Vendor = getattr(user, 'Vendor', None)
 
         # Get latest measurement for this user (any date), if present
         latest = (
@@ -418,8 +418,8 @@ class UserProfileAPIView(APIView):
             "member_id": user.member_id,
             "gender": getattr(user, 'gender', None),
             "phone": getattr(user, 'phone_number', '') or '',
-            "gym_name": getattr(gym, 'name', '') or '',
-            "location": getattr(gym, 'location', '') or '',
+            "vendor_name": getattr(Vendor, 'name', '') or '',
+            "location": getattr(Vendor, 'location', '') or '',
             "status": getattr(user, 'on_subscription', ''),
             "is_active": getattr(user, 'is_active', ''),
             "log_status": log_status,  # Fixed: Use actual log_status variable
@@ -917,7 +917,7 @@ logger = logging.getLogger(__name__)
 @permission_classes([IsAuthenticated])
 def initiate_subscription_payment_api(request):
     """
-    API endpoint to initiate gym membership subscription payment from Flutter app.
+    API endpoint to initiate Vendor membership subscription payment from Flutter app.
     Creates necessary database entries before Cashfree payment processing.
     
     Expected payload:
@@ -951,14 +951,14 @@ def initiate_subscription_payment_api(request):
             payment_status=SubscriptionOrder.PaymentStatus.PENDING,
             start_date=timezone.now().date(),
             end_date=timezone.now().date() + timedelta(days=package.duration_days),
-            gym=request.user.gym
+            Vendor=request.user.Vendor
         )
         
         # Create payment record
         payment, created = Payment.objects.get_or_create(
             content_type=ContentType.objects.get_for_model(subscription_order),
             object_id=subscription_order.id,
-            gym=request.user.gym,
+            Vendor=request.user.Vendor,
             defaults={
                 'payment_method': 'cashfree',
                 'amount': subscription_order.total,
@@ -1225,7 +1225,7 @@ def cashfree_webhook(request):
 
         payment = Payment.objects.filter(transaction_id=link_id).first()
         log_entry = PaymentAPILog.objects.create(
-            gym=payment.gym if payment else None,
+            Vendor=payment.Vendor if payment else None,
             action='WEBHOOK',
             request_url=request.path,
             response_body=request.body.decode('utf-8') if request.body else None,
@@ -1260,7 +1260,7 @@ def cashfree_webhook(request):
         transaction = Transaction.objects.filter(
             content_type=payment.content_type,
             object_id=payment.object_id,
-            gym=payment.gym
+            Vendor=payment.Vendor
         ).first()
 
         if (
@@ -1393,7 +1393,7 @@ from products.serializers import PackageSerializer
 
 class PackageListAPI(generics.ListAPIView):
     """
-    API to fetch all packages for the authenticated user's gym
+    API to fetch all packages for the authenticated user's Vendor
     ordered by price in ascending order
     """
     serializer_class = PackageSerializer
@@ -1402,14 +1402,14 @@ class PackageListAPI(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         
-        # Get user's gym - adjust this based on your User-Gym relationship
-        gym = getattr(user, 'gym', None)
+        # Get user's Vendor - adjust this based on your User-Vendor relationship
+        Vendor = getattr(user, 'Vendor', None)
         
-        if not gym:
+        if not Vendor:
             return Package.objects.none()
         
         return Package.objects.filter(
-            gym_id=gym.id,
+            vendor_id=Vendor.id,
             is_active=True  # Only return active packages
         ).order_by('price')  # Ascending order by price
 
@@ -1419,13 +1419,13 @@ class PackageListAPI(generics.ListAPIView):
         """
         queryset = self.get_queryset()
         
-        # Check if user has gym
+        # Check if user has Vendor
         user = request.user
-        gym = getattr(user, 'gym', None)
+        Vendor = getattr(user, 'Vendor', None)
         
-        if not gym:
+        if not Vendor:
             return Response(
-                {'detail': 'User is not associated with any gym'}, 
+                {'detail': 'User is not associated with any Vendor'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -1435,17 +1435,17 @@ class PackageListAPI(generics.ListAPIView):
             serializer = self.get_serializer(page, many=True)
             result = self.get_paginated_response(serializer.data)
             # Add custom fields to paginated response
-            result.data['gym_name'] = gym.name
-            result.data['gym_id'] = gym.id
+            result.data['vendor_name'] = Vendor.name
+            result.data['vendor_id'] = Vendor.id
             return result
 
         # Non-paginated response
         serializer = self.get_serializer(queryset, many=True)
         return Response({
             'count': queryset.count(),
-            'gym_name': gym.name,
-            'gym_location': gym.location,
-            'gym_id': gym.id,
+            'vendor_name': Vendor.name,
+            'vendor_location': Vendor.location,
+            'vendor_id': Vendor.id,
             'packages': serializer.data
         })
 
@@ -1573,23 +1573,23 @@ class TransactionListAPIView(generics.ListAPIView):
     
     def get_queryset(self):
         """
-        Filter transactions by user's gym and optimize queries
+        Filter transactions by user's Vendor and optimize queries
         """
         user = self.request.user
         
-        # Get gym from user (adjust field name as per your User model)
-        gym = None
-        if hasattr(user, 'gym'):
-            gym = user.gym
-        elif hasattr(user, 'gym_id'):
-            gym_id = user.gym_id
-            return Transaction.objects.filter(gym_id=gym_id).select_related('gym', 'content_type').prefetch_related('content_object')
+        # Get Vendor from user (adjust field name as per your User model)
+        Vendor = None
+        if hasattr(user, 'Vendor'):
+            Vendor = user.Vendor
+        elif hasattr(user, 'vendor_id'):
+            vendor_id = user.vendor_id
+            return Transaction.objects.filter(vendor_id=vendor_id).select_related('Vendor', 'content_type').prefetch_related('content_object')
         
-        if not gym:
-            # Return empty queryset if no gym found
+        if not Vendor:
+            # Return empty queryset if no Vendor found
             return Transaction.objects.none()
         
-        return Transaction.objects.filter(gym=gym).select_related('gym', 'content_type').prefetch_related('content_object')
+        return Transaction.objects.filter(Vendor=Vendor).select_related('Vendor', 'content_type').prefetch_related('content_object')
     
     def filter_queryset(self, queryset):
         """

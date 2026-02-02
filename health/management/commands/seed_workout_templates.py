@@ -95,7 +95,7 @@ TEMPLATES = [
             ]),
         ]
     },
-    # --------------------- 4. Gym Fat Loss (6-Day with Cardio) ---------------------
+    # --------------------- 4. Vendor Fat Loss (6-Day with Cardio) ---------------------
     {
         "name": "Fat Loss Accelerator (6-Day)",
         "description": "High frequency, moderate volume, cardio for maximum fat burning.",

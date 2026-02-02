@@ -545,7 +545,7 @@ class SubscriptionOrderSuccessView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['site_name'] = "Your Gym Name"
+        context['site_name'] = "Your Vendor Name"
         return context
 
 class SubscriptionOrderFailureView(LoginRequiredMixin, DetailView):
@@ -674,7 +674,7 @@ class SubscriptionOrderListView(LoginRequiredMixin, ListView):
         Accepts 'q' (search), 'status', 'date', and 'sort' from GET params.
         """
         user = self.request.user
-        queryset = super().get_queryset().filter(gym=user.gym)  # Filter by tenant
+        queryset = super().get_queryset().filter(Vendor=user.Vendor)  # Filter by tenant
 
         # Filters
         q = self.request.GET.get('q', '').strip()

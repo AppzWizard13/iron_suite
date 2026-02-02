@@ -4,12 +4,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
 
-from accounts.models import Gym
+from accounts.models import Vendor
 User = get_user_model()
 
 class PaymentAPILog(models.Model):
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='paymentapolog')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='paymentapolog')
+    tenant_id = 'vendor_id'
     PAYMENT_ACTIONS = [
         ('INITIATE', 'Initiate Payment'),
         ('FETCH_SESSION', 'Fetch Session'),
@@ -79,8 +79,8 @@ class PaymentAPILog(models.Model):
         )
 
 class Payment(models.Model):
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='payment')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='payment')
+    tenant_id = 'vendor_id'
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
         COMPLETED = 'completed', 'Completed'
@@ -114,8 +114,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.validators import RegexValidator
 
 class Transaction(models.Model):
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='transaction')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='transaction')
+    tenant_id = 'vendor_id'
     
     class Type(models.TextChoices):
         INCOME = 'income', 'Income'
@@ -220,7 +220,7 @@ class Transaction(models.Model):
     class Meta:
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['gym', 'date']),
+            models.Index(fields=['Vendor', 'date']),
             models.Index(fields=['customer_email']),
             models.Index(fields=['transaction_type', 'status']),
             models.Index(fields=['created_at']),

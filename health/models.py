@@ -67,12 +67,12 @@ class MemberWorkoutAssignment(models.Model):
 
 class BodyMeasurement(models.Model):
     """
-    Stores weight progress for each gym customer.
+    Stores weight progress for each Vendor customer.
     Includes BMI and week tracking for historical graph purposes.
     """
 
-    gym = models.ForeignKey(
-        'accounts.Gym',
+    Vendor = models.ForeignKey(
+        'accounts.Vendor',
         on_delete=models.CASCADE,
         related_name='measurements'
     )
@@ -88,7 +88,7 @@ class BodyMeasurement(models.Model):
     week_of_year = models.PositiveSmallIntegerField(editable=False, db_index=True)
     year = models.PositiveSmallIntegerField(editable=False, db_index=True)
 
-    # Week count since user joined the gym
+    # Week count since user joined the Vendor
     week_index_since_join = models.PositiveIntegerField(editable=False, db_index=True)
 
     weight_kg = models.DecimalField(
@@ -114,15 +114,15 @@ class BodyMeasurement(models.Model):
         unique_together = ('user', 'date')
         ordering = ['-date']
         indexes = [
-            models.Index(fields=['gym', 'user', 'date']),
-            models.Index(fields=['gym', 'user', 'year', 'week_of_year']),
-            models.Index(fields=['gym', 'user', 'week_index_since_join']),
+            models.Index(fields=['Vendor', 'user', 'date']),
+            models.Index(fields=['Vendor', 'user', 'year', 'week_of_year']),
+            models.Index(fields=['Vendor', 'user', 'week_index_since_join']),
         ]
 
     def save(self, *args, **kwargs):
-        # Ensure gym is set from user if not provided
-        if not self.gym_id and getattr(self.user, 'gym_id', None):
-            self.gym_id = self.user.gym_id
+        # Ensure Vendor is set from user if not provided
+        if not self.vendor_id and getattr(self.user, 'vendor_id', None):
+            self.vendor_id = self.user.vendor_id
 
         # Set year/week from date
         iso_year, iso_week, _ = self.date.isocalendar()

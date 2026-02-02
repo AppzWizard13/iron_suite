@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
-from accounts.models import Customer, Gym
+from accounts.models import Customer, Vendor
 from products.models import Package, Product
 from django.conf import settings
 from django_multitenant.mixins import TenantModelMixin
@@ -11,8 +11,8 @@ User = get_user_model()
 
 class Cart(models.Model, TenantModelMixin):
     customer = models.OneToOneField(Customer, on_delete=models.CASCADE, related_name='cart')
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='carts')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='carts')
+    tenant_id = 'vendor_id'
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -24,15 +24,15 @@ class Cart(models.Model, TenantModelMixin):
         return f"Cart #{self.id} - {self.customer}"
 
     def save(self, *args, **kwargs):
-        if self.customer and not self.gym:
-            self.gym = self.customer.gym
+        if self.customer and not self.Vendor:
+            self.Vendor = self.customer.Vendor
         super().save(*args, **kwargs)
 
 
 class CartItem(models.Model, TenantModelMixin):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='cart_items')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='cart_items')
+    tenant_id = 'vendor_id'
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     price_at_addition = models.DecimalField(max_digits=10, decimal_places=2)
@@ -45,8 +45,8 @@ class CartItem(models.Model, TenantModelMixin):
         return f"{self.quantity} x {self.product.name} in Cart #{self.cart.id}"
 
     def save(self, *args, **kwargs):
-        if self.cart and not self.gym:
-            self.gym = self.cart.gym
+        if self.cart and not self.Vendor:
+            self.Vendor = self.cart.Vendor
         super().save(*args, **kwargs)
 
 
@@ -65,8 +65,8 @@ class Order(models.Model, TenantModelMixin):
         COMPLETED = 'completed', 'Completed'
         REFUNDED = 'refunded', 'Refunded'
 
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='orders')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='orders')
+    tenant_id = 'vendor_id'
 
     order_number = models.CharField(max_length=20, unique=True)
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='orders')
@@ -97,8 +97,8 @@ class Order(models.Model, TenantModelMixin):
 
 class OrderItem(models.Model, TenantModelMixin):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='order_items')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='order_items')
+    tenant_id = 'vendor_id'
 
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     product_name = models.CharField(max_length=255)
@@ -115,8 +115,8 @@ class OrderItem(models.Model, TenantModelMixin):
         return f"{self.quantity} x {self.product_name} in Order #{self.order.order_number}"
 
     def save(self, *args, **kwargs):
-        if self.order and not self.gym:
-            self.gym = self.order.gym
+        if self.order and not self.Vendor:
+            self.Vendor = self.order.Vendor
         super().save(*args, **kwargs)
 
 
@@ -134,8 +134,8 @@ class SubscriptionOrder(models.Model, TenantModelMixin):
         REFUNDED = 'refunded', 'Refunded'
         FAILED = 'failed', 'Failed'
 
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='subscription_orders')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='subscription_orders')
+    tenant_id = 'vendor_id'
 
     order_number = models.CharField(max_length=40, unique=True)  
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='subscription_orders')
@@ -173,8 +173,8 @@ class SubscriptionOrder(models.Model, TenantModelMixin):
 class TempOrder(models.Model, TenantModelMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='temp_orders')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='temp_orders')
+    tenant_id = 'vendor_id'
     quantity = models.PositiveIntegerField(default=1)
     timestamp = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)

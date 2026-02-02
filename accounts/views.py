@@ -74,65 +74,65 @@ logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView,CreateView, UpdateView, DeleteView
-from .models import Gym, MonthlyMembershipTrend
+from .models import Vendor, MonthlyMembershipTrend
 from .forms import GymForm  
 
 class GymListView(LoginRequiredMixin, ListView):
-    model = Gym
-    template_name = 'advadmin/gym_list.html'
-    context_object_name = 'gyms'
+    model = Vendor
+    template_name = 'advadmin/vendor_list.html'
+    context_object_name = 'vendors'
 
 class GymCreateView(LoginRequiredMixin, CreateView):
-    model = Gym
+    model = Vendor
     form_class = GymForm
-    template_name = 'advadmin/gym_form.html'
-    success_url = reverse_lazy('gym_list')
+    template_name = 'advadmin/vendor_form.html'
+    success_url = reverse_lazy('vendor_list')
 
     def form_valid(self, form):
-        response = super().form_valid(form)  # save the Gym instance first
-        gym = self.object  # the newly created Gym instance
+        response = super().form_valid(form)  # save the Vendor instance first
+        Vendor = self.object  # the newly created Vendor instance
 
-        # Update the admin user's gym field to point to this new gym
-        admin_user = gym.admin
+        # Update the admin user's Vendor field to point to this new Vendor
+        admin_user = Vendor.admin
         print("admin_user", admin_user)
         if admin_user:
-            print("----------------------", gym)
-            admin_user.gym = gym
-            admin_user.save(update_fields=['gym'])
+            print("----------------------", Vendor)
+            admin_user.Vendor = Vendor
+            admin_user.save(update_fields=['Vendor'])
 
         return response
 
 class GymUpdateView(LoginRequiredMixin,UpdateView):
-    model = Gym
+    model = Vendor
     form_class = GymForm
-    template_name = 'advadmin/gym_form.html'
-    success_url = reverse_lazy('gym_list')
+    template_name = 'advadmin/vendor_form.html'
+    success_url = reverse_lazy('vendor_list')
 
     
     def form_valid(self, form):
-        response = super().form_valid(form)  # save the Gym instance first
-        gym = self.object  # the newly created Gym instance
+        response = super().form_valid(form)  # save the Vendor instance first
+        Vendor = self.object  # the newly created Vendor instance
 
-        # Update the admin user's gym field to point to this new gym
-        admin_user = gym.admin
+        # Update the admin user's Vendor field to point to this new Vendor
+        admin_user = Vendor.admin
         print("admin_user", admin_user)
         if admin_user:
-            print("----------------------", gym)
-            admin_user.gym = gym
-            admin_user.save(update_fields=['gym'])
+            print("----------------------", Vendor)
+            admin_user.Vendor = Vendor
+            admin_user.save(update_fields=['Vendor'])
 
         return response
 
 class GymDeleteView(LoginRequiredMixin, DeleteView):
-    model = Gym
-    success_url = reverse_lazy('gym_list')
+    model = Vendor
+    success_url = reverse_lazy('vendor_list')
     template_name = None  # No default template used
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
-        messages.success(request, "Gym deleted successfully!")
+        messages.success(request, "Vendor deleted successfully!")
         return super().delete(request, *args, **kwargs)
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = CustomUser
@@ -195,7 +195,7 @@ class UserCreateView(LoginRequiredMixin, CreateView):
 
             user.username = self.generate_username(user.member_id)
 
-            user.gym = self.request.user.gym
+            user.Vendor = self.request.user.Vendor
             user.save()
             messages.success(self.request, "User added successfully.")
 
@@ -383,6 +383,7 @@ class CustomLoginView(LoginView):
         return redirect(self.get_success_url())
 
     def form_invalid(self, form):
+        print("formformformform", form)
         messages.error(
             self.request,
             "Invalid credentials. Please try again.",
@@ -408,9 +409,9 @@ class UserListView(LoginRequiredMixin, ListView):
             staff_role__iexact='Member'
         )
 
-        # Apply gym filtering only for non-superusers
+        # Apply Vendor filtering only for non-superusers
         if not user.is_superuser:
-            queryset = queryset.filter(gym=user.gym)
+            queryset = queryset.filter(Vendor=user.Vendor)
 
         # Search
         search_query = self.request.GET.get('q')
@@ -461,9 +462,9 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
 
         queryset = User.objects.filter(staff_role__iexact=role)
 
-        # Apply gym filtering only for non-superusers
+        # Apply Vendor filtering only for non-superusers
         if not user.is_superuser:
-            queryset = queryset.filter(gym=user.gym)
+            queryset = queryset.filter(Vendor=user.Vendor)
 
         # Search
         search_query = self.request.GET.get('q')
@@ -530,7 +531,7 @@ class UserDeleteView(LoginRequiredMixin, DeleteView):
 
 # Home Page View
 class HomePageView(TemplateView):
-    template_name = "gym_ui/iron_board/index.html"
+    template_name = "vendor_ui/iron_board/index.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         total_categories = Category.objects.all().prefetch_related('products')
@@ -629,7 +630,7 @@ class BlockedUserListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return User.objects.filter(
             is_active=False,
-            gym=self.request.user.gym  # Multi-tenant filter
+            Vendor=self.request.user.Vendor  # Multi-tenant filter
         ).order_by('-date_joined')
 
     def get_context_data(self, **kwargs):
@@ -647,7 +648,7 @@ class InactiveUserListView(LoginRequiredMixin, ListView):
         return User.objects.filter(
             on_subscription=False,
             staff_role="Member",
-            gym=self.request.user.gym  # Multi-tenant filter
+            Vendor=self.request.user.Vendor  # Multi-tenant filter
         ).order_by('-date_joined')
 
     def get_context_data(self, **kwargs):
@@ -720,11 +721,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         today = timezone.now().date()
         membership_trends = defaultdict(lambda: [0] * 12)
 
-        # Query all relevant records upfront for efficiency and filter by user's gym
+        # Query all relevant records upfront for efficiency and filter by user's Vendor
         trends = MonthlyMembershipTrend.objects.filter(
             year__in=years,
             month__lte=12,  # Just a safety, all months 1-12
-            gym=self.request.user.gym
+            Vendor=self.request.user.Vendor
         ).order_by('year', 'month')
 
         # Build a quick lookup dictionary {(year, month): member_count}
@@ -746,7 +747,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         Collects and prepares context data for dashboard rendering.
         """
         context = super().get_context_data(**kwargs)
-        user_gym = self.request.user.gym
+        user_vendor = self.request.user.Vendor
         today = timezone.now().date()
         first_day = today.replace(day=1)
         last_day = today.replace(day=calendar.monthrange(today.year, today.month)[1])
@@ -761,19 +762,19 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # User Metrics
         active_users_count = CustomUser.objects.filter(
-            staff_role='Member', is_active=True, on_subscription=True, gym=user_gym
+            staff_role='Member', is_active=True, on_subscription=True, Vendor=user_vendor
         ).count()
 
         new_signups_today = CustomUser.objects.filter(
-            staff_role='Member', join_date=today, gym=user_gym
+            staff_role='Member', join_date=today, Vendor=user_vendor
         ).count()
 
         total_members = CustomUser.objects.filter(
-            staff_role='Member', is_active=True, gym=user_gym
+            staff_role='Member', is_active=True, Vendor=user_vendor
         ).count()
 
         # Attendance Metrics
-        attended_today = Attendance.objects.filter(date=today, user__gym=user_gym).values('user').distinct().count()
+        attended_today = Attendance.objects.filter(date=today, user__vendor=user_vendor).values('user').distinct().count()
         attendance_rate = round((attended_today / total_members * 100), 1) if total_members else 0
 
         expiring_memberships = 0  # Placeholder for expiring membership logic
@@ -783,11 +784,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             status=Payment.Status.COMPLETED,
             created_at__date__gte=first_day,
             created_at__date__lte=today,
-            gym=user_gym
+            Vendor=user_vendor
         ).aggregate(total=Sum('amount'))['total'] or 0
 
         # Transaction Summary
-        transactions = Transaction.objects.filter(gym=user_gym)
+        transactions = Transaction.objects.filter(Vendor=user_vendor)
 
         total_sales_amount = transactions.filter(
             category=Transaction.Category.SALES,
@@ -816,7 +817,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         profit = total_income - total_expense
 
         # Subscription Order Status Breakdown
-        orders = SubscriptionOrder.objects.filter(gym=user_gym).values('status').annotate(count=Count('id'))
+        orders = SubscriptionOrder.objects.filter(Vendor=user_vendor).values('status').annotate(count=Count('id'))
         status_map = {
             'pending': 'pending_orders',
             'processing': 'processing_orders',
@@ -848,7 +849,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             end_date__gte=today,
             end_date__lte=last_day,
             status__in=[SubscriptionOrder.Status.ACTIVE, SubscriptionOrder.Status.PENDING],
-            gym=user_gym,
+            Vendor=user_vendor,
         )
         upcoming_renewals_result = upcoming_renewals_qs.aggregate(
             renewals_count=Count('id'),
@@ -863,7 +864,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             end_date__gte=first_day,
             end_date__lte=last_day,
             payment_status=SubscriptionOrder.PaymentStatus.PENDING,
-            gym=user_gym,
+            Vendor=user_vendor,
         )
         pending_dues_result = pending_dues_qs.aggregate(
             pending_dues_count=Count('id'),
@@ -874,7 +875,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Enquiries
         try:
-            total_enquiries = Enquiry.objects.filter(gym=user_gym).count()
+            total_enquiries = Enquiry.objects.filter(Vendor=user_vendor).count()
         except Exception:
             total_enquiries = 0
 
@@ -883,7 +884,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Chart Data: Membership Trends and Earnings
         earliest_year_qs = CustomUser.objects.filter(
-            staff_role='Member', is_active=True, gym=user_gym
+            staff_role='Member', is_active=True, Vendor=user_vendor
         )
         earliest_year = earliest_year_qs.aggregate(
             earliest=Min('join_date')
@@ -903,7 +904,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 status=Payment.Status.COMPLETED,
                 created_at__date__gte=year_start,
                 created_at__date__lte=year_end,
-                gym=user_gym
+                Vendor=user_vendor
             ).aggregate(total=Sum('amount'))['total'] or 0
             yearly_earnings[year] = float(amount)
 
@@ -915,7 +916,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 Payment.objects.filter(
                     status=Payment.Status.COMPLETED,
                     created_at__year=year,
-                    gym=user_gym
+                    Vendor=user_vendor
                 )
                 .annotate(month=TruncMonth('created_at'))
                 .values('month')
@@ -930,18 +931,18 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Update today's schedule statuses
         Schedule.objects.filter(
             schedule_date=today,
-            gym=user_gym
+            Vendor=user_vendor
         ).select_related('trainer').prefetch_related(
             'enrollments', 'attendances'
         ).update(status='upcoming')
 
-        schedules_today = Schedule.objects.filter(schedule_date=today, gym=user_gym)
+        schedules_today = Schedule.objects.filter(schedule_date=today, Vendor=user_vendor)
         for schedule in schedules_today:
             schedule.update_status()
 
         # Running Classes
         running_classes_qs = Schedule.objects.filter(
-            schedule_date=today, status='live', gym=user_gym
+            schedule_date=today, status='live', Vendor=user_vendor
         ).select_related('trainer').prefetch_related('enrollments', 'attendances')
 
         running_classes = []
@@ -1077,7 +1078,7 @@ class DashboardSearchView(LoginRequiredMixin, TemplateView):
 
 # Static Pages
 class ServicesView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/services.html'
+    template_name = 'vendor_ui/services.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1085,7 +1086,7 @@ class ServicesView(LoginRequiredMixin,TemplateView):
         return context
 
 class AboutView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/about-us.html'
+    template_name = 'vendor_ui/about-us.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1744,8 +1745,8 @@ class MemberRegisterView(LoginRequiredMixin,CreateView):
             user = form.save(commit=False)
             user.staff_role = 'Member'
 
-            # ✅ Set gym from current logged-in user (assuming you're logged in as a manager/admin tied to a gym)
-            user.gym = self.request.user.gym
+            # ✅ Set Vendor from current logged-in user (assuming you're logged in as a manager/admin tied to a Vendor)
+            user.Vendor = self.request.user.Vendor
 
             if form.cleaned_data.get('password1'):
                 user.set_password(form.cleaned_data['password1'])
@@ -1984,35 +1985,35 @@ class GoogleSSOCallbackView(View):
 
 
 class BlogDetailsView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/blog-details.html'
+    template_name = 'vendor_ui/blog-details.html'
 
 class BlogView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/blog.html'
+    template_name = 'vendor_ui/blog.html'
 
 class BMICalculatorView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/bmi-calculator.html'
+    template_name = 'vendor_ui/bmi-calculator.html'
 
 class ClassDetailsView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/class-details.html'
+    template_name = 'vendor_ui/class-details.html'
 
 class ClassTimetableView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/class-timetable.html'
+    template_name = 'vendor_ui/class-timetable.html'
 
 class ContactView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/contact.html'
+    template_name = 'vendor_ui/contact.html'
 
 class GalleryView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/gallery.html'
+    template_name = 'vendor_ui/gallery.html'
 
 
 class ServicesView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/services.html'
+    template_name = 'vendor_ui/services.html'
 
 class TeamView(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/team.html'
+    template_name = 'vendor_ui/team.html'
 
 class Error404View(LoginRequiredMixin,TemplateView):
-    template_name = 'gym_ui/404.html'
+    template_name = 'vendor_ui/404.html'
 
 
 from django.views import View

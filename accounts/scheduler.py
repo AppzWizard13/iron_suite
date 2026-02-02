@@ -6,7 +6,7 @@ import calendar
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-from accounts.models import CustomUser, Gym, MonthlyMembershipTrend
+from accounts.models import CustomUser, Vendor, MonthlyMembershipTrend
 from accounts.utils import generate_invoice_pdf
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -269,19 +269,19 @@ def update_membership_trends():
     end_day = calendar.monthrange(year, month)[1]
     end = today.replace(day=end_day)
 
-    gym_ids = CustomUser.objects.values_list('gym_id', flat=True).distinct()
+    vendor_ids = CustomUser.objects.values_list('vendor_id', flat=True).distinct()
 
-    for gym_id in gym_ids:
+    for vendor_id in vendor_ids:
         count = CustomUser.objects.filter(
             staff_role='Member',
             is_active=True,
             on_subscription=True,
             join_date__lte=end,
-            gym_id=gym_id
+            vendor_id=vendor_id
         ).count()
 
         lookup = {
-            'gym_id': gym_id,
+            'vendor_id': vendor_id,
             'year': year,
             'month': month,
         }
@@ -289,7 +289,7 @@ def update_membership_trends():
             defaults={'member_count': count},
             **lookup
         )
-        logger.info(f"Updated membership trend for gym {gym_id} — {year}-{month}: {count}")
+        logger.info(f"Updated membership trend for Vendor {vendor_id} — {year}-{month}: {count}")
 
 def start():
     if not getattr(settings, 'ENABLE_QR_SCHEDULER', True):

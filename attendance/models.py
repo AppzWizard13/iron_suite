@@ -5,7 +5,7 @@ from django.utils.crypto import get_random_string
 from datetime import timedelta, date
 import datetime
 from django.utils.timezone import now
-from accounts.models import Gym
+from accounts.models import Vendor
 from django_multitenant.mixins import TenantModelMixin
 
 
@@ -26,12 +26,12 @@ class Schedule(models.Model,TenantModelMixin):
     ]
 
     name = models.CharField(max_length=100)  # e.g., "Zumba", "HIIT"
-    gym = models.ForeignKey(  # 👈 This is the tenant reference
-            Gym,
+    Vendor = models.ForeignKey(  # 👈 This is the tenant reference
+            Vendor,
             on_delete=models.CASCADE,
             related_name='schedules'
         )
-    tenant_id = 'gym_id' 
+    tenant_id = 'vendor_id' 
     trainer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -74,12 +74,12 @@ class QRToken(models.Model, TenantModelMixin):
         on_delete=models.CASCADE,
         related_name='qr_tokens'
     )
-    gym = models.ForeignKey(  # 👈 Required for TenantModelMixin to resolve tenant directly
-        Gym,
+    Vendor = models.ForeignKey(  # 👈 Required for TenantModelMixin to resolve tenant directly
+        Vendor,
         on_delete=models.CASCADE,
         related_name='qr_tokens'
     )
-    tenant_id = 'gym_id'  # 👈 This must point to a real field on this model
+    tenant_id = 'vendor_id'  # 👈 This must point to a real field on this model
 
     token = models.CharField(max_length=64, unique=True, default=generate_token)
     generated_at = models.DateTimeField(auto_now_add=True)
@@ -96,9 +96,9 @@ class QRToken(models.Model, TenantModelMixin):
             self.save(update_fields=['used'])
 
     def save(self, *args, **kwargs):
-        # Ensure `gym` is synced from `schedule`
-        if self.schedule and not self.gym:
-            self.gym = self.schedule.gym
+        # Ensure `Vendor` is synced from `schedule`
+        if self.schedule and not self.Vendor:
+            self.Vendor = self.schedule.Vendor
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -123,12 +123,12 @@ class Attendance(models.Model, TenantModelMixin):
         null=True,
         related_name='attendances'
     )
-    gym = models.ForeignKey(
-        Gym,
+    Vendor = models.ForeignKey(
+        Vendor,
         on_delete=models.CASCADE,
         related_name='attendances'
     )
-    tenant_id = 'gym_id'  # 👈 Required for multitenancy
+    tenant_id = 'vendor_id'  # 👈 Required for multitenancy
 
     date = models.DateField(default=date.today)
     check_in_time = models.DateTimeField(auto_now_add=True)
@@ -150,16 +150,16 @@ class Attendance(models.Model, TenantModelMixin):
             self.save(update_fields=['check_out_time', 'status', 'duration'])
 
     def save(self, *args, **kwargs):
-        if self.schedule and not self.gym:
-            self.gym = self.schedule.gym
+        if self.schedule and not self.Vendor:
+            self.Vendor = self.schedule.Vendor
         super().save(*args, **kwargs)
 
 class CheckInLog(models.Model, TenantModelMixin):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     token = models.ForeignKey(QRToken, on_delete=models.CASCADE)
     attendance = models.ForeignKey(Attendance, on_delete=models.SET_NULL, null=True, blank=True)
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='checkin_logs')
-    tenant_id = 'gym_id'
+    Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='checkin_logs')
+    tenant_id = 'vendor_id'
 
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField()
@@ -171,8 +171,8 @@ class CheckInLog(models.Model, TenantModelMixin):
         return f"{self.user.username} @ {self.scanned_at.strftime('%I:%M %p')}"
 
     def save(self, *args, **kwargs):
-        if self.token and not self.gym:
-            self.gym = self.token.gym
+        if self.token and not self.Vendor:
+            self.Vendor = self.token.Vendor
         super().save(*args, **kwargs)
 
 
@@ -187,12 +187,12 @@ class ClassEnrollment(models.Model, TenantModelMixin):
         on_delete=models.CASCADE,
         related_name='enrollments'
     )
-    gym = models.ForeignKey(
-        Gym,
+    Vendor = models.ForeignKey(
+        Vendor,
         on_delete=models.CASCADE,
         related_name='class_enrollments'
     )
-    tenant_id = 'gym_id'
+    tenant_id = 'vendor_id'
 
     enrolled_on = models.DateTimeField(auto_now_add=True)
 

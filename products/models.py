@@ -109,12 +109,12 @@ class Package(TenantModelMixin, models.Model):
         ('percent', 'Percentage'),
     ]
 
-    gym = models.ForeignKey(
-        'accounts.Gym',  # ✅ string reference avoids circular import
+    Vendor = models.ForeignKey(
+        'accounts.Vendor',  # ✅ string reference avoids circular import
         on_delete=models.CASCADE,
         related_name='packages'
     )
-    tenant_id = 'gym_id'  # 👈 Required for TenantModelMixin
+    tenant_id = 'vendor_id'  # 👈 Required for TenantModelMixin
 
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)

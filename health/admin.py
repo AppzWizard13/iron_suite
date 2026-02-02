@@ -16,9 +16,9 @@ admin.site.register(Equipment)
 
 # @admin.register(BodyMeasurement)
 # class BodyMeasurementAdmin(admin.ModelAdmin):
-#     list_display = ('user', 'gym', 'date', 'weight_kg')
-#     list_filter = ('gym', 'date')
-#     autocomplete_fields = ('user', 'gym')
+#     list_display = ('user', 'Vendor', 'date', 'weight_kg')
+#     list_filter = ('Vendor', 'date')
+#     autocomplete_fields = ('user', 'Vendor')
 #     search_fields = [
 #         'user__phone_number',
 #         'user__first_name',

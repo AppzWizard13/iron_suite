@@ -28,7 +28,7 @@ TEMPLATES = [
     # 3. Home Bodyweight Only (5-Day)
     {
         "name": "Home Bodyweight Only (5-Day)",
-        "description": "Perfect when you can't access a gym; zero equipment, effective training.",
+        "description": "Perfect when you can't access a Vendor; zero equipment, effective training.",
         "days": [
             (1, [("Push-ups", 4, "AMRAP", ""), ("Plank", 3, "60s", ""), ("Lunges (Walking/Stationary)", 3, "20", ""), ("Russian Twists", 3, "25", "")]),
             (2, [("Squats (Back/Front)", 4, "20", "Bodyweight only"), ("Sit-ups / Crunches", 3, "20", ""), ("Incline Push-ups", 3, "15", ""), ("Glute Bridge", 3, "20", "")]),

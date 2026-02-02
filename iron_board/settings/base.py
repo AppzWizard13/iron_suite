@@ -168,15 +168,14 @@ WSGI_APPLICATION = 'iron_board.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME', 'codespikedb'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', 'db'),  # Container name of the database service
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'), 
+        'NAME': os.getenv('DB_NAME', 'iron_board_db'), 
+        'USER': os.getenv('DB_USER', 'iron_board_admin'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'xPL7y6qe1gLHAg2B9SWvW06vXSC8lxSe'),
+        'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
-
 DEFAULT_CHARSET = 'utf-8'
 
 AUTH_PASSWORD_VALIDATORS = [

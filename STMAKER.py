@@ -84,7 +84,7 @@ def convert_all_templates(app_name):
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python STMAKER.py <app_name>")
-        print("Example: python STMAKER.py gym_ui")
+        print("Example: python STMAKER.py vendor_ui")
     else:
         app_name = sys.argv[1]
         convert_all_templates(app_name)
