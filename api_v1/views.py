@@ -3,6 +3,7 @@ import random
 from accounts import models
 from accounts.views import DashboardView
 from attendance.models import Attendance
+from core.choices import TransactionCategoryChoice, TransactionTypeChoice
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
@@ -1521,9 +1522,9 @@ class TransactionFilter(FilterSet):
     """Custom filter class for Transaction model"""
     
     date_range = DateFromToRangeFilter(field_name='date')
-    transaction_type = ChoiceFilter(choices=Transaction.Type.choices)
-    category = ChoiceFilter(choices=Transaction.Category.choices)
-    status = ChoiceFilter(choices=Transaction.Status.choices)
+    transaction_type = ChoiceFilter(choices=TransactionTypeChoice)
+    category = ChoiceFilter(choices=TransactionCategoryChoice)
+    status = ChoiceFilter(choices=TransactionCategoryChoice)
     amount_min = NumberFilter(field_name='amount', lookup_expr='gte')
     amount_max = NumberFilter(field_name='amount', lookup_expr='lte')
     reference = CharFilter(lookup_expr='icontains')

@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
+from core.choices import CountryChoice, GenderChoice  , StaffRoleChoice
 from .models import CustomUser, Customer
 from .utils import generate_username  # Import generate_username function.
 from django.contrib.auth.hashers import make_password
@@ -16,7 +18,14 @@ from .models import CustomUser, SocialMedia
 from django.core.exceptions import ValidationError
 from django import forms
 from .models import Vendor
-class GymForm(forms.ModelForm):
+from django import forms
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+from master.models import Vendor
+
+CustomUser = get_user_model()
+
+class VendorForm(forms.ModelForm):
     class Meta:
         model = Vendor
         fields = '__all__'
@@ -35,71 +44,17 @@ class GymForm(forms.ModelForm):
         # Restrict the admin field choices to users with staff_role='Admin'
         self.fields['admin'].queryset = CustomUser.objects.filter(staff_role='Admin')
 
-
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Max
 from accounts.models import CustomUser
 
-# Manual country choices list
-COUNTRY_CHOICES = [
-    ("", "--- Select Country ---"),
-    ("AF", "Afghanistan"),
-    ("AL", "Albania"),
-    ("DZ", "Algeria"),
-    ("AR", "Argentina"),
-    ("AU", "Australia"),
-    ("AT", "Austria"),
-    ("BD", "Bangladesh"),
-    ("BE", "Belgium"),
-    ("BR", "Brazil"),
-    ("CA", "Canada"),
-    ("CN", "China"),
-    ("CO", "Colombia"),
-    ("DK", "Denmark"),
-    ("EG", "Egypt"),
-    ("FI", "Finland"),
-    ("FR", "France"),
-    ("DE", "Germany"),
-    ("GH", "Ghana"),
-    ("GR", "Greece"),
-    ("IN", "India"),
-    ("ID", "Indonesia"),
-    ("IE", "Ireland"),
-    ("IT", "Italy"),
-    ("JP", "Japan"),
-    ("KE", "Kenya"),
-    ("MY", "Malaysia"),
-    ("MX", "Mexico"),
-    ("NL", "Netherlands"),
-    ("NG", "Nigeria"),
-    ("NO", "Norway"),
-    ("PK", "Pakistan"),
-    ("PH", "Philippines"),
-    ("PL", "Poland"),
-    ("PT", "Portugal"),
-    ("RU", "Russia"),
-    ("SA", "Saudi Arabia"),
-    ("SG", "Singapore"),
-    ("ZA", "South Africa"),
-    ("KR", "South Korea"),
-    ("ES", "Spain"),
-    ("LK", "Sri Lanka"),
-    ("SE", "Sweden"),
-    ("CH", "Switzerland"),
-    ("TH", "Thailand"),
-    ("TR", "Turkey"),
-    ("UA", "Ukraine"),
-    ("AE", "United Arab Emirates"),
-    ("GB", "United Kingdom"),
-    ("US", "United States"),
-    ("VN", "Vietnam"),
-]
+
 
 class CustomUserForm(UserCreationForm):
     # Convert country_code to ChoiceField
     country_code = forms.ChoiceField(
-        choices=COUNTRY_CHOICES,
+        choices=CountryChoice.choices,
         widget=forms.Select(attrs={"class": "form-control"}),
         label="Country",
         required=True
@@ -133,17 +88,8 @@ class CustomUserForm(UserCreationForm):
             "state": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter State"}),
             "pincode": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter Pincode"}),
             "date_of_birth": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "gender": forms.Select(attrs={"class": "form-control"}, choices=[
-                ("Male", "Male"),
-                ("Female", "Female"),
-                ("Other", "Other")
-            ]),
-            "staff_role": forms.Select(attrs={"class": "form-control"}, choices=[
-                ("Admin", "Admin"), 
-                ("Manager", "Manager"), 
-                ("Employee", "Employee"),
-                ("Trainer", "Trainer")
-            ]),
+            "gender": forms.Select(attrs={"class": "form-control"}, choices=GenderChoice.choices  ),
+            "staff_role": forms.Select(attrs={"class": "form-control"}, choices= StaffRoleChoice.choices),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }

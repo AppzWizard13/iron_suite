@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from accounts.models import Vendor
@@ -19,7 +20,7 @@ class NotificationConfig(models.Model):
 
 
 class NotificationLog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     Vendor = models.ForeignKey(
         Vendor,
         on_delete=models.CASCADE,

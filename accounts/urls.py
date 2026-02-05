@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import (
-    HomePageView, CustomLoginView, DashboardView, DashboardSearchView, LoginWithOTPView,
+    CustomerListView, HomePageView, CustomLoginView, DashboardView, DashboardSearchView, LoginWithOTPView,
     LogoutView, OTPLoginSuccessView, ServicesView, AboutView, DownloadDatabaseView,
     UserListView,UserStaffRoleListView, UserCreateView, UserUpdateView, UserDeleteView,
     ReviewListView, ReviewCreateView, ReviewDetailView, ReviewUpdateView, ReviewDeleteView,
@@ -17,7 +17,7 @@ from .views import (
     ClassTimetableView, ContactView, GalleryView,
     ServicesView, TeamView, Error404View
 )
-from .views import GymListView, GymCreateView, GymUpdateView, GymDeleteView
+from .views import VendorListView, VendorCreateView, VendorUpdateView, VendorDeleteView
 
 
 urlpatterns = [
@@ -31,10 +31,10 @@ urlpatterns = [
     path('password-reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset/verify/<str:user_username>/', PasswordResetVerifyView.as_view(), name='password_reset_verify'),
 
-    path('vendors/', GymListView.as_view(), name='vendor_list'),
-    path('vendors/add/', GymCreateView.as_view(), name='vendor_add'),
-    path('vendors/edit/<int:pk>/', GymUpdateView.as_view(), name='vendor_edit'),
-    path('vendors/delete/<int:pk>/', GymDeleteView.as_view(), name='vendor_delete'),
+    path('vendors/', VendorListView.as_view(), name='vendor_list'),
+    path('vendors/add/', VendorCreateView.as_view(), name='vendor_add'),
+    path('vendors/edit/<int:pk>/', VendorUpdateView.as_view(), name='vendor_edit'),
+    path('vendors/delete/<int:pk>/', VendorDeleteView.as_view(), name='vendor_delete'),
 
     # Dashboard search
     path('dashboard/search/', DashboardSearchView.as_view(), name='dashboard_search_list'),
@@ -46,6 +46,7 @@ urlpatterns = [
 
     # User management
     path('users/', UserListView.as_view(), name='user_list'),
+    path('customers/', CustomerListView.as_view(), name='customer_list'),
     path('staff/<slug:role>/', UserStaffRoleListView.as_view(), name='staff_by_role'),
     path('users/registartion/', UserCreateView.as_view(), name='user_registration'),
     path('users/edit/<str:username>/', UserUpdateView.as_view(), name='user_edit'),

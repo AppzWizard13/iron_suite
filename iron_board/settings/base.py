@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     'health',
     'api_v1',
     'workout',
+    'master',
+    'ecommerce',
 
 
     'corsheaders',

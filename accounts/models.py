@@ -1,20 +1,25 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.db import models
+from django.conf import settings
 from django.utils.timezone import now
 
+from core.choices import GenderChoice  , SocialMediaChoice, StaffRoleChoice
 from products.models import Package  # Fix the NameError issue
 
 
 # users/models.py
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.db import models
+from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django_multitenant.models import TenantModelMixin       # Import the Vendor (tenant) model
 from products.models import Package
 from django.db import models
+from django.conf import settings
 
 
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.core.validators import FileExtensionValidator
 from django_countries.fields import CountryField
@@ -23,20 +28,51 @@ from django_countries.fields import CountryField
 from django_multitenant.mixins import TenantModelMixin
 from django_multitenant.models import TenantManager
 from django_multitenant.fields import TenantForeignKey
+from django.utils import timezone
+
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
 
 class Vendor(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    location = models.TextField()
+    # Core fields - nullable for migration safety
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='vendor_profile',
+        null=True,  # Allow null for existing records
+        blank=True
+    )
+    shop_name = models.CharField(max_length=200, blank=True, default='')
+    shop_description = models.TextField(blank=True, default='')
+    shop_logo = models.ImageField(upload_to='vendors/logos/', blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
+    
+    # Address - all optional
+    address = models.TextField(blank=True, default='')
+    city = models.CharField(max_length=100, blank=True, default='')
+    state = models.CharField(max_length=100, blank=True, default='')
+    pincode = models.CharField(max_length=10, blank=True, default='')
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    proprietor_name = models.CharField(max_length=255)
+    
+    # Business details - optional
+    gstin = models.CharField(max_length=15, blank=True, default='')
+    pan = models.CharField(max_length=10, blank=True, default='')
+    
+    # Status
     is_active = models.BooleanField(default=True)
     
-    # FK to CustomUser (using string to avoid circular import)
-    admin = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='vendors_administered', null=True, blank=True)
-
+    # Timestamps - nullable for migration
+    created_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
     def __str__(self):
-        return self.name
+        return self.shop_name or f'Vendor {self.id}'
 
 class CustomUserManager(TenantManager, BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
@@ -66,18 +102,14 @@ class CustomUser(AbstractUser, TenantModelMixin):
     join_date = models.DateField(auto_now_add=True)
     package_expiry_date = models.DateField(null=True)
 
-    STAFF_ROLES = [
-        ('Admin', 'Admin'), ('Manager', 'Manager'), ('Employee', 'Employee'),
-        ('Customer', 'Customer'), ('Member', 'Member'), ('Trainer', 'Trainer'),
-    ]
-    staff_role = models.CharField(max_length=100, choices=STAFF_ROLES)
+    staff_role = models.CharField(max_length=100, choices=StaffRoleChoice.choices)
     email = models.EmailField(unique=True)
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
     pincode = models.CharField(max_length=10, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
-    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], blank=True, null=True)
+    gender = models.CharField(max_length=10, choices=GenderChoice.choices  , blank=True, null=True)
 
     profile_image = models.ImageField(
         upload_to='profile_pics/', 
@@ -145,6 +177,7 @@ class Banner(models.Model):
 
 
 from django.db import models
+from django.conf import settings
 from django.contrib.auth import get_user_model
 import random
 import string
@@ -154,7 +187,7 @@ from datetime import timedelta
 User = get_user_model()
 
 class PasswordResetOTP(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     otp = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -172,30 +205,16 @@ class PasswordResetOTP(models.Model):
 
 
 from django.db import models
+from django.conf import settings
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 class SocialMedia(models.Model):
-    SOCIAL_MEDIA_CHOICES = [
-        ('GMAIL', 'Gmail'),
-        ('FACEBOOK', 'Facebook'),
-        ('INSTAGRAM', 'Instagram'),
-        ('LINKEDIN', 'LinkedIn'),
-        ('PHONE', 'Phone'),
-        ('TWITTER', 'Twitter'),
-        ('YOUTUBE', 'YouTube'),
-        ('WHATSAPP', 'WhatsApp'),
-        ('HOME_PAGE_WHATSAPP', 'Home Page WhatsApp'),
-        ('HOME_PAGE_PHONE', 'Home Page Phone'),
-        ('HOME_PAGE_INSTAGRAM', 'Home Page Instagram'),
-        ('HOME_PAGE_GMAIL', 'Home Page Gmail'),
-        # Add more as needed
-    ]
-    
+
     platform = models.CharField(
         max_length=20,
-        choices=SOCIAL_MEDIA_CHOICES,
+        choices=SocialMediaChoice.choices,
         verbose_name='Social Media Platform'
     )
     url = models.CharField(
@@ -222,6 +241,7 @@ class SocialMedia(models.Model):
     
 
 from django.db import models
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils.crypto import get_random_string
 

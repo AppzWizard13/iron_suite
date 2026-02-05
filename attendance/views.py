@@ -41,7 +41,7 @@ class AttendanceAdminView(LoginRequiredMixin, ListView):
         Optionally filter attendance by user, date, or status.
         """
         queryset = super().get_queryset().select_related('user', 'schedule')
-        queryset = queryset.filter(schedule__vendor=self.request.user.Vendor)  # Multi-tenant filter
+        queryset = queryset.filter(schedule__vendor=self.request.user.vendor)  # Multi-tenant filter
 
         q = self.request.GET.get('q')
         date = self.request.GET.get('date')
@@ -80,7 +80,7 @@ class AttendanceReportView(LoginRequiredMixin, ListView):
         Optionally filter attendance by user, date, or status.
         """
         queryset = super().get_queryset().select_related('user', 'schedule')
-        queryset = queryset.filter(schedule__vendor=self.request.user.Vendor)  # Multi-tenant filter
+        queryset = queryset.filter(schedule__vendor=self.request.user.vendor)  # Multi-tenant filter
 
         q = self.request.GET.get('q')
         date = self.request.GET.get('date')
@@ -196,7 +196,7 @@ class EnrollmentListView(LoginRequiredMixin, ListView):
         Prefetch user and schedule, and filter enrollments by Vendor.
         """
         return super().get_queryset().select_related('user', 'schedule').filter(
-            schedule__vendor=self.request.user.Vendor
+            schedule__vendor=self.request.user.vendor
         )
 
     def get_context_data(self, **kwargs):

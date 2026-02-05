@@ -1,8 +1,11 @@
 from django.db import models
+from django.conf import settings
 from django.utils.timezone import now 
+from core.choices import DiscountTypeChoice, PackageTypeChoice, PackageTypeChoice
 from django_multitenant.mixins import TenantModelMixin
 import uuid
 from django.db import models
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 class Category(models.Model):
@@ -96,18 +99,6 @@ class Product(models.Model):
 
 
 class Package(TenantModelMixin, models.Model):
-    PACKAGE_TYPE_CHOICES = [
-        ('monthly', 'Monthly'),
-        ('quarterly', 'Quarterly'),
-        ('yearly', 'Yearly'),
-        ('custom', 'Custom'),
-    ]
-
-    DISCOUNT_TYPE_CHOICES = [
-        ('none', 'None'),
-        ('flat', 'Flat Amount'),
-        ('percent', 'Percentage'),
-    ]
 
     Vendor = models.ForeignKey(
         'accounts.Vendor',  # ✅ string reference avoids circular import
@@ -121,7 +112,7 @@ class Package(TenantModelMixin, models.Model):
 
     type = models.CharField(
         max_length=20,
-        choices=PACKAGE_TYPE_CHOICES,
+        choices=PackageTypeChoice.choices,
         default='monthly'
     )
 
@@ -136,7 +127,7 @@ class Package(TenantModelMixin, models.Model):
 
     discount_type = models.CharField(
         max_length=10,
-        choices=DISCOUNT_TYPE_CHOICES,
+        choices=DiscountTypeChoice.choices,
         default='none'
     )
 

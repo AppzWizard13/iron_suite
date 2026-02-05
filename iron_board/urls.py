@@ -39,6 +39,7 @@ urlpatterns = [
     path('', include('health.urls')),
     path('', include('api_v1.urls')),
     path('', include('workout.urls')),
+     path('ecommerce/', include('ecommerce.urls', namespace='ecommerce')), 
     # SSO 
     path('accounts/', include('allauth.urls')),
 

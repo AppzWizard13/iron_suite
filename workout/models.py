@@ -1,18 +1,16 @@
 # workout/models.py
 from django.db import models
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
+
+from core.choices import ActivityTypeChoice, GoalChoice, LevelChoice, WeekdayChoice, WorkoutStatusChoice
 User = get_user_model()
 
 class FitnessLevel(models.Model):
     """Fitness levels: Beginner, Medium, Advanced, Master"""
-    LEVELS = [
-        ('beginner', 'Beginner'),
-        ('medium', 'Medium'), 
-        ('advanced', 'Advanced'),
-        ('master', 'Master'),
-    ]
-    name = models.CharField(max_length=20, choices=LEVELS, unique=True)
+
+    name = models.CharField(max_length=20, choices=LevelChoice.choices, unique=True)
     description = models.TextField(blank=True)
     
     def __str__(self):
@@ -20,13 +18,8 @@ class FitnessLevel(models.Model):
 
 class Goal(models.Model):
     """Goals: Weight Loss, Weight Gain, Competition, Basic Maintenance"""
-    GOALS = [
-        ('weight_loss', 'Weight Loss'),
-        ('weight_gain', 'Weight Gain'),
-        ('competition', 'Competition'),
-        ('basic_maintenance', 'Basic Maintenance'),
-    ]
-    name = models.CharField(max_length=30, choices=GOALS, unique=True)
+
+    name = models.CharField(max_length=30, choices=GoalChoice.choices, unique=True)
     description = models.TextField(blank=True)
     
     def __str__(self):
@@ -82,18 +75,9 @@ class WeeklyTemplate(models.Model):
 
 class DayTemplate(models.Model):
     """Daily workout template within a weekly template"""
-    WEEKDAYS = [
-        ('monday', 'Monday'),
-        ('tuesday', 'Tuesday'),
-        ('wednesday', 'Wednesday'),
-        ('thursday', 'Thursday'),
-        ('friday', 'Friday'),
-        ('saturday', 'Saturday'),
-        ('sunday', 'Sunday'),
-    ]
     
     weekly_template = models.ForeignKey(WeeklyTemplate, on_delete=models.CASCADE, related_name='day_templates')
-    day = models.CharField(max_length=10, choices=WEEKDAYS)
+    day = models.CharField(max_length=10, choices=WeekdayChoice.choices)
     name = models.CharField(max_length=200)  # e.g., "Full-Body Circuit A", "Push Day"
     is_rest_day = models.BooleanField(default=False)
     estimated_duration = models.CharField(max_length=20, default="45-55min")
@@ -110,16 +94,11 @@ class DayTemplate(models.Model):
 
 class ActivityTemplate(models.Model):
     """Individual activity within a day template"""
-    ACTIVITY_TYPES = [
-        ('exercise', 'Exercise'),
-        ('cardio', 'Cardio'),
-        ('circuit', 'Circuit'),
-        ('rest', 'Rest'),
-    ]
+
     
     day_template = models.ForeignKey(DayTemplate, on_delete=models.CASCADE, related_name='activities')
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
-    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES, default='exercise')
+    activity_type = models.CharField(max_length=20, choices=ActivityTypeChoice.choices, default='exercise')
     order = models.PositiveIntegerField()  # Order within the day
     
     # Exercise parameters
@@ -144,21 +123,14 @@ class ActivityTemplate(models.Model):
 
 class UserWorkoutAssignment(models.Model):
     """Assignment of weekly template to user"""
-    STATUS_CHOICES = [
-        ('assigned', 'Assigned'),
-        ('active', 'Active'),
-        ('completed', 'Completed'),
-        ('paused', 'Paused'),
-    ]
-    
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workout_assignments')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='workout_assignments')
     trainer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_workouts')
     weekly_template = models.ForeignKey(WeeklyTemplate, on_delete=models.CASCADE)
     
     assigned_date = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='assigned')
+    status = models.CharField(max_length=20, choices=WorkoutStatusChoice.choices, default='assigned')
     
     # Customizations for individual user
     custom_notes = models.TextField(blank=True)

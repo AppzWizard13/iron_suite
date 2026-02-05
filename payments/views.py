@@ -607,7 +607,7 @@ class PaymentListView(LoginRequiredMixin, ListView):
         Add users list and sort context to template.
         """
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.filter(Vendor=self.request.user.Vendor)
+        context['users'] = User.objects.filter(vendor=self.request.user.vendor)
         context['page_name'] = "payment_list"
         context['current_sort'] = self.request.GET.get('sort', 'created_at')
         context['current_order'] = 'asc' if self.request.GET.get('order', 'desc') == 'asc' else 'desc'

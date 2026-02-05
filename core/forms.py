@@ -54,21 +54,40 @@ class BusinessDetailsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Ensure required fields
-        for field in ['company_name', 'info_mobile', 'info_email', 'gstn','company_instagram', 'company_facebook', 'company_email_ceo',
-                      'complaint_mobile', 'complaint_email',
-                      'sales_mobile', 'sales_email', 'company_logo_svg','breadcrumb_image', 'about_page_image']:
-            self.fields[field].required = True
+        required_fields = [
+            'company_name', 'info_mobile', 'info_email', 'gstn',
+            'company_instagram', 'company_facebook', 'company_email_ceo',
+            'complaint_mobile', 'complaint_email',
+            'sales_mobile', 'sales_email', 'company_logo_svg',
+            'breadcrumb_image', 'about_page_image'
+        ]
+        
+        for field in required_fields:
+            if field in self.fields:
+                self.fields[field].required = True
 
-        # Ensure the time fields have values
-        if self.instance and self.instance.pk:  # Check if instance exists
-            if self.instance.opening_time:
-                self.fields['opening_time'].initial = self.instance.opening_time.strftime('%H:%M')
-            if self.instance.closing_time:
-                self.fields['closing_time'].initial = self.instance.closing_time.strftime('%H:%M')
+        # FIXED: Safe time field handling (handles both TimeField & CharField)
+        if self.instance and self.instance.pk:
+            # Opening time - safe handling
+            opening_time = getattr(self.instance, 'opening_time', None)
+            if opening_time:
+                if hasattr(opening_time, 'strftime'):  # TimeField/datetime
+                    self.fields['opening_time'].initial = opening_time.strftime('%H:%M')
+                else:  # CharField (string)
+                    self.fields['opening_time'].initial = str(opening_time)
+            
+            # Closing time - safe handling  
+            closing_time = getattr(self.instance, 'closing_time', None)
+            if closing_time:
+                if hasattr(closing_time, 'strftime'):  # TimeField/datetime
+                    self.fields['closing_time'].initial = closing_time.strftime('%H:%M')
+                else:  # CharField (string)
+                    self.fields['closing_time'].initial = str(closing_time)
         else:
-            # Set default values explicitly
+            # Set default values for new instances
             self.fields['opening_time'].initial = '09:00'
             self.fields['closing_time'].initial = '17:00'
+
         
     def clean(self):
         cleaned_data = super().clean()

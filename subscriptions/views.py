@@ -23,7 +23,7 @@ class UpcomingRenewalMemberListView(LoginRequiredMixin, ListView):
             last_day = today.replace(month=today.month + 1, day=1) - timezone.timedelta(days=1)
 
         return User.objects.filter(
-            Vendor=self.request.user.Vendor,
+            vendor=self.request.user.vendor,
             staff_role='Member',
             is_active=True,
             on_subscription=True,

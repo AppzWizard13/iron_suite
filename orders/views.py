@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
+from django.conf import settings
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -16,6 +17,7 @@ from django.views.generic import (
     View, TemplateView, FormView, DetailView, ListView, UpdateView, DeleteView
 )
 
+from core.choices import TransactionCategoryChoice, TransactionStatusChoice
 from core.models import Configuration
 from orders.forms import CheckoutForm, OrderForm
 from payments.models import Payment, Transaction
@@ -633,8 +635,8 @@ class TransactionListView(LoginRequiredMixin, ListView):
             'date_to': self.request.GET.get('date_to', ''),
             'status': self.request.GET.get('status', ''),
             'category': self.request.GET.get('category', ''),
-            'status_choices': Transaction.Status.choices,
-            'category_choices': Transaction.Category.choices,
+            'status_choices': TransactionStatusChoice.choices,
+            'category_choices': TransactionCategoryChoice.choices,
         })
         return context
 

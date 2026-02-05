@@ -9,7 +9,7 @@ export DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-iron_board.settings.deve
 echo "=== Iron Board Setup Started ==="
 
 echo "Generating migrations..."
-python manage.py makemigrations
+python manage.py makemigrations --noinput
 
 echo "Applying migrations..."
 python manage.py migrate

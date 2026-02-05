@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
 from accounts.models import Customer, Vendor
+from core.choices import PaymentActionChoice, SubscriptionStatusChoice
 from products.models import Package, Product
 from django.conf import settings
 from django_multitenant.mixins import TenantModelMixin
@@ -121,27 +122,13 @@ class OrderItem(models.Model, TenantModelMixin):
 
 
 class SubscriptionOrder(models.Model, TenantModelMixin):
-    class Status(models.TextChoices):
-        PENDING = 'pending', 'Pending'
-        ACTIVE = 'active', 'Active'
-        EXPIRED = 'expired', 'Expired'
-        CANCELLED = 'cancelled', 'Cancelled'
-
-    class PaymentStatus(models.TextChoices):
-        INITIATED = 'initiated', 'Initiated'
-        PENDING = 'pending', 'Pending'
-        COMPLETED = 'completed', 'Completed'
-        REFUNDED = 'refunded', 'Refunded'
-        FAILED = 'failed', 'Failed'
-
     Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='subscription_orders')
     tenant_id = 'vendor_id'
-
     order_number = models.CharField(max_length=40, unique=True)  
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='subscription_orders')
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, related_name='orders')
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
-    payment_status = models.CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.INITIATED)
+    status = models.CharField(max_length=20, choices=SubscriptionStatusChoice.choices, default=SubscriptionStatusChoice.PENDING)
+    payment_status = models.CharField(max_length=20, choices=PaymentActionChoice.choices, default=PaymentActionChoice.INITIATE)
     payment_gateway = models.CharField(max_length=50, default='cashfree')
     start_date = models.DateField()
     end_date = models.DateField()
@@ -171,7 +158,7 @@ class SubscriptionOrder(models.Model, TenantModelMixin):
 
 
 class TempOrder(models.Model, TenantModelMixin):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='temp_orders')
     tenant_id = 'vendor_id'

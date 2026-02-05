@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 class BusinessDetails(models.Model):
     DAY_CHOICES = [

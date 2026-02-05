@@ -1,11 +1,13 @@
 from django.db import models
 from django.conf import settings
+from django.conf import settings
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from datetime import timedelta, date
 import datetime
 from django.utils.timezone import now
 from accounts.models import Vendor
+from core.choices import SessionStatusChoice, AttendanceStatusChoice
 from django_multitenant.mixins import TenantModelMixin
 
 
@@ -19,11 +21,6 @@ def default_expiry():
 
 
 class Schedule(models.Model,TenantModelMixin):
-    SESSION_STATUS = [
-        ('upcoming', 'Upcoming'),
-        ('live', 'Live'),
-        ('ended', 'Ended'),
-    ]
 
     name = models.CharField(max_length=100)  # e.g., "Zumba", "HIIT"
     Vendor = models.ForeignKey(  # 👈 This is the tenant reference
@@ -43,7 +40,7 @@ class Schedule(models.Model,TenantModelMixin):
     start_time = models.TimeField()
     end_time = models.TimeField()
     capacity = models.PositiveIntegerField(default=30)
-    status = models.CharField(max_length=10, choices=SESSION_STATUS, default='upcoming')
+    status = models.CharField(max_length=10, choices=SessionStatusChoice.choices, default='upcoming')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -106,11 +103,6 @@ class QRToken(models.Model, TenantModelMixin):
 
 
 class Attendance(models.Model, TenantModelMixin):
-    STATUS_CHOICES = [
-        ('checked_in', 'Checked In'),
-        ('checked_out', 'Checked Out'),
-        ('auto_checked_out', 'Auto Checked Out'),
-    ]
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -133,7 +125,7 @@ class Attendance(models.Model, TenantModelMixin):
     date = models.DateField(default=date.today)
     check_in_time = models.DateTimeField(auto_now_add=True)
     check_out_time = models.DateTimeField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='checked_in')
+    status = models.CharField(max_length=20, choices=AttendanceStatusChoice.choices, default=AttendanceStatusChoice.CHECKED_IN)
     duration = models.DurationField(blank=True, null=True)
 
     class Meta:
@@ -155,7 +147,7 @@ class Attendance(models.Model, TenantModelMixin):
         super().save(*args, **kwargs)
 
 class CheckInLog(models.Model, TenantModelMixin):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     token = models.ForeignKey(QRToken, on_delete=models.CASCADE)
     attendance = models.ForeignKey(Attendance, on_delete=models.SET_NULL, null=True, blank=True)
     Vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='checkin_logs')
