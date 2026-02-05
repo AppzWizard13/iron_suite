@@ -1,0 +1,448 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Load Material Design 3 Themes -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+<link rel="stylesheet" href="{% static 'mob-custom/theme-enh1.css' %}">
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    
+    <!-- Material Design Header + Toast Messages -->
+    <div class="md-header mb-5">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <!-- Breadcrumb -->
+          <nav aria-label="breadcrumb" class="mb-3">
+            {% comment %} <ol class="md-breadcrumb">
+              <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}"><i class="bx bx-home"></i></a>
+              </li>
+              <li class="breadcrumb-item">
+                <a href="{% url 'vendor_list' %}">Vendors</a>
+              </li>
+              <li class="breadcrumb-item active" aria-current="page">
+                {% if form.instance.pk %}Edit Vendor{% else %}Add New Vendor{% endif %}
+              </li>
+            </ol> {% endcomment %}
+          </nav>
+          
+          <!-- Page Title -->
+          <h1 class="md-title mb-1">
+            <i class="bx {% if form.instance.pk %}bx-edit-alt text-warning{% else %}bx-store-plus text-success{% endif %} me-3" style="font-size: 32px;"></i>
+            {% if form.instance.pk %}Edit Vendor{% else %}Add New Vendor{% endif %}
+          </h1>
+          <p class="md-subtitle mb-0">
+            {% if form.instance.pk %}
+              Update vendor information and business settings
+            {% else %}
+              Create a new restaurant partner for your platform
+            {% endif %}
+          </p>
+        </div>
+        <a href="{% url 'vendor_list' %}" class="md-outlined-button px-6 py-3">
+          <i class="bx bx-arrow-back me-2"></i>Back to List
+        </a>
+      </div>
+    </div>
+
+    <!-- Enhanced Toast Messages (CBV Compatible) -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
+      {% for message in messages %}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
+          </div>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- COMPLETE FORM - All Fields -->
+    <form method="post" enctype="multipart/form-data" id="vendorForm" novalidate>
+      {% csrf_token %}
+      
+      <div class="row g-5">
+        <!-- LEFT COLUMN: Main Information (8 cols) -->
+        <div class="col-lg-8">
+          
+          <!-- 1. BASIC INFO -->
+          <div class="md-card mb-5">
+            <div class="md-card-header">
+              <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+                <i class="bx bx-info-circle me-2 text-primary"></i>Basic Information
+              </h5>
+            </div>
+            <div class="p-5">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.shop_name.id_for_label }}">
+                      <i class="bx bx-store text-primary me-1"></i>{{ form.shop_name.label }} <span class="text-danger">*</span>
+                    </label>
+                    <div class="position-relative">{{ form.shop_name }}</div>
+                    {% if form.shop_name.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.shop_name.errors|join:", " }}</div>
+                    {% endif %}
+                    <div class="form-text mt-2" style="color: #64748b;">Official restaurant name</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.user.id_for_label }}">
+                      <i class="bx bx-user text-primary me-1"></i>{{ form.user.label }}
+                    </label>
+                    <div class="position-relative">{{ form.user }}</div>
+                    {% if form.user.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.user.errors|join:", " }}</div>
+                    {% endif %}
+                    <div class="form-text mt-2" style="color: #64748b;">Vendor admin user account</div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.shop_description.id_for_label }}">
+                      <i class="bx bx-detail text-primary me-1"></i>{{ form.shop_description.label }}
+                    </label>
+                    <div class="position-relative">{{ form.shop_description }}</div>
+                    {% if form.shop_description.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.shop_description.errors|join:", " }}</div>
+                    {% endif %}
+                    <div class="form-text mt-2" style="color: #64748b;">Restaurant description</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. CONTACT INFO -->
+          <div class="md-card mb-5">
+            <div class="md-card-header">
+              <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+                <i class="bx bx-phone me-2 text-info"></i>Contact Information
+              </h5>
+            </div>
+            <div class="p-5">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.phone.id_for_label }}">
+                      <i class="bx bx-phone text-info me-1"></i>{{ form.phone.label }}
+                    </label>
+                    <div class="position-relative">{{ form.phone }}</div>
+                    {% if form.phone.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.phone.errors|join:", " }}</div>
+                    {% endif %}
+                    <div class="form-text mt-2" style="color: #64748b;">Primary contact number</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.email.id_for_label }}">
+                      <i class="bx bx-envelope text-info me-1"></i>{{ form.email.label }}
+                    </label>
+                    <div class="position-relative">{{ form.email }}</div>
+                    {% if form.email.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.email.errors|join:", " }}</div>
+                    {% endif %}
+                    <div class="form-text mt-2" style="color: #64748b;">Business email</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. LOCATION -->
+          <div class="md-card mb-5">
+            <div class="md-card-header">
+              <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+                <i class="bx bx-map me-2 text-success"></i>Location Details
+              </h5>
+            </div>
+            <div class="p-5">
+              <div class="row g-4">
+                <div class="col-12">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.address.id_for_label }}">
+                      <i class="bx bx-map-pin text-success me-1"></i>{{ form.address.label }}
+                    </label>
+                    <div class="position-relative">{{ form.address }}</div>
+                    {% if form.address.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.address.errors|join:", " }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.city.id_for_label }}">
+                      <i class="bx bx-building-house text-success me-1"></i>{{ form.city.label }}
+                    </label>
+                    <div class="position-relative">{{ form.city }}</div>
+                    {% if form.city.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.city.errors|join:", " }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.state.id_for_label }}">
+                      <i class="bx bx-map-alt text-success me-1"></i>{{ form.state.label }}
+                    </label>
+                    <div class="position-relative">{{ form.state }}</div>
+                    {% if form.state.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.state.errors|join:", " }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.pincode.id_for_label }}">
+                      <i class="bx bx-hash text-success me-1"></i>{{ form.pincode.label }}
+                    </label>
+                    <div class="position-relative">{{ form.pincode }}</div>
+                    {% if form.pincode.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.pincode.errors|join:", " }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- GPS Coordinates -->
+                <div class="col-12 mt-4 pt-4 border-top" style="border-color: #e8f0fe;">
+                  <div class="row g-4">
+                    <div class="col-md-6">
+                      <div class="md-field-wrapper">
+                        <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.latitude.id_for_label }}">
+                          <i class="bx bx-target-lock text-success me-1"></i>{{ form.latitude.label }}
+                        </label>
+                        <div class="position-relative">{{ form.latitude }}</div>
+                        {% if form.latitude.errors %}
+                          <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.latitude.errors|join:", " }}</div>
+                        {% endif %}
+                        <div class="form-text mt-2" style="color: #64748b;">Decimal format (ex: 11.2588)</div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="md-field-wrapper">
+                        <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.longitude.id_for_label }}">
+                          <i class="bx bx-target-lock text-success me-1"></i>{{ form.longitude.label }}
+                        </label>
+                        <div class="position-relative">{{ form.longitude }}</div>
+                        {% if form.longitude.errors %}
+                          <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.longitude.errors|join:", " }}</div>
+                        {% endif %}
+                        <div class="form-text mt-2" style="color: #64748b;">Decimal format (ex: 75.7804)</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. BUSINESS DETAILS -->
+          <div class="md-card mb-5">
+            <div class="md-card-header">
+              <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+                <i class="bx bx-briefcase me-2 text-warning"></i>Business Details
+              </h5>
+            </div>
+            <div class="p-5">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.gstin.id_for_label }}">
+                      <i class="bx bx-id-card text-warning me-1"></i>{{ form.gstin.label }}
+                    </label>
+                    <div class="position-relative">{{ form.gstin }}</div>
+                    {% if form.gstin.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.gstin.errors|join:", " }}</div>
+                    {% endif %}
+                    <div class="form-text mt-2" style="color: #64748b;">15-digit GSTIN (optional)</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.pan.id_for_label }}">
+                      <i class="bx bx-credit-card text-warning me-1"></i>{{ form.pan.label }}
+                    </label>
+                    <div class="position-relative">{{ form.pan }}</div>
+                    {% if form.pan.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.pan.errors|join:", " }}</div>
+                    {% endif %}
+                    <div class="form-text mt-2" style="color: #64748b;">10-character PAN (optional)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Media & Status (4 cols) -->
+        <div class="col-lg-4">
+          <!-- LOGO UPLOAD -->
+          <div class="md-card mb-5">
+            <div class="md-card-header">
+              <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+                <i class="bx bx-image-alt me-2 text-primary"></i>Shop Logo
+              </h5>
+            </div>
+            <div class="p-5 text-center">
+              <div class="mb-4">
+                {% if form.instance.shop_logo %}
+                  <img src="{{ form.instance.shop_logo.url }}" 
+                       alt="Current Logo" 
+                       class="img-fluid rounded-3 shadow-lg md-logo-preview border"
+                       style="max-height: 220px; width: 100%; object-fit: cover; border: 3px solid #e8f0fe;">
+                {% else %}
+                  <div class="md-logo-placeholder rounded-3 shadow-lg p-5 mb-3 border" 
+                       style="height: 220px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 3px solid #e8f0fe;">
+                    <i class="bx bx-image bx-lg text-muted mb-3 d-block" style="font-size: 48px;"></i>
+                    <p class="text-muted mb-2 fs-6 fw-semibold">No logo uploaded</p>
+                    <small class="text-muted">Upload restaurant logo (300x300px recommended)</small>
+                  </div>
+                  <img src="" alt="Logo Preview" class="img-fluid rounded-3 shadow-lg d-none md-logo-preview border" 
+                       style="max-height: 220px; width: 100%; object-fit: cover; border: 3px solid #e8f0fe;">
+                {% endif %}
+              </div>
+              <label for="{{ form.shop_logo.id_for_label }}" class="md-filled-button w-100 mb-3 px-6 py-3 d-block cursor-pointer">
+                <i class="bx bx-upload me-2"></i>Choose Logo Image
+              </label>
+              {{ form.shop_logo }}
+              {% if form.shop_logo.errors %}
+                <div class="text-danger mt-2 fs-6 fw-medium">{{ form.shop_logo.errors|join:", " }}</div>
+              {% endif %}
+              <div class="form-text mt-2" style="color: #64748b;">
+                PNG, JPG • Max 5MB • Square images work best
+              </div>
+            </div>
+          </div>
+
+          <!-- STATUS TOGGLE -->
+          <div class="md-card mb-5">
+            <div class="md-card-header">
+              <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+                <i class="bx bx-toggle-right me-2 text-success"></i>Status
+              </h5>
+            </div>
+            <div class="p-5">
+              <div class="md-checkbox-wrapper mb-4">
+                <label class="md-checkbox-label" for="{{ form.is_active.id_for_label }}">
+                  <span class="checkbox-container">
+                    {{ form.is_active }}
+                    <span class="md-checkbox-checkmark"></span>
+                  </span>
+                  <span class="checkbox-text fw-semibold fs-6">
+                    <i class="bx bx-check-circle me-1 text-success"></i>Active Status
+                  </span>
+                </label>
+                {% if form.is_active.errors %}
+                  <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.is_active.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+              
+              <!-- Status Indicator -->
+              <div class="p-4 rounded-3 border" style="background: {% if form.instance.is_active %}rgba(34,197,94,0.08){% else %}rgba(239,68,68,0.08){% endif %}; 
+                           border-color: {% if form.instance.is_active %}rgba(34,197,94,0.2){% else %}rgba(239,68,68,0.2){% endif %}">
+                <div class="d-flex align-items-center">
+                  <i class="bx {% if form.instance.is_active %}bx-check-circle text-success{% else %}bx-x-circle text-danger{% endif %} me-3 fs-4"></i>
+                  <div>
+                    {% if form.instance.is_active %}
+                      <div class="fw-bold fs-6" style="color: #166534;">ACTIVE</div>
+                      <div class="small" style="color: #4ade80;">Visible to customers</div>
+                    {% else %}
+                      <div class="fw-bold fs-6" style="color: #991b1b;">INACTIVE</div>
+                      <div class="small" style="color: #f87171;">Hidden from customers</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- QUICK STATS (Edit Mode Only) -->
+          {% if form.instance.pk %}
+          <div class="md-card">
+            <div class="md-card-header">
+              <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+                <i class="bx bx-bar-chart-alt-2 me-2 text-info"></i>Quick Stats
+              </h5>
+            </div>
+            <div class="p-5">
+              <div class="mb-4 p-4 rounded-3 border" style="background: rgba(25,118,210,0.08); border-color: rgba(25,118,210,0.2);">
+                <div class="d-flex align-items-center">
+                  <div class="bg-primary bg-opacity-20 rounded-circle p-3 me-4">
+                    <i class="bx bx-calendar text-primary fs-4"></i>
+                  </div>
+                  <div>
+                    <div class="small text-muted mb-1">Created</div>
+                    <strong class="fs-5" style="color: #1a202c;">{{ form.instance.created_at|date:"d M Y, H:i" }}</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 rounded-3 border" style="background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2);">
+                <div class="d-flex align-items-center">
+                  <div class="bg-success bg-opacity-20 rounded-circle p-3 me-4">
+                    <i class="bx bx-refresh text-success fs-4"></i>
+                  </div>
+                  <div>
+                    <div class="small text-muted mb-1">Updated</div>
+                    <strong class="fs-5" style="color: #1a202c;">{{ form.instance.updated_at|date:"d M Y, H:i" }}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="md-card mt-5">
+        <div class="p-5">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <a href="{% url 'vendor_list' %}" class="md-outlined-button px-6 py-3">
+              <i class="bx bx-x-circle me-2"></i>Cancel
+            </a>
+            <div class="d-flex gap-3 flex-wrap">
+              <button type="reset" class="md-outlined-button px-6 py-3">
+                <i class="bx bx-reset me-2"></i>Reset Form
+              </button>
+              <button type="submit" name="submit" class="md-filled-button px-8 py-3">
+                <i class="bx bx-save me-2"></i>
+                {% if form.instance.pk %}Update Vendor{% else %}Create Vendor{% endif %}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MINIMAL FIXED SCRIPT -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Only show toasts - NO form interference
+  document.querySelectorAll('.toast').forEach(function(toast) {
+    new bootstrap.Toast(toast).show();
+  });
+});
+</script>
+
+
+{% endblock %}

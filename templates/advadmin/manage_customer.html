@@ -12,11 +12,11 @@
     <div class="md-header">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
         <div>
-          <h1 class="md-title mb-0">Members Directory</h1>
-          <p class="md-subtitle">Manage your member ecosystem</p>
+          <h1 class="md-title mb-0">Customers Directory</h1>
+          <p class="md-subtitle">Manage your customer ecosystem</p>
         </div>
         <a href="{% url 'user_registration' %}?next={{ request.path }}" class="md-filled-button">
-          <i class="bx bx-user-plus me-2"></i>Add Member
+          <i class="bx bx-user-plus me-2"></i>Add Customer
         </a>
       </div>
     </div>
@@ -51,9 +51,8 @@
         <div class="row align-items-center g-4 mb-4">
           <div class="col-lg-7">
             <h5 class="mb-0 fw-semibold" style="color: var(--md-sys-color-on-surface); font-size: 24px;">
-              Active Members
-              <span class="badge ms-3 px-4 py-2 fw-semibold rounded-pill" 
-                    style="background: rgba(25, 118, 210, 0.15); color: var(--md-sys-color-primary); border: 1px solid rgba(25, 118, 210, 0.3);">
+              All Customers
+              <span class="badge ms-3 px-4 py-2 fw-semibold rounded-pill md-role-badge">
                 {{ users|length }}
               </span>
             </h5>
@@ -67,8 +66,7 @@
                 <input type="text" name="q" class="form-control md-search border-start-0 shadow-none ps-0" 
                        placeholder="Search by name, username, phone..." value="{{ request.GET.q }}">
                 {% if request.GET.q %}
-                <a href="{% url 'user_list' %}" class="btn ms-2 rounded-circle p-3 border-0" 
-                   style="background: #f8fafc; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;">
+                <a href="{% url 'user_list' %}" class="btn ms-2 rounded-circle p-3 border-0 md-icon-button-secondary">
                   <i class="bx bx-x text-muted fs-5"></i>
                 </a>
                 {% endif %}
@@ -95,7 +93,7 @@
               <th style="width: 160px;">Username</th>
               <th style="width: 200px;">
                 <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}sort={% if request.GET.sort == 'name' %}-name{% else %}name{% endif %}" 
-                   class="text-white text-decoration-none">
+                   class="text-white text-decoration-none fw-semibold">
                   Name
                   {% if request.GET.sort == 'name' %}<i class="bx bx-chevron-up ms-1"></i>{% elif request.GET.sort == '-name' %}<i class="bx bx-chevron-down ms-1"></i>{% endif %}
                 </a>
@@ -171,10 +169,10 @@
                     <i class="bx bx-user-plus" style="color: var(--md-sys-color-on-primary-container);"></i>
                   </div>
                   <h5 class="mb-4 fw-semibold" style="color: var(--md-sys-color-on-surface);">
-                    No members found
+                    No customers found
                   </h5>
                   <a href="{% url 'user_registration' %}" class="md-filled-button px-6">
-                    <i class="bx bx-user-plus me-2"></i>Create First Member
+                    <i class="bx bx-user-plus me-2"></i>Create First Customer
                   </a>
                 </div>
               </td>
@@ -201,7 +199,7 @@
               <li class="page-item active">
                 <a class="page-link fw-bold text-white">{{ num }}</a>
               </li>
-              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'-3' %}
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
               <li class="page-item">
                 <a class="page-link fw-semibold" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
               </li>
@@ -232,7 +230,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body py-0">
-        <p class="mb-3">Are you sure you want to <strong id="actionText" style="color: var(--md-sys-color-primary);"></strong> this member?</p>
+        <p class="mb-3">Are you sure you want to <strong id="actionText" style="color: var(--md-sys-color-primary);"></strong> this customer?</p>
       </div>
       <div class="modal-footer border-0 pt-0 gap-3">
         <button type="button" class="btn btn-outline-secondary rounded-pill px-5 py-3 fw-medium" data-bs-dismiss="modal">
@@ -251,7 +249,7 @@
     <div class="modal-content border-0 shadow-2xl rounded-4" style="backdrop-filter: blur(20px);">
       <div class="modal-header bg-gradient text-white rounded-top-4 p-5" 
            style="background: linear-gradient(135deg, var(--md-sys-color-error), #dc2626) !important;">
-        <h5 class="modal-title fw-semibold mb-0">Delete Member</h5>
+        <h5 class="modal-title fw-semibold mb-0">Delete Customer</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body py-4 px-5">
@@ -279,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;
     const userId = button.getAttribute('data-user-id');
-    const userName = button.getAttribute('data-user-name') || 'this member';
+    const userName = button.getAttribute('data-user-name') || 'this customer';
     document.getElementById('userName').textContent = userName;
     document.getElementById('confirmDeleteBtn').href = "{% url 'user_delete' 0 %}".replace('0', userId);
   });

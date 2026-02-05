@@ -1,57 +1,112 @@
 {% extends 'advadmin/index.html' %}
 {% load static %}
+
 {% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-semi-bold py-3 mb-4">
-      <span class="text-muted fw-light">Manage / Member /</span> 
-      {% if object %}Edit{% else %}Add{% endif %} Member
-    </h4>
+    
+    <!-- Material Design Header -->
+    <div class="md-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-0">
+            {% if object %}Edit{% else %}Add{% endif %} Member
+          </h1>
+          <p class="md-subtitle">
+            {% if object %}Update member details{% else %}Create new member account{% endif %}
+          </p>
+        </div>
+        <a href="{% url 'user_list' %}" class="md-filled-button">
+          <i class="bx bx-arrow-back me-2"></i>Back to Members
+        </a>
+      </div>
+    </div>
 
-    <!-- Toast Messages -->
+    <!-- Enhanced Toast Messages -->
     {% if messages %}
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
       {% for message in messages %}
-      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ message }}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}var(--md-sys-color-error){% else %}var(--md-sys-color-success){% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}var(--md-sys-color-error){% else %}var(--md-sys-color-success){% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
           </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
         </div>
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    <div class="card mb-4">
-      <h5 class="card-header">Member Registration</h5>
-      <div class="card-body">
-        <form method="post">
+    <!-- Main Content Card - SLIGHT BLUE CANVAS -->
+    <div class="md-card md-form-canvas">
+      <!-- WHITE TITLE HEADER -->
+      <div class="md-card-header">
+        <h5 class="mb-0 fw-semibold">
+          Member Registration
+        </h5>
+      </div>
+
+      <div class="card-body p-5">
+        <form method="post" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
 
-          {{ form.staff_role }} {# Hidden field rendered separately #}
+          <!-- Hidden staff_role field -->
+          {{ form.staff_role }}
 
-          <div class="row">
+          <div class="row g-4">
             {% for field in form %}
               {% if field.name != 'staff_role' %}
-              <div class="col-md-6 mb-3">
-                <label class="form-label">{{ field.label }}:</label>
-                {{ field }}
+              <div class="col-lg-6 col-md-6">
+                <label class="form-label fw-semibold mb-2 md-field-label" for="{{ field.id_for_label }}">
+                  {{ field.label }}
+                </label>
+                
+                <!-- Material Design Field Wrapper -->
+                <div class="md-field-wrapper">
+                  {{ field }}
+                </div>
+                
+                <!-- Error styling -->
                 {% if field.errors %}
-                <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                <div class="invalid-feedback d-block mt-2 text-danger fw-medium">
+                  {{ field.errors|join:", " }}
+                </div>
+                {% endif %}
+                
+                <!-- Field help text -->
+                {% if field.help_text %}
+                <div class="form-text mt-2 fw-medium" style="color: var(--md-sys-color-outline);">
+                  {{ field.help_text }}
+                </div>
                 {% endif %}
               </div>
               {% endif %}
             {% endfor %}
           </div>
 
-          <div class="text-center my-1">
-            <button type="submit" class="btn btn-primary">
-              {% if object %}Update Member{% else %}Create Member{% endif %}
-            </button>
-            <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+          <!-- Form Actions -->
+          <div class="mt-6 pt-4 border-top" style="border-color: rgba(25, 118, 210, 0.1) !important;">
+            <div class="d-flex justify-content-end gap-3 flex-wrap">
+              <a href="{% url 'user_list' %}" class="btn btn-outline-secondary rounded-pill px-5 py-3 fw-medium md-secondary-btn">
+                <i class="bx bx-arrow-back me-2"></i>Cancel
+              </a>
+              <button type="submit" class="md-filled-button px-6 py-3">
+                <i class="bx bx-{% if object %}edit{% else %}user-plus{% endif %} me-2"></i>
+                {% if object %}Update Member{% else %}Create Member{% endif %}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -59,106 +114,198 @@
   </div>
 </div>
 
+<!-- Image Preview Styles (Enhanced Material Design) -->
 <style>
-  .image-preview-container {
-    display: flex;
-    justify-content: flex-start;
-  }
+/* Material Design Image Preview */
+.image-preview-container {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 
-  .image-wrapper {
-    position: relative;
-    width: 300px;
-    height: 150px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f8f9fa;
-    overflow: hidden;
-  }
+.image-wrapper {
+  position: relative;
+  width: 320px;
+  height: 180px;
+  border: 2px solid #e8f0fe;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fbff 0%, #f0f7ff 100%);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+}
 
-  .image-wrapper img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-  }
+.image-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(25, 118, 210, 0.24);
+  border-color: #1976d2;
+}
 
-  .remove-image {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 25px;
-    height: 25px;
-    padding: 0;
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
+.image-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  border-radius: 16px;
+}
 
-  .image-wrapper:hover .remove-image {
-    display: flex;
-  }
+.remove-image {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  border: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+  transition: all 0.2s ease;
+}
+
+.remove-image:hover {
+  background: #ef4444;
+  transform: scale(1.1);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
+}
+
+.image-wrapper:hover .remove-image {
+  display: flex;
+}
 </style>
 
 <script>
-  // Image preview functionality
-  function previewImage(input, previewId) {
-    const file = input.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const preview = document.getElementById(previewId);
-        preview.src = e.target.result;
-        preview.style.display = "block";
+// Enhanced Material Design Form + Image Preview
+document.addEventListener("DOMContentLoaded", function() {
+  // Auto-show Material Design toasts
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 6000 }).show();
+  });
 
-        // Show remove button
-        const removeBtn = preview.parentElement.querySelector('.remove-image');
-        if (removeBtn) removeBtn.style.display = "flex";
+  // Material Design input enhancement
+  document.querySelectorAll('.md-field-wrapper *').forEach(field => {
+    const wrapper = field.closest('.md-field-wrapper');
+    const input = field.tagName === 'INPUT' || field.tagName === 'SELECT' || field.tagName === 'TEXTAREA' ? field : field.querySelector('input, select, textarea');
+    
+    if (input) {
+      input.addEventListener('focus', function() {
+        wrapper.classList.add('focused');
+      });
+      
+      input.addEventListener('blur', function() {
+        wrapper.classList.remove('focused');
+      });
+      
+      // Error state detection
+      if (wrapper.parentElement.querySelector('.invalid-feedback') || input.classList.contains('is-invalid')) {
+        wrapper.classList.add('error');
       }
-      reader.readAsDataURL(file);
     }
+  });
+
+  // Form submission state
+  const form = document.querySelector('form');
+  const submitBtn = document.querySelector('.md-filled-button[type="submit"]');
+  
+  if (form && submitBtn) {
+    form.addEventListener('submit', function() {
+      submitBtn.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Saving...
+      `;
+      submitBtn.disabled = true;
+    });
   }
 
-  // Remove image functionality
-  document.querySelectorAll('.remove-image').forEach(btn => {
-    btn.addEventListener('click', function () {
-      const inputId = this.getAttribute('data-target');
-      const previewId = this.getAttribute('data-preview');
+  // ENHANCED Image Preview Functionality
+  document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function(e) {
+      previewImage(e.target);
+    });
+  });
 
-      // Clear file input
-      document.getElementById(inputId).value = '';
+  // Material ripple effect
+  document.querySelectorAll('.md-filled-button, .md-secondary-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.cssText = `
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        transform: scale(0);
+        animation: md-ripple 0.6s linear;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        pointer-events: none;
+      `;
+      
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+});
 
-      // Hide preview
-      document.getElementById(previewId).style.display = 'none';
-      this.style.display = 'none';
-
-      // For existing images, add a hidden field to mark for deletion
-      if (document.getElementById(previewId).src.includes('/media/')) {
-        const deleteInput = document.createElement('input');
-        deleteInput.type = 'hidden';
-        deleteInput.name = 'image-clear';
-        deleteInput.value = 'on';
-        this.parentNode.appendChild(deleteInput);
+// Enhanced Image Preview Function
+function previewImage(input) {
+  const file = input.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      let preview = input.parentElement.querySelector('.image-wrapper img');
+      if (!preview) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-wrapper';
+        wrapper.innerHTML = `<img src="" alt="Preview" style="display: none;">`;
+        preview = wrapper.querySelector('img');
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-image';
+        removeBtn.innerHTML = '×';
+        wrapper.appendChild(removeBtn);
+        input.parentElement.appendChild(wrapper);
       }
-    });
-  });
-
-  // Auto-dismiss toast messages after 5 seconds
-  document.addEventListener('DOMContentLoaded', function () {
-    var toastElements = document.querySelectorAll('.toast');
-    toastElements.forEach(function (toastEl) {
-      setTimeout(function () {
-        var toast = bootstrap.Toast.getInstance(toastEl);
-        if (toast) {
-          toast.hide();
+      
+      preview.src = e.target.result;
+      preview.style.display = "block";
+      wrapper.querySelector('.remove-image').style.display = "flex";
+      
+      // Remove functionality
+      wrapper.querySelector('.remove-image').onclick = function() {
+        input.value = '';
+        preview.style.display = 'none';
+        this.style.display = 'none';
+        if (preview.src.includes('/media/')) {
+          const deleteInput = document.createElement('input');
+          deleteInput.type = 'hidden';
+          deleteInput.name = 'image-clear';
+          deleteInput.value = 'on';
+          input.parentElement.appendChild(deleteInput);
         }
-      }, 5000);
-    });
-  });
+      };
+    };
+    reader.readAsDataURL(file);
+  }
+}
 </script>
 
 {% endblock %}

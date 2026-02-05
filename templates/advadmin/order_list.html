@@ -1,219 +1,326 @@
 {% extends 'advadmin/index.html' %}
 {% load static %}
+
 {% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+{% comment %} <link rel="stylesheet" href="{% static 'mob-custom/theme-enh1.css' %}"> {% endcomment %}
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-semi-bold py-3 mb-4">
-      <span class="text-muted fw-light">Manage /</span> Orders
-    </h4>
+    
+    <!-- Material Design Header -->
+    <div class="md-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-0">Orders Dashboard</h1>
+          <p class="md-subtitle">Manage all order operations</p>
+        </div>
+      </div>
+    </div>
 
     <!-- Toast Messages -->
     {% if messages %}
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
       {% for message in messages %}
-      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ message }}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}var(--md-sys-color-error){% else %}var(--md-sys-color-success){% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}var(--md-sys-color-error){% else %}var(--md-sys-color-success){% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
           </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
         </div>
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Order List -->
-    <div class="card mb-4">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">All Orders</h5>
-        <div class="d-flex gap-3">
-          <form method="GET" action="{% url 'order_list' %}" class="d-flex">
-            <div class="input-group input-group-merge">
-              <span class="input-group-text"><i class="bx bx-search"></i></span>
-              <input 
-                type="text" 
-                name="q" 
-                class="form-control" 
-                placeholder="Search orders..." 
-                value="{{ request.GET.q }}"
-              >
-              {% if request.GET.q %}
-              <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">
-                <i class="bx bx-x"></i>
-              </a>
-              {% endif %}
-            </div>
-            <button type="submit" class="btn btn-primary ms-2">Search</button>
-          </form>
+    <!-- Main Content Card -->
+    <div class="md-card">
+      <div class="md-card-header">
+        <div class="row align-items-center g-4 mb-4">
+          <div class="col-lg-7">
+            <h5 class="mb-0 fw-semibold" style="color: var(--md-sys-color-on-surface); font-size: 24px;">
+              Recent Orders
+              <span class="badge ms-3 px-4 py-2 fw-semibold rounded-pill" 
+                    style="background: rgba(25, 118, 210, 0.15); color: var(--md-sys-color-primary); border: 1px solid rgba(25, 118, 210, 0.3);">
+                {{ orders|length }}
+              </span>
+            </h5>
+          </div>
+          <div class="col-lg-5">
+            <form method="GET" action="{% url 'ecommerce:order_list' %}" class="d-flex gap-3">
+              <!-- Search -->
+              <div class="input-group flex-grow-1">
+                <span class="input-group-text bg-transparent border-0 ps-4 pe-0">
+                  <i class="bx bx-search text-muted"></i>
+                </span>
+                <input type="text" name="q" class="form-control md-search border-start-0 shadow-none ps-0" 
+                       placeholder="Search by order #, customer, vendor..." value="{{ request.GET.q }}">
+                {% if request.GET.q %}
+                <a href="{% url 'ecommerce:order_list' %}" class="btn ms-2 rounded-circle p-3 border-0" 
+                   style="background: #f8fafc; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;">
+                  <i class="bx bx-x text-muted fs-5"></i>
+                </a>
+                {% endif %}
+              </div>
+              
+              <!-- Status Filter -->
+              <select name="status" class="form-select md-select rounded-3 shadow-sm" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                {% for value, label in statuses %}
+                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+                {% endfor %}
+              </select>
+            </form>
+          </div>
         </div>
       </div>
-      <div class="card-body">
-        <div class="table-responsive text-nowrap">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Order Number</th>
-                <th>Customer</th>
-                <th>Status</th>
-                <th>Payment Status</th>
-                <th>Payment Method</th>
-                <th>Total</th>
-                <th>Created At</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="table-border-bottom-0">
-              {% for order in orders %}
-              <tr>
-                <td><strong>{{ order.id }}</strong></td>
-                <td>{{ order.order_number }}</td>
-                <td>{{ order.customer.username }}</td>
-                <td>
-                  <span class="badge bg-label-{% if order.status == 'cancelled' %}danger{% else %}primary{% endif %}">
-                    {{ order.get_status_display }}
-                  </span>
-                </td>
-                <td>
-                  <span class="badge bg-label-{% if order.payment_status == 'completed' %}success{% else %}secondary{% endif %}">
-                    {{ order.get_payment_status_display }}
-                  </span>
-                </td>
-                <td>
-                  {% if order.payment_details %}
-                    {{ order.payment_details.payment_method }}
-                  {% else %}
-                    N/A
+
+      <div class="table-responsive">
+        <table class="table md-table mb-0">
+          <thead>
+            <tr>
+              <th style="width: 100px;">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}sort={% if request.GET.sort == 'order_number' %}-order_number{% else %}order_number{% endif %}" 
+                   class="text-white text-decoration-none fw-semibold">
+                  Order #
+                  {% if request.GET.sort == 'order_number' %}
+                    <i class="bx bx-chevron-up ms-1"></i>
+                  {% elif request.GET.sort == '-order_number' %}
+                    <i class="bx bx-chevron-down ms-1"></i>
                   {% endif %}
-                </td>
-
-                <td>${{ order.total }}</td>
-                <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
-                <td class="text-center">
-                  <div class="d-flex justify-content-center gap-2">
-                    <!-- View Button -->
-                    <a href="{% url 'order_detail' order.id %}" class="btn btn-icon btn-secondary">
-                      <i class="bx bx-show"></i>
-                    </a>
-                    
-                    <!-- Edit Button -->
-                    <a href="{% url 'order_edit' order.id %}" class="btn btn-icon btn-secondary">
-                      <i class="bx bx-edit"></i>
-                    </a>
-                    
-                    <!-- Delete Button -->
-                    <button class="btn btn-icon btn-danger" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#deleteOrderModal"
-                            data-order-id="{{ order.id }}"
-                            data-order-number="{{ order.order_number }}">
-                      <i class="bx bx-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="8" class="text-center py-4">
-                  <div class="text-muted">No orders found</div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination -->
-        {% if is_paginated %}
-        <div class="mt-4">
-          <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-              {% if page_obj.has_previous %}
-              <li class="page-item prev">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
-                  <i class="tf-icon bx bx-chevron-left"></i>
                 </a>
-              </li>
-              {% endif %}
-              
-              {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                <li class="page-item active">
-                  <a class="page-link" href="#">{{ num }}</a>
-                </li>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
-                </li>
+              </th>
+              <th style="width: 160px;">Customer</th>
+              <th style="width: 150px;">Vendor</th>
+              <th style="width: 120px;">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}sort={% if request.GET.sort == 'total_amount' %}-total_amount{% else %}total_amount{% endif %}" 
+                   class="text-white text-decoration-none">
+                  Amount
+                  {% if request.GET.sort == 'total_amount' %}
+                    <i class="bx bx-chevron-up ms-1"></i>
+                  {% elif request.GET.sort == '-total_amount' %}
+                    <i class="bx bx-chevron-down ms-1"></i>
+                  {% endif %}
+                </a>
+              </th>
+              <th style="width: 120px;">Payment</th>
+              <th style="width: 110px;">Status</th>
+              <th style="width: 160px;">Created</th>
+              <th style="width: 180px;" class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+            <tr>
+              <td>
+                <span class="fw-bold text-muted fs-5">#{{ order.order_number }}</span>
+              </td>
+              <td>
+                <div class="fw-bold" style="color: var(--md-sys-color-on-surface); font-size: 16px;">
+                  {{ order.user.username }}
+                </div>
+                <small class="text-muted">{{ order.user.get_full_name|default:"—" }}</small>
+              </td>
+              <td>
+                <span class="fw-semibold">{{ order.vendor.name|default:"—" }}</span>
+              </td>
+              <td>
+                <span class="fw-bold fs-6" style="color: var(--md-sys-color-primary);">
+                  ₹{{ order.total_amount|floatformat:2 }}
+                </span>
+                {% if order.discount_amount > 0 %}
+                <small class="text-success fw-medium">Save ₹{{ order.discount_amount|floatformat:2 }}</small>
                 {% endif %}
-              {% endfor %}
-              
-              {% if page_obj.has_next %}
-              <li class="page-item next">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
-                  <i class="tf-icon bx bx-chevron-right"></i>
+              </td>
+              <td>
+                <span class="md-badge md-badge--{% if order.payment_status == 'paid' %}success{% else %}warning{% endif %}">
+                  {{ order.get_payment_status_display }}
+                </span>
+              </td>
+              <td>
+                <span class="md-badge md-badge--{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}secondary{% else %}info{% endif %}">
+                  {{ order.get_status_display }}
+                </span>
+              </td>
+              <td>
+                <span class="fw-semibold text-muted">{{ order.created_at|date:"M d, Y" }}</span>
+                <div><small>{{ order.created_at|time:"H:i" }}</small></div>
+              </td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  {% if order.status != 'delivered' and order.status != 'cancelled' %}
+                  <a href="#" class="md-icon-button md-icon-button-primary"
+                     title="Assign Rider"
+                     data-bs-toggle="modal"
+                     data-bs-target="#assignRiderModal"
+                     data-order-id="{{ order.order_number }}">
+                    <i class="bx bx-bike"></i>
+                  </a>
+                  {% endif %}
+                  <!-- These two URLs you can wire later or namespace as needed -->
+                  <a href="{% url 'ecommerce:order_list' %}?q={{ order.order_number }}" 
+                     class="md-icon-button md-icon-button-secondary" title="View Details">
+                    <i class="bx bx-detail"></i>
+                  </a>
+                  <a href="{% url 'ecommerce:order_list' %}?q={{ order.order_number }}" 
+                     class="md-icon-button md-icon-button-info" title="Edit Order">
+                    <i class="bx bx-edit-alt"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8">
+                <div class="md-empty-state">
+                  <div class="md-empty-icon">
+                    <i class="bx bx-package" style="color: var(--md-sys-color-on-primary-container); font-size: 48px;"></i>
+                  </div>
+                  <h5 class="mb-4 fw-semibold" style="color: var(--md-sys-color-on-surface);">
+                    No orders found
+                  </h5>
+                  <p class="text-muted mb-4">Orders will appear here when created.</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if is_paginated %}
+      <div class="p-5 pt-0 border-top" style="border-color: rgba(25, 118, 210, 0.1) !important;">
+        <nav aria-label="Page navigation">
+          <ul class="pagination md-pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link fw-semibold" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                <i class="bx bx-chevron-left me-1"></i>Previous
+              </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+              <li class="page-item active">
+                <a class="page-link fw-bold text-white">{{ num }}</a>
+              </li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link fw-semibold" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                  {{ num }}
                 </a>
               </li>
               {% endif %}
-            </ul>
-          </nav>
-        </div>
-        {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link fw-semibold" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                Next<i class="bx bx-chevron-right ms-1"></i>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Assign Rider Modal -->
+<div class="modal fade" id="assignRiderModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-2xl rounded-4">
+      <div class="modal-header border-0 pb-3">
+        <h5 class="modal-title fw-semibold" style="color: var(--md-sys-color-on-surface);">Assign Rider</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{% url 'ecommerce:assign_rider' %}">
+          {% csrf_token %}
+          <input type="hidden" name="order_number" id="orderNumber">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Assign to Rider</label>
+            <select name="rider_id" class="form-select" required>
+              <option value="">Select Rider</option>
+              {% for rider in riders %}
+                <option value="{{ rider.id }}">
+                  {{ rider.user.get_full_name|default:rider.user.username }} - {{ rider.phone }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="md-filled-button w-100">Assign Rider</button>
+        </form>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-{% comment %} <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirm Delete</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col mb-3">
-            <p>Delete order <strong id="orderNumber"></strong>?</p>
-            <p class="text-muted">This action cannot be undone.</p>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <a id="confirmDeleteOrderBtn" class="btn btn-danger">Delete</a>
-      </div>
-    </div>
-  </div>
-</div> {% endcomment %}
-{% comment %} 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  // Toast auto-dismiss
-  const toastElements = document.querySelectorAll('.toast');
-  toastElements.forEach(toastEl => {
-    setTimeout(() => {
-      const toast = bootstrap.Toast.getInstance(toastEl);
-      toast?.hide();
-    }, 5000);
+  // Auto-show toasts
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 6000 }).show();
   });
 
-  // Delete modal handler
-  const deleteOrderModal = document.getElementById('deleteOrderModal');
-  if (deleteOrderModal) {
-    deleteOrderModal.addEventListener('show.bs.modal', function (event) {
+  // Assign Rider Modal
+  const assignModal = document.getElementById('assignRiderModal');
+  if (assignModal) {
+    assignModal.addEventListener('show.bs.modal', function (event) {
       const button = event.relatedTarget;
       const orderId = button.getAttribute('data-order-id');
-      const orderNumber = button.getAttribute('data-order-number');
-      document.getElementById('orderNumber').textContent = orderNumber;
-      document.getElementById('confirmDeleteOrderBtn').setAttribute('href', 
-        "{% url 'order_delete' 0 %}".replace('0', orderId));
+      const orderInput = document.getElementById('orderNumber');
+      if (orderInput) {
+        orderInput.value = orderId;
+      }
     });
   }
+
+  // Material ripple effect on buttons
+  document.querySelectorAll('.md-filled-button, .md-icon-button').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.cssText = `
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        transform: scale(0);
+        animation: md-ripple 0.6s linear;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        pointer-events: none;
+      `;
+      
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
 });
-</script> {% endcomment %}
+</script>
 
 {% endblock %}

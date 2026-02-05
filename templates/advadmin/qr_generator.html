@@ -13,11 +13,11 @@
         {% csrf_token %}
         <div class="row g-3 align-items-end">
           <div class="col-md-5">
-            <label for="gym_select" class="form-label fw-semibold">Select Gym:</label>
-            <select class="form-select" id="gym_select" name="gym_id" required>
-              <option value="">Choose a gym...</option>
-              {% for gym in gyms %}
-                <option value="{{ gym.id }}">{{ gym.name }} - {{ gym.location }}</option>
+            <label for="vendor_select" class="form-label fw-semibold">Select Gym:</label>
+            <select class="form-select" id="vendor_select" name="vendor_id" required>
+              <option value="">Choose a vendor...</option>
+              {% for vendor in vendors %}
+                <option value="{{ vendor.id }}">{{ vendor.name }} - {{ vendor.location }}</option>
               {% endfor %}
             </select>
           </div>
@@ -42,7 +42,7 @@
       <!-- QR Result -->
       <div id="qrResult" style="display:none;">
         <div class="text-center py-4">
-          <h5 id="gymName" class="fw-bold"></h5>
+          <h5 id="vendorName" class="fw-bold"></h5>
           <div class="d-flex justify-content-center mb-3">
             <div id="qrCode" class="border rounded p-3 bg-light"></div>
           </div>
@@ -78,11 +78,11 @@
     $('#qrForm').on('submit', function(e) {
       e.preventDefault();
 
-      const gymId = $('#gym_select').val();
+      const vendorId = $('#vendor_select').val();
       const validityDays = $('#validity_days').val();
 
-      if (!gymId) {
-        alert('Please select a gym first!');
+      if (!vendorId) {
+        alert('Please select a vendor first!');
         return;
       }
 
@@ -93,7 +93,7 @@
         url: "{% url 'generate_attendance_qr' %}",
         method: 'POST',
         data: {
-          'gym_id': gymId,
+          'vendor_id': vendorId,
           'validity_days': validityDays,
           'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
         },
@@ -124,7 +124,7 @@
       });
 
       $('#qrCode').html(qr.canvas);
-      $('#gymName').text(data.gym_name);
+      $('#vendorName').text(data.vendor_name);
       $('#validUntil').text(new Date(data.expires_at).toLocaleString());
       $('#validityDays').text(data.validity_days);
       $('#qrResult').show();
@@ -134,14 +134,14 @@
       if (!currentQRData) return;
       const canvas = document.querySelector('#qrCode canvas');
       const link = document.createElement('a');
-      link.download = `${currentQRData.gym_name}_attendance_qr.png`;
+      link.download = `${currentQRData.vendor_name}_attendance_qr.png`;
       link.href = canvas.toDataURL();
       link.click();
     });
 
     $('#newBtn').on('click', function() {
       $('#qrResult').hide();
-      $('#gym_select').val('');
+      $('#vendor_select').val('');
       $('#validity_days').val('');
     });
   });

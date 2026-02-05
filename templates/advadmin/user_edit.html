@@ -1,88 +1,230 @@
 {% extends 'advadmin/index.html' %}
 {% load static %}
+
 {% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+<link rel="stylesheet" href="{% static 'mob-custom/theme-enh1.css' %}">
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-semi-bold py-3 mb-4">
-      <span class="text-muted fw-light">Manage / Member /</span>
-      {% if object %}Edit{% else %}Add{% endif %} Member
-    </h4>
+    
+    <!-- Material Design Header -->
+    <div class="md-header mb-5">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-1 mb-sm-2">
+            {% if object %}
+              <i class="bx bx-edit-alt text-warning me-3" style="font-size: 32px;"></i>
+              Edit Member
+            {% else %}
+              <i class="bx bx-user-plus text-success me-3" style="font-size: 32px;"></i>
+              Add New Member
+            {% endif %}
+          </h1>
+          <p class="md-subtitle mb-0">
+            {% if object %}
+              Update member profile information and permissions
+            {% else %}
+              Create a new member account with complete profile details
+            {% endif %}
+          </p>
+        </div>
+        <a href="{% url 'user_list' %}" class="md-outlined-button px-6 py-3">
+          <i class="bx bx-arrow-back me-2"></i>Back to List
+        </a>
+      </div>
+    </div>
 
-    <!-- Toast Messages -->
+    <!-- Enhanced Toast Messages -->
     {% if messages %}
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
       {% for message in messages %}
-      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ message }}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
           </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
         </div>
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    <div class="card mb-4">
-      <h5 class="card-header">Member Details</h5>
-      <div class="card-body">
-        <form method="post">
-          {% csrf_token %}
-          <div class="row">
-            <!-- Generic field loop, as per your design -->
-            {% for field in form %}
-              {% if field.name not in 'password1,password2' %}
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">{{ field.label }}:</label>
-                  {{ field }}
-                  {% if field.errors %}
-                    <div class="text-danger small">{{ field.errors|join:", " }}</div>
+    <!-- Main Form Card -->
+    <div class="row g-5">
+      <div class="col-12">
+        <div class="md-card">
+          <div class="md-card-header">
+            <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+              <i class="bx bx-user-circle me-2 text-primary"></i>Member Details
+            </h5>
+          </div>
+          <div class="card-body p-5">
+            <form method="post" novalidate>
+              {% csrf_token %}
+              
+              <!-- Profile Information -->
+              <div class="row g-4 mb-5">
+                {% for field in form %}
+                  {% if field.name not in 'password1,password2' %}
+                    <div class="col-lg-6 col-md-12">
+                      {% if field.field.widget.input_type == 'checkbox' %}
+                        <!-- CUSTOM CHECKBOX HANDLING -->
+                        <div class="md-checkbox-wrapper">
+                          <label class="md-checkbox-label" for="{{ field.id_for_label }}">
+                            <span class="checkbox-container">
+                              <input type="checkbox" id="{{ field.id_for_label }}" name="{{ field.html_name }}" 
+                                     value="{{ field.field.choices.0.0|default:'on' }}" 
+                                     {% if field.value %}checked{% endif %}
+                                     {% if field.field.required %}required{% endif %}>
+                              <span class="md-checkbox-checkmark"></span>
+                            </span>
+                            <span class="checkbox-text">{{ field.label }}</span>
+                          </label>
+                          
+                          {% if field.help_text %}
+                            <div class="form-text mt-2" style="color: #64748b;">{{ field.help_text }}</div>
+                          {% endif %}
+                          {% if field.errors %}
+                            <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">
+                              {{ field.errors|join:", " }}
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% else %}
+                        <!-- REGULAR FIELDS -->
+                        <div class="md-field-wrapper">
+                          <label class="form-label fw-semibold mb-2 md-field-label" for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                          </label>
+                          <div class="position-relative">
+                            {{ field }}
+                            {% if field.help_text %}
+                              <div class="form-text mt-2" style="color: #64748b;">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                              <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">
+                                {{ field.errors|join:", " }}
+                              </div>
+                            {% endif %}
+                          </div>
+                        </div>
+                      {% endif %}
+                    </div>
                   {% endif %}
+                {% endfor %}
+              </div>
+
+              <!-- Password Change Section (Edit Only) -->
+              {% if object %}
+              <div class="md-divider mb-5">
+                <div class="divider-line"></div>
+                <div class="divider-text">Change Password (Optional)</div>
+                <div class="divider-line"></div>
+              </div>
+              
+              <div class="row g-4">
+                <div class="col-lg-6 col-md-12">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.password1.id_for_label }}">
+                      {{ form.password1.label }}
+                    </label>
+                    <div class="position-relative">
+                      {{ form.password1 }}
+                      <div class="form-text mt-2" style="color: #64748b;">Leave blank to keep current password</div>
+                      {% if form.password1.errors %}
+                        <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.password1.errors|join:", " }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
                 </div>
+                <div class="col-lg-6 col-md-12">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.password2.id_for_label }}">
+                      {{ form.password2.label }}
+                    </label>
+                    <div class="position-relative">
+                      {{ form.password2 }}
+                      <div class="form-text mt-2" style="color: #64748b;">Re-enter new password for verification</div>
+                      {% if form.password2.errors %}
+                        <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">{{ form.password2.errors|join:", " }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
               {% endif %}
-            {% endfor %}
-          </div>
 
-          <!-- Password Change Section (for update only, with help text) -->
-          {% if object %}
-            <hr class="m-4">
-            <h6 class="mb-3">Change Password (leave blank to keep current password)</h6>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">{{ form.password1.label }}:</label>
-              {{ form.password1 }}
-              <small class="form-text text-muted">Set a new password if you want to update it.</small>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">{{ form.password2.label }}:</label>
-              {{ form.password2 }}
-              <small class="form-text text-muted">Re-enter the new password for verification.</small>
-            </div>
-          {% endif %}
-
-          <div class="text-center my-4">
-            <button type="submit" class="btn btn-primary">{% if object %}Update Member{% else %}Create Member{% endif %}</button>
-            <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+              <!-- Action Buttons -->
+              <div class="d-flex justify-content-end gap-3 flex-wrap mt-5 pt-4 border-top" style="border-color: #e8f0fe;">
+                <a href="{% url 'user_list' %}" class="md-outlined-button px-6 py-3">
+                  <i class="bx bx-arrow-back me-2"></i>Cancel
+                </a>
+                <button type="submit" class="md-filled-button px-8 py-3">
+                  <i class="bx bx-{% if object %}edit{% else %}plus{% endif %}-circle me-2"></i>
+                  {% if object %}Update Member{% else %}Create Member{% endif %}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Optional: Add this if you want to auto-dismiss toast messages after 5 seconds -->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var toastElements = document.querySelectorAll('.toast');
-    toastElements.forEach(function(toastEl) {
-      setTimeout(function() {
-        var toast = bootstrap.Toast.getInstance(toastEl);
-        if (toast) {
-          toast.hide();
-        }
-      }, 5000);
-    });
+// Material Design Form + Checkbox Interactions
+document.addEventListener("DOMContentLoaded", function() {
+  // Auto-show toasts
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 6000 }).show();
   });
+
+  // Style regular form fields
+  document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]), select, textarea').forEach(field => {
+    if (field.type === 'hidden' || field.type === 'file') return;
+    
+    field.classList.add('form-control', 'md-field');
+    const wrapper = field.closest('.md-field-wrapper');
+    if (wrapper) {
+      field.addEventListener('focus', function() {
+        wrapper.classList.add('focused');
+        field.style.borderColor = '#1976d2';
+        field.style.boxShadow = '0 0 0 4px rgba(25, 118, 210, 0.15)';
+        field.style.background = '#fafbff';
+        field.style.transform = 'translateY(-2px)';
+      });
+      
+      field.addEventListener('blur', function() {
+        wrapper.classList.remove('focused');
+        field.style.borderColor = '#e8f0fe';
+        field.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+        field.style.background = 'white';
+        field.style.transform = '';
+      });
+    }
+  });
+
+  // Button loading state
+  const submitBtn = document.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', function() {
+      this.innerHTML = '<i class="bx bx-loader-alt bx-spin me-2"></i>Processing...';
+      this.disabled = true;
+    });
+  }
+});
 </script>
+
 {% endblock %}

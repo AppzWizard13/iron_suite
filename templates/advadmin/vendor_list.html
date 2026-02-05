@@ -1,0 +1,478 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    
+    <!-- Material Design Header -->
+    <div class="md-header mb-5">
+      <div class="container-fluid">
+        <div class="row align-items-start g-4 g-lg-0">
+          <!-- Left Content -->
+          <div class="col-lg-8 col-xl-9">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 gap-sm-0">
+              <div>
+                <h1 class="md-title mb-1 mb-sm-2">
+                  <i class="bx bx-store-alt text-primary me-3" style="font-size: 32px;"></i>
+                  Vendor Management
+                </h1>
+                <p class="md-subtitle mb-0">
+                  Manage restaurant partners, outlets and business relationships
+                </p>
+              </div>
+              
+              <!-- Quick Stats -->
+              <div class="d-none d-lg-flex gap-4 align-items-center text-muted">
+                <div class="text-center">
+                  <div class="fs-3 fw-bold text-primary">{{ page_obj.paginator.count|default:0 }}</div>
+                  <small>Total Vendors</small>
+                </div>
+                <div class="text-center">
+                  <div class="fs-3 fw-bold text-success">{{ active_count|default:0 }}</div>
+                  <small>Active</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Add Button -->
+          {% if is_superuser %}
+          <div class="col-lg-4 col-xl-3">
+            <div class="d-flex justify-content-lg-end justify-content-center">
+              <a href="{% url 'vendor_add' %}" class="md-filled-button px-6 py-3 flex-fill flex-lg-grow-0">
+                <i class="bx bx-plus me-2"></i>
+                <span class="d-none d-sm-inline">Add New Vendor</span>
+                <span class="d-inline d-sm-none">+</span>
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
+      {% for message in messages %}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
+          </div>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Search Card -->
+    <div class="row g-4 mb-5">
+      <div class="col-12">
+        <div class="md-card">
+          <div class="md-card-header">
+            <h5 class="mb-0 fw-semibold">
+              <i class="bx bx-search me-2"></i>Search Vendors
+            </h5>
+          </div>
+          <div class="card-body p-5">
+            <form method="GET" action="{% url 'vendor_list' %}" class="row g-4 align-items-end">
+              <div class="col-lg-10 col-md-8">
+                <label class="form-label fw-semibold mb-2 md-field-label">Search Vendors</label>
+                <div class="position-relative">
+                  <i class="bx bx-search position-absolute top-50 start-0 translate-middle-y ms-4 z-3" 
+                     style="color: #94a3b8;"></i>
+                  <input 
+                    type="text" 
+                    name="search" 
+                    class="form-control ps-5" 
+                    placeholder="Shop name, email, phone, city, GSTIN..." 
+                    value="{{ search_query }}"
+                    style="border: 2px solid #e8f0fe; border-radius: 50px; padding: 18px 24px 18px 60px; background: white; color: #1a202c;"
+                  >
+                </div>
+                {% if search_query %}
+                <div class="mt-3">
+                  <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 me-2 border">
+                    {{ filtered_count|default:0 }} results
+                  </span>
+                  <a href="{% url 'vendor_list' %}" class="btn btn-outline-secondary btn-sm px-4">
+                    <i class="bx bx-x me-1"></i>Clear Search
+                  </a>
+                </div>
+                {% endif %}
+              </div>
+              <div class="col-lg-2 col-md-4">
+                <button type="submit" class="md-filled-button w-100 px-6 py-3">
+                  <i class="bx bx-search me-2"></i>Search
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendors Table -->
+    <div class="md-card">
+      <div class="md-card-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <h5 class="mb-0 fw-semibold" style="color: #acaeb1; font-size: 24px;">
+            <i class="bx bx-store me-2 text-primary"></i>Vendor List
+            <span class="badge ms-3 px-4 py-2 fw-semibold rounded-pill bg-primary bg-opacity-20  border">
+              {{ page_obj.paginator.count|default:0 }} Total
+            </span>
+          </h5>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table md-table mb-0">
+          <thead>
+            <tr>
+              <th style="width: 80px;"><span class="table-header-text">ID</span></th>
+              <th style="width: 280px;"><span class="table-header-text">Shop Name</span></th>
+              <th style="width: 180px;"><span class="table-header-text">Contact</span></th>
+              <th style="width: 220px;"><span class="table-header-text">Location</span></th>
+              <th style="width: 160px;"><span class="table-header-text">Coordinates</span></th>
+              <th style="width: 160px;"><span class="table-header-text">GSTIN</span></th>
+              <th style="width: 120px;"><span class="table-header-text">Status</span></th>
+              <th style="width: 120px;" class="text-center"><span class="table-header-text">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for vendor in vendors %}
+            <tr class="table-row">
+              <td style="color: #1976d2; font-weight: 700; font-size: 16px;">
+                #{{ vendor.id }}
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  {% if vendor.shop_logo %}
+                  <div class="avatar-wrapper me-3">
+                    <img src="{{ vendor.shop_logo.url }}" alt="{{ vendor.shop_name }}" 
+                         class="avatar-img rounded-3" style="width: 56px; height: 56px; object-fit: cover; border: 2px solid #e8f0fe;">
+                  </div>
+                  {% else %}
+                  <div class="avatar-wrapper me-3 bg-primary text-white rounded-3 d-flex align-items-center justify-content-center" 
+                       style="width: 56px; height: 56px; font-weight: 700; font-size: 18px; border: 2px solid #1976d2;">
+                    {{ vendor.shop_name|slice:":1"|upper }}
+                  </div>
+                  {% endif %}
+                  <div class="flex-grow-1 min-w-0">
+                    <div class="fw-bold" style="color: #0f172a; font-size: 16px; margin-bottom: 4px;">
+                      {{ vendor.shop_name }}
+                    </div>
+                    <div class="text-muted small" style="color: #64748b;">{{ vendor.shop_description|truncatewords:8 }}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color: #1a202c;">
+                <div class="fw-semibold mb-1" style="font-size: 15px;">{{ vendor.phone|default:"—" }}</div>
+                <div class="small" style="color: #64748b;">
+                  <i class="bx bx-envelope me-1"></i>{{ vendor.email|truncatechars:25|default:"—" }}
+                </div>
+              </td>
+              <td style="color: #1a202c;">
+                <div class="fw-semibold mb-1">{{ vendor.city|default:"—" }}, {{ vendor.state|default:"—" }}</div>
+                <div class="small text-muted" style="color: #64748b;">{{ vendor.pincode|default:"—" }}</div>
+              </td>
+              <td>
+                {% if vendor.latitude and vendor.longitude %}
+                <span class="badge bg-info text-white px-3 py-2 rounded-pill fw-semibold" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;">
+                  <i class="bx bx-map-pin me-1"></i>{{ vendor.latitude|floatformat:4 }}, {{ vendor.longitude|floatformat:4 }}
+                </span>
+                {% else %}
+                <span class="text-muted small">Not set</span>
+                {% endif %}
+              </td>
+              <td style="color: #1a202c;">
+                {% if vendor.gstin %}
+                <div class="fw-bold text-primary small mb-1" style="color: #1976d2 !important;">{{ vendor.gstin }}</div>
+                <div class="text-muted xsmall" style="color: #94a3b8; font-size: 12px;">PAN: {{ vendor.pan|default:"N/A" }}</div>
+                {% else %}
+                <span class="text-muted small">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if vendor.is_active %}
+                <span class="badge bg-success text-white px-4 py-2 rounded-pill fw-semibold" style="background: linear-gradient(135deg, #22c55e, #16a34a) !important;">
+                  <i class="bx bx-check-circle me-1"></i>Active
+                </span>
+                {% else %}
+                <span class="badge bg-danger text-white px-4 py-2 rounded-pill fw-semibold" style="background: linear-gradient(135deg, #ef4444, #dc2626) !important;">
+                  <i class="bx bx-x-circle me-1"></i>Inactive
+                </span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2 p-2">
+                  <a href="{% url 'vendor_edit' vendor.id %}" 
+                     class="icon-btn icon-btn-primary" 
+                     {% comment %} data-bs-toggle="tooltip"  {% endcomment %}
+                     data-bs-placement="top"
+                     title="Edit Vendor">
+                    <i class="bx bx-edit"></i>
+                  </a>
+                  {% if is_superuser %}
+                  <button class="icon-btn icon-btn-danger" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#deleteModal"
+                          data-vendor-id="{{ vendor.id }}" 
+                          data-vendor-name="{{ vendor.shop_name }}"
+                          data-bs-toggle="tooltip" 
+                          data-bs-placement="top"
+                          title="Delete Vendor">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="text-center py-8">
+                <div class="empty-state">
+                  <i class="bx bx-store bx-lg mb-4" style="color: #64748b; font-size: 64px;"></i>
+                  <h5 class="mb-4 fw-semibold" style="color: #1a202c; font-size: 24px;">
+                    {% if search_query %}
+                      No vendors found matching "{{ search_query }}"
+                    {% else %}
+                      No vendors available
+                    {% endif %}
+                  </h5>
+                  <p class="mb-5 text-muted" style="color: #64748b; max-width: 400px; margin-inline: auto;">
+                    {% if search_query %}
+                      Try adjusting your search terms or filters
+                    {% else %}
+                      Get started by adding your first restaurant partner
+                    {% endif %}
+                  </p>
+                  {% if is_superuser %}
+                  <a href="{% url 'vendor_add' %}" class="md-filled-button px-8 py-3">
+                    <i class="bx bx-plus me-2"></i>Add First Vendor
+                  </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <div class="card-body border-top" style="border-color: #e8f0fe !important; padding: 24px !important;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div class="text-muted" style="color: #64748b;">
+            Showing <strong>{{ page_obj.start_index }} - {{ page_obj.end_index }}</strong> 
+            of <strong>{{ page_obj.paginator.count }}</strong> vendors
+          </div>
+          <nav aria-label="Vendor pagination">
+            {% include 'partials/pagination.html' with page_obj=page_obj %}
+          </nav>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 24px; border: 1px solid #e8f0fe;">
+      <form id="deleteForm" method="post">
+        {% csrf_token %}
+        <div class="modal-header" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border-radius: 24px 24px 0 0;">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-white bg-opacity-20 p-3">
+              <i class="bx bx-trash" style="font-size: 24px;"></i>
+            </div>
+            <div>
+              <h5 class="modal-title mb-0 fw-bold">Confirm Deletion</h5>
+              <small class="opacity-75">This action cannot be undone</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center py-5 px-4">
+          <div class="mb-4">
+            <i class="bx bx-error-circle text-danger" style="font-size: 64px; color: #ef4444;"></i>
+          </div>
+          <h6 class="mb-4 fw-semibold" style="color: #1a202c;">Delete this vendor permanently?</h6>
+          <div class="fw-semibold fs-5 mb-3 text-primary" id="vendorName" style="color: #1976d2;"></div>
+          <div class="alert alert-warning bg-warning bg-opacity-10 border-warning mb-0 py-3">
+            <i class="bx bx-info-circle me-2 text-warning"></i>
+            All associated data will be permanently removed
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 px-4 pb-4">
+          <button type="button" class="btn btn-outline-secondary px-6 py-3" data-bs-dismiss="modal">
+            <i class="bx bx-x me-2"></i>Cancel
+          </button>
+          <button type="submit" class="btn btn-danger px-6 py-3 fw-semibold">
+            <i class="bx bx-trash me-2"></i>Delete Vendor
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// FIXED Interactions - PERFECT VISIBILITY + TOOLTIP POSITIONING
+document.addEventListener("DOMContentLoaded", function() {
+  // Auto-show Material Design toasts
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 6000 }).show();
+  });
+
+  // Delete modal handler
+  const deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const vendorId = button.getAttribute('data-vendor-id');
+      const vendorName = button.getAttribute('data-vendor-name');
+      const vendorNameField = document.getElementById('vendorName');
+      const deleteForm = document.getElementById('deleteForm');
+      const actionUrl = "{% url 'vendor_delete' 0 %}".replace("0", vendorId);
+
+      vendorNameField.textContent = '"' + vendorName + '"';
+      deleteForm.setAttribute("action", actionUrl);
+    });
+  }
+
+  // FIXED Tooltips - Perfect positioning
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+    new bootstrap.Tooltip(tooltipTriggerEl, {
+      container: 'body',
+      trigger: 'hover focus',
+      placement: 'top',
+      delay: { "show": 200, "hide": 100 }
+    });
+  });
+
+  // Button hover effects ONLY (no row elevation)
+  document.querySelectorAll('.icon-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px)';
+      this.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+    });
+    btn.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+      this.style.boxShadow = '';
+    });
+  });
+});
+</script>
+
+<style>
+/* PERFECT TABLE VISIBILITY - WHITE BG WITH DARK TEXT */
+.table-header-text {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.md-table {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-radius: 0 0 24px 24px !important;
+}
+
+.md-table thead th {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+  color: white !important;
+  padding: 20px 24px !important;
+  border: none !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+}
+
+.md-table tbody td {
+  padding: 24px !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  vertical-align: middle !important;
+}
+
+.md-table tbody tr:nth-child(even) td {
+  background: #fafbff !important;
+}
+
+.md-table tbody tr:hover td {
+  background: #f0f9ff !important;
+  color: #0f172a !important;
+}
+
+/* ICON BUTTONS - FIXED */
+.icon-btn {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  font-size: 18px !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  position: relative !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.icon-btn-primary {
+  background: #1976d2 !important;
+  color: white !important;
+}
+
+.icon-btn-danger {
+  background: #ef4444 !important;
+  color: white !important;
+}
+
+.icon-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* SEARCH INPUT */
+.md-search-wrapper input {
+  border: 2px solid #e8f0fe !important;
+  background: white !important;
+  color: #1a202c !important;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #1a202c;
+}
+
+.xsmall { font-size: 12px !important; }
+</style>
+
+{% endblock %}

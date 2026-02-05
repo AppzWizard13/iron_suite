@@ -2,171 +2,191 @@
 {% load static %}
 
 {% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-semi-bold py-3 mb-4">
-      <span class="text-muted fw-light">Manage /</span> Inactive Member
-    </h4>
-
-    <!-- Toast Messages -->
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050" id="toastContainer"></div>
-
-    <!-- Unblock Confirmation Modal -->
-    <div class="modal fade" id="unblockModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Confirm Unblock</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Are you sure you want to unblock <strong id="unblockUserName"></strong>?</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-success" id="confirmUnblock">Unblock</button>
-          </div>
+    
+    <!-- Material Design Header -->
+    <div class="md-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-0">Inactive Members</h1>
+          <p class="md-subtitle">Manage members with expired subscriptions</p>
         </div>
+        <a href="{% url 'user_list' %}" class="md-filled-button">
+          <i class="bx bx-arrow-back me-2"></i>Back to All Users
+        </a>
       </div>
     </div>
 
-    <div class="card mb-4">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Inactive Member List</h5>
-        <div>
-          <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">
-            <i class="bx bx-arrow-back me-1"></i> Back to All Users
-          </a>
-        </div>
+    <!-- Toast Messages -->
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060" id="toastContainer"></div>
+
+    <!-- Main Content Card -->
+    <div class="md-card">
+      <div class="md-card-header">
+        <h5 class="mb-0 fw-semibold" style="color: var(--md-sys-color-on-surface); font-size: 24px;">
+          Inactive Member List
+          <span class="badge ms-3 px-4 py-2 fw-semibold rounded-pill md-role-badge">
+            {{ users|length }}
+          </span>
+        </h5>
       </div>
-      <div class="card-body">
-        <div class="table-responsive text-nowrap">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>inactive Since</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="table-border-bottom-0">
-              {% for user in users %}
-              <tr id="user-row-{{ user.username }}">
-                <td><strong>{{ user.member_id }}</strong></td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.get_full_name }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.package_expiry_date|date:"Y-m-d" }}</td>
-                <td class="text-center">
-                    {% if not user.on_subscription %}
-                      <a href="{% url 'choose_package' member_id=user.member_id %}" class="btn btn-icon btn-primary">
-                        <i class="bx bx-refresh"></i>
-                      </a>
-                    {% endif %}
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="6" class="text-center py-4">
-                  <div class="text-muted">No Inactive Member found</div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+
+      <div class="table-responsive">
+        <table class="table md-table mb-0">
+          <thead>
+            <tr>
+              <th style="width: 90px;">
+                <span class="text-white fw-semibold">ID</span>
+              </th>
+              <th style="width: 160px;">
+                <span class="text-white fw-semibold">Username</span>
+              </th>
+              <th style="width: 200px;">
+                <span class="text-white fw-semibold">Name</span>
+              </th>
+              <th style="width: 220px;">
+                <span class="text-white fw-semibold">Email</span>
+              </th>
+              <th style="width: 180px;">
+                <span class="text-white fw-semibold">Inactive Since</span>
+              </th>
+              <th style="width: 120px;" class="text-center">
+                <span class="text-white fw-semibold">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr id="user-row-{{ user.username }}">
+              <td><span class="fw-bold text-muted fs-5">#{{ user.member_id }}</span></td>
+              <td>
+                <div class="fw-bold" style="color: var(--md-sys-color-on-surface); font-size: 16px;">
+                  {{ user.username }}
+                </div>
+              </td>
+              <td>
+                <span class="fw-semibold text-muted">{{ user.get_full_name }}</span>
+              </td>
+              <td>
+                <span class="fw-semibold">{{ user.email|default:"—" }}</span>
+              </td>
+              <td>
+                <span class="fw-semibold text-muted">{{ user.package_expiry_date|date:"M d, Y"|default:"Never" }}</span>
+              </td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-3">
+                  {% if not user.on_subscription %}
+                  <a href="{% url 'choose_package' member_id=user.member_id %}" 
+                     class="md-icon-button md-icon-button-primary" title="Renew Subscription">
+                    <i class="bx bx-refresh"></i>
+                  </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="md-empty-state">
+                  <div class="md-empty-icon">
+                    <i class="bx bx-time-five" style="color: var(--md-sys-color-on-primary-container);"></i>
+                  </div>
+                  <h5 class="mb-4 fw-semibold" style="color: var(--md-sys-color-on-surface);">
+                    No inactive members found
+                  </h5>
+                  <a href="{% url 'user_list' %}" class="md-filled-button px-6">
+                    <i class="bx bx-arrow-back me-2"></i>View All Members
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Material Design Toast Container (empty - populated by JS) -->
+<!-- No modal needed for this page since it only has renew actions -->
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-  const unblockModal = document.getElementById('unblockModal');
-  let currentUserId = null;
-  let currentUserName = null;
-
-  // Set up modal when shown
-  unblockModal.addEventListener('show.bs.modal', function(event) {
-    const button = event.relatedTarget;
-    currentUserId = button.getAttribute('data-user-id');
-    currentUserName = button.getAttribute('data-user-name');
-    document.getElementById('unblockUserName').textContent = currentUserName;
-  });
-
-  // Confirm unblock button handler
-  document.getElementById('confirmUnblock').addEventListener('click', async function() {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                       document.cookie.match(/csrftoken=([^;]+)/)?.[1];
-    
-    try {
-      const response = await fetch(`/unblock-user/${currentUserId}/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({})
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to unblock user');
-      }
-
-      if (data.success) {
-        showToast(data.message, 'success');
-        // Remove the row from table
-        document.getElementById(`user-row-${currentUserId}`).remove();
-        
-        // If no users left, show empty message
-        if (document.querySelectorAll('tbody tr').length === 1) { // Only empty row left
-          document.querySelector('tbody').innerHTML = `
-            <tr>
-              <td colspan="6" class="text-center py-4">
-                <div class="text-muted">No Inactive Member found</div>
-              </td>
-            </tr>
-          `;
-        }
-      } else {
-        throw new Error(data.message || 'Failed to unblock user');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      showToast(`Error: ${error.message}`, 'danger');
-    } finally {
-      // Hide the modal
-      bootstrap.Modal.getInstance(unblockModal).hide();
-    }
-  });
-
-  // Toast function
+  // Enhanced Material Design toast function
   function showToast(message, type) {
     const toastContainer = document.getElementById('toastContainer');
     const toastId = `toast-${Date.now()}`;
     
+    const bgColor = type === 'error' ? '#fef2f2' : '#f0fdf4';
+    const borderColor = type === 'error' ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-success)';
+    const iconClass = type === 'error' ? 'bx-error-circle' : 'bx-check-circle';
+    const iconColor = type === 'error' ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-success)';
+    
     toastContainer.insertAdjacentHTML('beforeend', `
-      <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert">
-        <div class="d-flex">
-          <div class="toast-body">${message}</div>
-          <button class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+      <div id="${toastId}" class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: ${bgColor}; border-left: 5px solid ${borderColor} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: ${type === 'error' ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)'}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx ${iconClass}" style="font-size: 20px; color: ${iconColor};"></i>
+            </div>
+            <span class="fw-medium fs-6">${message}</span>
+          </div>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
         </div>
       </div>
     `);
     
     const toastEl = document.getElementById(toastId);
-    new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 }).show();
+    new bootstrap.Toast(toastEl).show();
     
     toastEl.addEventListener('hidden.bs.toast', () => {
       toastEl.remove();
     });
   }
+
+  // Material ripple effect on buttons
+  document.querySelectorAll('.md-filled-button, .md-icon-button').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.cssText = `
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        transform: scale(0);
+        animation: md-ripple 0.6s linear;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        pointer-events: none;
+      `;
+      
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+
+  // Auto-dismiss any existing toasts on page load
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 6000 }).show();
+  });
 });
 </script>
+
 {% endblock %}

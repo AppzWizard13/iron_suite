@@ -1,160 +1,353 @@
 {% extends 'advadmin/index.html' %}
 {% load static %}
+
 {% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-semi-bold py-3 mb-4">
-      <span class="text-muted fw-light">Manage /</span> 
-      {% if transaction_type == 'income' %}
-        Income Transactions
-      {% elif transaction_type == 'expense' %}
-        Expense Transactions
-      {% else %}
-        Transactions
-      {% endif %}
-    </h4>
-
-    <!-- Toast Messages -->
-    {% if messages %}
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
-      {% for message in messages %}
-      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ message }}
+    
+    <!-- Material Design Header - PERFECTLY RESPONSIVE -->
+    <div class="md-header mb-5">
+      <div class="container-fluid">
+        <div class="row align-items-start g-4 g-lg-0">
+          <!-- Left Content -->
+          <div class="col-lg-8 col-xl-9">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 gap-sm-0">
+              <!-- Title Section -->
+              <div>
+                <h1 class="md-title mb-1 mb-sm-2 mx-5">
+                  {% if transaction_type == 'income' %}
+                    <i class="bx bx-trending-up text-success me-3"></i>
+                    Income Transactions
+                  {% elif transaction_type == 'expense' %}
+                    <i class="bx bx-trending-down text-danger me-3"></i>
+                    Expense Transactions  
+                  {% else %}
+                    <i class="bx bx-grid-alt text-primary me-3"></i>
+                    All Transactions
+                  {% endif %}
+                </h1>
+                <p class="md-subtitle mb-0">
+                  {% if transaction_type == 'income' %}
+                    Revenue from all payment sources and membership fees
+                  {% elif transaction_type == 'expense' %}
+                    Track business expenses, vendor payments and operational costs
+                  {% else %}
+                    Complete financial overview across all transaction types
+                  {% endif %}
+                </p>
+              </div>
+              
+              <!-- Quick Stats (Desktop Only) -->
+              <div class="d-none d-lg-flex gap-4 align-items-center text-muted mx-5">
+                <div class="text-center">
+                  <div class="fs-3 fw-bold text-primary">{{ transactions|length }}</div>
+                  <small>Total Records</small>
+                </div>
+                {% if transaction_type == 'income' %}
+                <div class="text-center">
+                  <div class="fs-3 fw-bold text-success">₹{{ total_income|default:0|floatformat:0 }}</div>
+                  <small>Total Income</small>
+                </div>
+                {% elif transaction_type == 'expense' %}
+                <div class="text-center">
+                  <div class="fs-3 fw-bold text-danger">₹{{ total_expense|default:0|floatformat:0 }}</div>
+                  <small>Total Expense</small>
+                </div>
+                {% endif %}
+              </div>
+            </div>
           </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          
+          <!-- Right Actions - Mobile Stacked -->
+          <div class="col-lg-4 col-xl-3 ml-5">
+            <div class="d-flex flex-wrap gap-2 justify-content-lg-end justify-content-center">
+              <!-- Income Button -->
+              {% if transaction_type != 'income' %}
+              <a href="{% url 'transaction_list' 'income' %}" 
+                class="md-tab-button md-tab-income" 
+                title="View all income transactions">
+                <div class="md-tab-icon">
+                  <i class="bx bx-trending-up"></i>
+                </div>
+                <span class="md-tab-label">Income</span>
+                <div class="md-tab-indicator"></div>
+              </a>
+              {% endif %}
+
+              <!-- Expense Button -->
+              {% if transaction_type != 'expense' %}
+              <a href="{% url 'transaction_list' 'expense' %}" 
+                class="md-tab-button md-tab-expense" 
+                title="View all expense transactions">
+                <div class="md-tab-icon">
+                  <i class="bx bx-trending-down"></i>
+                </div>
+                <span class="md-tab-label">Expenses</span>
+                <div class="md-tab-indicator"></div>
+              </a>
+              {% endif %}
+
+              <!-- All Button (Active/Primary) -->
+              <a href="{% url 'transaction_list' 'all' %}" 
+                class="md-tab-button md-tab-all md-tab-active" 
+                title="View all transactions">
+                <div class="md-tab-icon">
+                  <i class="bx bx-grid-alt"></i>
+                </div>
+                <span class="md-tab-label">All</span>
+                <div class="md-tab-indicator"></div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Enhanced Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
+      {% for message in messages %}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
+          </div>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
         </div>
       </div>
       {% endfor %}
     </div>
     {% endif %}
-<!-- Filter Form -->
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Filter Transactions</h5>
-    </div>
-    <div class="card-body">
-      <form method="GET" action="{% url 'transaction_list' transaction_type %}">
-        <div class="row">
-          <div class="col-md-4">
-            <label for="date_from" class="form-label">Date From</label>
-            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+
+    <!-- Filter Card -->
+    <div class="row g-4 mb-5">
+      <div class="col-12">
+        <div class="md-card">
+          <div class="md-card-header">
+            <h5 class="mb-0 fw-semibold">Filter Transactions</h5>
           </div>
-          <div class="col-md-4">
-            <label for="date_to" class="form-label">Date To</label>
-            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
-          </div>
-          <div class="col-md-4">
-            <label for="status" class="form-label">Status</label>
-            <select class="form-select" id="status" name="status">
-              <option value="">All</option>
-              {% for value, name in status_choices %}
-              <option value="{{ value }}" {% if value == request.GET.status %}selected{% endif %}>{{ name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label for="category" class="form-label">Category</label>
-            <select class="form-select" id="category" name="category">
-              <option value="">All</option>
-              {% for value, name in category_choices %}
-              <option value="{{ value }}" {% if value == request.GET.category %}selected{% endif %}>{{ name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-4">
-            <button type="submit" class="btn btn-primary mt-3">Filter</button>
+          <div class="card-body p-5">
+            <form method="GET" action="{% url 'transaction_list' transaction_type %}" class="row g-4">
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold mb-2 md-field-label">Date From</label>
+                <div class="md-field-wrapper">
+                  <input type="date" class="form-control" id="date_from" name="date_from" 
+                         value="{{ date_from }}" placeholder="Start date">
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold mb-2 md-field-label">Date To</label>
+                <div class="md-field-wrapper">
+                  <input type="date" class="form-control" id="date_to" name="date_to" 
+                         value="{{ date_to }}" placeholder="End date">
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold mb-2 md-field-label">Status</label>
+                <div class="md-field-wrapper">
+                  <select class="form-select" id="status" name="status">
+                    <option value="">All Status</option>
+                    {% for value, name in status_choices %}
+                    <option value="{{ value }}" {% if value == request.GET.status %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold mb-2 md-field-label">Category</label>
+                <div class="md-field-wrapper">
+                  <select class="form-select" id="category" name="category">
+                    <option value="">All Categories</option>
+                    {% for value, name in category_choices %}
+                    <option value="{{ value }}" {% if value == request.GET.category %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="d-flex justify-content-end gap-3">
+                  <button type="submit" class="md-filled-button px-6 py-3">
+                    <i class="bx bx-filter-alt me-2"></i>Apply Filters
+                  </button>
+                  <a href="{% url 'transaction_list' transaction_type %}" class="md-outlined-button px-6 py-3">
+                    <i class="bx bx-refresh me-2"></i>Clear All
+                  </a>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
-      </form>
+      </div>
     </div>
-  </div>
 
-    <!-- Transaction List -->
-    <div class="card mb-4">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">All Transactions</h5>
-        <div class="d-flex gap-3">
-          <form method="GET" action="{% url 'transaction_list' transaction_type %}" class="d-flex">
-            <div class="input-group input-group-merge">
-              <span class="input-group-text"><i class="bx bx-search"></i></span>
-              <input 
-                type="text" 
-                name="q" 
-                class="form-control" 
-                placeholder="Search transactions..." 
-                value="{{ request.GET.q }}"
-              >
-              {% if request.GET.q %}
-              <a href="{% url 'transaction_list' transaction_type %}" class="btn btn-outline-secondary">
-                <i class="bx bx-x"></i>
-              </a>
-              {% endif %}
+    <!-- Main Transactions Table -->
+    <div class="md-card">
+      <div class="md-card-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <h5 class="mb-0 fw-semibold" style="color: var(--md-sys-color-on-surface); font-size: 24px;">
+            All Transactions
+            <span class="badge ms-3 px-4 py-2 fw-semibold rounded-pill md-role-badge">
+              {{ transactions|length }}
+            </span>
+          </h5>
+          
+          <!-- Search Form -->
+          <form method="GET" action="{% url 'transaction_list' transaction_type %}" class="d-flex gap-2">
+            <div class="position-relative">
+              <div class="md-search-wrapper">
+                <i class="bx bx-search position-absolute top-50 start-0 translate-middle-y ms-4" style="z-index: 10; color: var(--md-sys-color-outline);"></i>
+                <input 
+                  type="text" 
+                  name="q" 
+                  class="form-control ps-5" 
+                  placeholder="Search transactions, references..." 
+                  value="{{ request.GET.q }}"
+                  style="border-radius: 50px; padding: 16px 24px 16px 56px;"
+                >
+              </div>
             </div>
-            <button type="submit" class="btn btn-primary ms-2">Search</button>
+            {% if request.GET.q %}
+            <a href="{% url 'transaction_list' transaction_type %}" class="md-icon-button md-icon-button-danger" title="Clear search">
+              <i class="bx bx-x"></i>
+            </a>
+            {% endif %}
+            <button type="submit" class="md-filled-button px-5" style="border-radius: 50px;">
+              <i class="bx bx-search"></i>
+            </button>
           </form>
         </div>
       </div>
-      <div class="card-body">
-        <div class="table-responsive text-nowrap">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Reference</th>
-                <th>Type</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="table-border-bottom-0">
-              {% for transaction in transactions %}
-              <tr>
-                <td><strong>{{ transaction.id }}</strong></td>
-                <td>{{ transaction.reference }}</td>
-                <td>{{ transaction.get_transaction_type_display }}</td>
-                <td>{{ transaction.get_category_display }}</td>
-                <td>
-                  <span class="badge bg-label-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'refunded' %}danger{% else %}primary{% endif %}">
-                    {{ transaction.get_status_display }}
-                  </span>
-                </td>
-                <td>${{ transaction.amount }}</td>
-                <td>{{ transaction.date}}</td>
-                <td class="text-center">
-                  <div class="d-flex justify-content-center gap-2">
-                    <!-- View Button -->
-                    <a href="{% url 'transaction_detail' transaction.id %}" class="btn btn-icon btn-secondary">
-                      <i class="bx bx-show"></i>
+
+      <div class="table-responsive">
+        <table class="table md-table mb-0">
+          <thead>
+            <tr>
+              <th style="width: 80px;">
+                <span class="text-white fw-semibold">ID</span>
+              </th>
+              <th style="width: 200px;">
+                <span class="text-white fw-semibold">Reference</span>
+              </th>
+              <th style="width: 120px;">
+                <span class="text-white fw-semibold">Type</span>
+              </th>
+              <th style="width: 140px;">
+                <span class="text-white fw-semibold">Category</span>
+              </th>
+              <th style="width: 130px;">
+                <span class="text-white fw-semibold">Status</span>
+              </th>
+              <th style="width: 140px;">
+                <span class="text-white fw-semibold">Amount</span>
+              </th>
+              <th style="width: 140px;">
+                <span class="text-white fw-semibold">Date</span>
+              </th>
+              <th style="width: 100px;" class="text-center">
+                <span class="text-white fw-semibold">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in transactions %}
+            <tr class="transaction-row" data-id="{{ transaction.id }}">
+              <td>
+                <span class="fw-bold text-muted fs-5">#{{ transaction.id|floatformat:0 }}</span>
+              </td>
+              <td>
+                <div class="fw-semibold" style="color: var(--md-sys-color-on-surface); font-size: 15px;">
+                  {{ transaction.reference|truncatechars:30 }}
+                </div>
+              </td>
+              <td>
+                <span class="fw-semibold px-3 py-1 rounded-pill" 
+                      style="background: {% if transaction.transaction_type == 'income' %}rgba(34,197,94,0.15){% else %}rgba(239,68,68,0.15){% endif %}; 
+                             color: {% if transaction.transaction_type == 'income' %}#22c55e{% else %}#ef4444{% endif %};">
+                  {{ transaction.get_transaction_type_display }}
+                </span>
+              </td>
+              <td>
+                <span class="fw-semibold text-muted">{{ transaction.get_category_display|default:"—" }}</span>
+              </td>
+              <td>
+                <span class="badge fs-6 fw-semibold px-3 py-2 rounded-pill 
+                             {% if transaction.status == 'completed' %}md-badge-success
+                             {% elif transaction.status == 'refunded' %}md-badge-danger
+                             {% elif transaction.status == 'pending' %}md-badge-warning
+                             {% else %}md-badge-primary{% endif %}">
+                  {{ transaction.get_status_display }}
+                </span>
+              </td>
+              <td>
+                <span class="fw-bold fs-5 {% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                  {% if transaction.transaction_type == 'income' %}+{% endif %}
+                  ${{ transaction.amount|floatformat:2 }}
+                </span>
+              </td>
+              <td>
+                <span class="fw-semibold text-muted">{{ transaction.date|date:"M d, Y H:i"|default:"—" }}</span>
+              </td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center">
+                  <a href="{% url 'transaction_detail' transaction.id %}" 
+                     class="md-icon-button md-icon-button-primary" 
+                     title="View Details">
+                    <i class="bx bx-show"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8">
+                <div class="md-empty-state">
+                  <div class="md-empty-icon">
+                    <i class="bx bx-credit-card" style="color: var(--md-sys-color-on-primary-container); font-size: 48px;"></i>
+                  </div>
+                  <h5 class="mb-4 fw-semibold" style="color: var(--md-sys-color-on-surface);">
+                    No transactions found
+                  </h5>
+                  <p class="mb-4 text-muted">No transactions match your current filters</p>
+                  <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{% url 'transaction_list' transaction_type %}" class="md-filled-button px-6">
+                      <i class="bx bx-refresh me-2"></i>Clear Filters
                     </a>
                   </div>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="8" class="text-center py-4">
-                  <div class="text-muted">No transactions found</div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Pagination -->
-        {% if is_paginated %}
-        <div class="mt-4">
-          <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
+      <!-- Material Design Pagination -->
+      {% if is_paginated %}
+      <div class="card-body border-top" style="border-color: rgba(25, 118, 210, 0.1) !important;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div class="text-muted">
+            Showing <strong>{{ page_obj.start_index }} - {{ page_obj.end_index }}</strong> 
+            of <strong>{{ page_obj.paginator.count }}</strong> transactions
+          </div>
+          
+          <nav aria-label="Transaction pagination">
+            <ul class="pagination md-pagination mb-0">
               {% if page_obj.has_previous %}
-              <li class="page-item prev">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
-                  <i class="tf-icon bx bx-chevron-left"></i>
+              <li class="page-item">
+                <a class="page-link md-pagination-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                  <i class="bx bx-chevron-left"></i>
                 </a>
               </li>
               {% endif %}
@@ -162,29 +355,93 @@
               {% for num in page_obj.paginator.page_range %}
                 {% if page_obj.number == num %}
                 <li class="page-item active">
-                  <a class="page-link" href="#">{{ num }}</a>
+                  <span class="page-link md-pagination-active">{{ num }}</span>
                 </li>
                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                 <li class="page-item">
-                  <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
+                  <a class="page-link md-pagination-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">{{ num }}</a>
                 </li>
                 {% endif %}
               {% endfor %}
               
               {% if page_obj.has_next %}
-              <li class="page-item next">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
-                  <i class="tf-icon bx bx-chevron-right"></i>
+              <li class="page-item">
+                <a class="page-link md-pagination-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                  <i class="bx bx-chevron-right"></i>
                 </a>
               </li>
               {% endif %}
             </ul>
           </nav>
         </div>
-        {% endif %}
       </div>
+      {% endif %}
     </div>
   </div>
 </div>
+
+<script>
+// Material Design Table Interactions
+document.addEventListener("DOMContentLoaded", function() {
+  // Auto-show Material Design toasts
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 6000 }).show();
+  });
+
+  // Table row hover effects
+  document.querySelectorAll('.transaction-row').forEach(row => {
+    row.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px)';
+      this.style.boxShadow = '0 8px 32px rgba(25, 118, 210, 0.12)';
+    });
+    
+    row.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+      this.style.boxShadow = '';
+    });
+  });
+
+  // Search form live search (debounced)
+  const searchInput = document.querySelector('input[name="q"]');
+  if (searchInput) {
+    let timeout;
+    searchInput.addEventListener('input', function() {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        this.form.submit();
+      }, 500);
+    });
+  }
+
+  // Material ripple effect on buttons
+  document.querySelectorAll('.md-filled-button, .md-outlined-button, .md-icon-button').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.cssText = `
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        transform: scale(0);
+        animation: md-ripple 0.6s linear;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        pointer-events: none;
+      `;
+      
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+});
+</script>
 
 {% endblock %}

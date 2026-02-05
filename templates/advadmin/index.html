@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/theme-default.css' %}" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{% static 'advadmin/assets/css/demo.css' %}" />
 
+    <link rel="stylesheet" href="{% static 'mob-custom/theme-index.css' %}">
+
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}" />
 
@@ -75,9 +77,7 @@
       /* margin-right: 0px !important;
       /* margin-left: 0px !important;
     }
-    {% comment %} .card{
-      min-height: 900px !important;
-    } {% endcomment %}
+
 
 		h1, h2, h3, h4, h5, h6 {
 		font-family: 'Poppins', sans-serif;
@@ -133,6 +133,8 @@
         opacity: 1;
       }
     }
+
+    
   </style>
     <!-- Toast Messages -->
     {% if messages %}
@@ -208,6 +210,12 @@
               <div data-i18n="All Members">All Members</div>
             </a>
           </li>
+          <li class="menu-item {% if page_name == 'customer_list' %}active{% endif %}">
+            <a href="{% url 'customer_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-user-check"></i>
+              <div data-i18n="All Customers">All Customers</div>
+            </a>
+          </li>
           <li class="menu-item {% if page_name == 'blocked_users' %}active{% endif %}">
             <a href="{% url 'blocked_users' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-user-x"></i>
@@ -234,7 +242,7 @@
           </li>
 
           <!-- Monitoring -->
-          <li class="menu-header small text-uppercase">
+          {% comment %} <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Monitoring</span>
           </li>
           <li class="menu-item {% if page_name == 'view_attendance' %}active{% endif %}">
@@ -273,9 +281,9 @@
               <i class="menu-icon tf-icons bx bx-log-in-circle"></i>
               <div data-i18n="Check-in Logs">Check-in Logs</div>
             </a>
-          </li>
+          </li> {% endcomment %}
 
-          <!-- Operations -->
+          {% comment %} <!-- Operations -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">WORKOUT MANAGEMENT</span>
           </li>
@@ -354,7 +362,7 @@
                 </a>
               </li>
             </ul>
-          </li>
+          </li> {% endcomment %}
 
           {% comment %} <!-- User Workouts (for users) -->
           <li class="menu-item {% if page_name == 'user_dashboard' or page_name == 'workout_calendar' or page_name == 'session_history' %}active open{% endif %}">
@@ -386,7 +394,7 @@
 
 
 
-
+{% comment %} 
 
 
           <li class="menu-item {% if page_name == 'diet_plans' %}active{% endif %}">
@@ -428,7 +436,7 @@
               <i class="menu-icon tf-icons bx bx-refresh"></i>
               <div data-i18n="Renewals">Renewals</div>
             </a>
-          </li>
+          </li> {% endcomment %}
 
 
           <!-- Accounts Management -->
@@ -469,18 +477,19 @@
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Admin</span>
           </li>
-          <li class="menu-item {% if page_name == 'gym_admin' %}active{% endif %}">
+          <li class="menu-item {% if page_name == 'manage_vendor' %}active{% endif %}">
+            <a href="{% url 'vendor_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
+              <div data-i18n="Roles & Permissions">Manage Stall</div>
+            </a>
+          </li>
+          <li class="menu-item {% if page_name == 'vendor_admin' %}active{% endif %}">
             <a href="{% url 'staff_by_role' role='Admin' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-run"></i>
-              <div data-i18n="Manage GYM Admin">Manage GYM Admin</div>
+              <div data-i18n="Manage GYM Admin">Manage Vendor</div>
             </a>
           </li>
-          <li class="menu-item {% if page_name == 'manage_gym' %}active{% endif %}">
-            <a href="{% url 'gym_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
-              <div data-i18n="Roles & Permissions">Manage GYM</div>
-            </a>
-          </li>
+
           <li class="menu-item {% if page_name == 'roles_permissions' %}active{% endif %}">
             <a href="#" class="menu-link">
               <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
@@ -544,7 +553,7 @@
             </a>
           </li>
 
-          <!-- Layouts -->
+          {% comment %} <!-- Layouts -->
           <li class="menu-item {% if page_name == 'layouts' %}active{% endif %}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
               <i class="menu-icon tf-icons bx bx-layout"></i>
@@ -577,7 +586,7 @@
                 </a>
               </li>
             </ul>
-          </li>
+          </li> {% endcomment %}
           <li class="menu-item {% if page_name == 'account_settings' %}active{% endif %}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
               <i class="menu-icon tf-icons bx bx-dock-top"></i>
@@ -624,6 +633,67 @@
               </li>
             </ul>
           </li>
+          <li class="menu-item {% if page_name == 'ecommerce' %}active{% endif %}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <i class="menu-icon tf-icons bx bx-cart-alt"></i>
+              <div data-i18n="E-commerce">E-commerce</div>
+            </a>
+            <ul class="menu-sub">
+              <li class="menu-item {% if page_name == 'orders' %}active{% endif %}">
+                <a href="{% url 'ecommerce:order_list' %}" class="menu-link">
+                  <div data-i18n="Orders">Orders</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'customer_addresses' %}active{% endif %}">
+                <a href="{% url 'ecommerce:customer_address_list' %}" class="menu-link">
+                  <div data-i18n="Customer Addresses">Customer Addresses</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'carts' %}active{% endif %}">
+                <a href="{% url 'ecommerce:cart_list' %}" class="menu-link">
+                  <div data-i18n="Carts">Carts</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'wishlists' %}active{% endif %}">
+                <a href="{% url 'ecommerce:wishlist_list' %}" class="menu-link">
+                  <div data-i18n="Wishlists">Wishlists</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'order_items' %}active{% endif %}">
+                <a href="{% url 'ecommerce:order_item_list' %}" class="menu-link">
+                  <div data-i18n="Order Items">Order Items</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'transactions' %}active{% endif %}">
+                <a href="{% url 'ecommerce:transaction_list' %}" class="menu-link">
+                  <div data-i18n="Transactions">Transactions</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'invoices' %}active{% endif %}">
+                <a href="{% url 'ecommerce:invoice_list' %}" class="menu-link">
+                  <div data-i18n="Invoices">Invoices</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'riders' %}active{% endif %}">
+                <a href="{% url 'ecommerce:rider_list' %}" class="menu-link">
+                  <div data-i18n="Riders">Riders</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'reviews' %}active{% endif %}">
+                <a href="{% url 'ecommerce:review_list' %}" class="menu-link">
+                  <div data-i18n="Reviews">Reviews</div>
+                </a>
+              </li>
+              <li class="menu-item {% if page_name == 'order_status_history' %}active{% endif %}">
+                <a href="{% url 'ecommerce:order_status_history_list' %}" class="menu-link">
+                  <div data-i18n="Order Status History">Order Status History</div>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+
+
           <li class="menu-item {% if page_name == 'misc' %}active{% endif %}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
               <i class="menu-icon tf-icons bx bx-cube-alt"></i>
@@ -642,7 +712,7 @@
               </li>
             </ul>
           </li>
-          <li class="menu-header small text-uppercase"><span class="menu-header-text">Components</span></li>
+          {% comment %} <li class="menu-header small text-uppercase"><span class="menu-header-text">Components</span></li>
           <li class="menu-item {% if page_name == 'cards' %}active{% endif %}">
             <a href="cards-basic.html" class="menu-link">
               <i class="menu-icon tf-icons bx bx-collection"></i>
@@ -824,7 +894,7 @@
               <div data-i18n="Tables">Tables</div>
             </a>
           </li>
-          
+           {% endcomment %}
 
           <!-- Misc -->
           <li class="menu-header small text-uppercase"><span class="menu-header-text">Misc</span></li>
@@ -867,7 +937,7 @@
 
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
               <!-- Search -->
-              <div class="navbar-nav align-items-center">
+              {% comment %} <div class="navbar-nav align-items-center">
                 <div class="nav-item d-flex align-items-center">
                   <i class="bx bx-search fs-4 lh-0"></i>
                   <input
@@ -877,7 +947,7 @@
                     aria-label="Search..."
                   />
                 </div>
-              </div>
+              </div> {% endcomment %}
               <!-- /Search -->
 
               <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -896,7 +966,6 @@
                       <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}" 
                            class="rounded-circle border border-2" 
                            style="width: 40px; height: 40px; object-fit: cover;" 
-                           alt="Profile Image" />
                       <span class="status-indicator {% if user.is_active %}online{% else %}offline{% endif %}"></span>
                   </div>
                   
@@ -910,7 +979,7 @@
                               <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}"
                               class="rounded-circle border border-2" 
                               style="width: 40px; height: 40px; object-fit: cover;" 
-                              alt="Profile Image" />
+  
                             </div>
                           </div>
                           <div class="flex-grow-1">
@@ -1183,7 +1252,7 @@
 
 
             <div class="col-lg-12 col-md-12 order-1">
-                <!-- Active Membership Trends -->
+                {% comment %} <!-- Active Membership Trends -->
                 <style>
                   #totalRevenueChart,
                   #growthChart {
@@ -1287,7 +1356,7 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> {% endcomment %}
               <div class="row">
                 <!-- Membership & Subscription Overview -->
                 <div class="col-md-4 col-lg-4 col-xl-4 mb-4">
