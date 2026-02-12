@@ -1,0 +1,62 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+ <link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="md-header">
+      <h1 class="md-title">{% if object %}Edit{% else %}Add{% endif %} Product</h1>
+    </div>
+
+    <div class="md-card p-5">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="row g-4">
+          {% for field in form %}
+          <div class="col-md-{% if field.name == 'description' %}12{% else %}6{% endif %}">
+            <label class="form-label fw-bold" style="color: var(--md-sys-color-on-surface)">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="text-danger mt-1 small">{{ field.errors }}</div>
+            {% endif %}
+            {% if field.help_text %}
+              <div class="text-muted mt-1" style="font-size: 12px;">{{ field.help_text }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-5 d-flex gap-3">
+          <button type="submit" class="md-filled-button px-5">
+            <i class="bx bx-save me-2"></i>Save Product
+          </button>
+          <a href="{% url 'master:product_list' %}" class="btn btn-outline-secondary rounded-pill px-5">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Ensure Django form inputs match Material style */
+  input, select, textarea {
+    display: block;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background-color: #f8fafc;
+    transition: all 0.2s;
+  }
+  input:focus {
+    border-color: var(--md-sys-color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+  }
+</style>
+{% endblock %}

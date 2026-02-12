@@ -1,0 +1,102 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+ <link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    
+    <!-- Header -->
+    <div class="md-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-0">Product Catalog</h1>
+          <p class="md-subtitle">Manage your fish inventory and pricing</p>
+        </div>
+        <a href="{% url 'master:product_create' %}" class="md-filled-button">
+          <i class="bx bx-plus me-2"></i>Add Product
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="md-card">
+      <div class="md-card-header">
+        <div class="row align-items-center g-4 mb-4">
+          <div class="col-lg-7">
+            <h5 class="mb-0 fw-semibold">
+              Total Products
+              <span class="badge ms-3 px-4 py-2 rounded-pill" style="background: rgba(25, 118, 210, 0.15); color: var(--md-sys-color-primary);">
+                {{ products|length }}
+              </span>
+            </h5>
+          </div>
+          <div class="col-lg-5">
+            <form method="GET" class="d-flex">
+              <input type="text" name="q" class="form-control md-search" placeholder="Search products..." value="{{ request.GET.q }}">
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table md-table mb-0">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+            <tr>
+              <td>
+                <img src="{{ product.image.url }}" class="rounded-3" style="width: 50px; height: 50px; object-fit: cover;">
+              </td>
+              <td>
+                <div class="fw-bold fs-6">{{ product.name }}</div>
+                <small class="text-muted">{{ product.slug }}</small>
+              </td>
+              <td><span class="md-role-badge">{{ product.category.name }}</span></td>
+              <td>
+                <span class="fw-bold">₹{{ product.final_price }}</span>
+                {% if product.discount_price %}<br><small class="text-decoration-line-through text-muted">₹{{ product.price }}</small>{% endif %}
+              </td>
+              <td>
+                <span class="fw-semibold {% if product.stock < 5 %}text-danger{% endif %}">
+                  {{ product.stock }} {{ product.unit }}
+                </span>
+              </td>
+              <td>
+                <span class="md-badge md-badge--{% if product.is_active %}success{% else %}secondary{% endif %}">
+                  {{ product.is_active|yesno:"Active,Inactive" }}
+                </span>
+              </td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  <a href="{% url 'master:product_update' product.pk %}" class="md-icon-button md-icon-button-secondary">
+                    <i class="bx bx-edit-alt"></i>
+                  </a>
+                  <form action="{% url 'master:product_delete' product.pk %}" method="POST" onsubmit="return confirm('Archive this product?');">
+                    {% csrf_token %}
+                    <button type="submit" class="md-icon-button md-icon-button-warning">
+                      <i class="bx bx-archive-in"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

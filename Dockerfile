@@ -5,7 +5,7 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 # Set a default settings module so management commands don't crash
-ENV DJANGO_SETTINGS_MODULE=iron_board.settings 
+ENV DJANGO_SETTINGS_MODULE=myoceanbasket.settings 
 
 # Set working directory
 WORKDIR /app

@@ -16,34 +16,37 @@
                         <div class="row g-4">
                             <!-- Display Form Errors -->
                             {% if form.errors %}
-                                <div class="col-12">
-                                    <div class="alert alert-danger text-center mb-2">
-                                        Please enter a correct phone number and password.
-                                    </div>
+                            <div class="col-12">
+                                <div class="alert alert-danger text-center mb-2">
+                                    Please enter a correct phone number and password.
                                 </div>
+                            </div>
                             {% endif %}
 
                             <!-- Django messages -->
                             {% if messages %}
-                                <div class="col-12">
-                                    {% for message in messages %}
-                                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} text-center mb-2">
-                                            {{ message }}
-                                        </div>
-                                    {% endfor %}
+                            <div class="col-12">
+                                {% for message in messages %}
+                                <div
+                                    class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} text-center mb-2">
+                                    {{ message }}
                                 </div>
+                                {% endfor %}
+                            </div>
                             {% endif %}
 
                             <div class="col-12">
                                 <div class="form-floating">
                                     <!-- IMPORTANT: name must be "username" -->
-                                    <input type="text" class="form-control" id="phone_number" name="username" placeholder="Enter mobile number" required>
+                                    <input type="text" class="form-control" id="phone_number" name="username"
+                                        placeholder="Enter mobile number" required>
                                     <label for="phone_number">Enter mobile number</label>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                    <input type="password" class="form-control" id="password" name="password"
+                                        placeholder="Password" required>
                                     <label for="password">Password</label>
                                 </div>
                             </div>
@@ -53,9 +56,10 @@
                                     <label class="form-check-label" for="remember_me">Remember me</label>
                                 </div>
                             </div>
-           
+
                             <div class="col-12 text-center">
-                                <button class="btn btn-primary-gradient rounded-pill py-3 px-5 w-100" type="submit">Login</button>
+                                <button class="btn btn-primary-gradient rounded-pill py-3 px-5 w-100"
+                                    type="submit">Login</button>
                             </div>
                         </div>
                     </form>

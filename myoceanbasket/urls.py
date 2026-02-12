@@ -1,5 +1,5 @@
 """
-URL configuration for iron_board project.
+URL configuration for myoceanbasket project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -28,7 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('accounts.urls')),
     path('', include('enquiry.urls')),
-    path('', include('products.urls')),
+    path('products/', include('products.urls')),
     path('', include('orders.urls')),
     path('core/', include('core.urls')),
     path('', include('cms.urls')),
@@ -39,7 +39,8 @@ urlpatterns = [
     path('', include('health.urls')),
     path('', include('api_v1.urls')),
     path('', include('workout.urls')),
-     path('ecommerce/', include('ecommerce.urls', namespace='ecommerce')), 
+    path('', include('master.urls')),
+    path('ecommerce/', include('ecommerce.urls', namespace='ecommerce')), 
     # SSO 
     path('accounts/', include('allauth.urls')),
 

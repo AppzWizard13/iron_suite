@@ -3,13 +3,13 @@
 
 {% block content %}
 <!-- Load custom theme CSS -->
-<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+ <link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     
     <!-- Material Design Header -->
-    <div class="md-header">
+    {% comment %} <div class="md-header">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
         <div>
           <h1 class="md-title mb-0">
@@ -23,7 +23,7 @@
           <i class="bx bx-arrow-back me-2"></i>Back to Members
         </a>
       </div>
-    </div>
+    </div> {% endcomment %}
 
     <!-- Toast Messages -->
     {% if messages %}
@@ -57,7 +57,7 @@
         </h5>
       </div>
 
-      <div class="card-body p-5">
+      <div class="card-body p-3">
         <form method="post" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
           <div class="row g-4">
@@ -106,7 +106,7 @@
               <a href="{% url 'user_list' %}" class="btn btn-outline-secondary rounded-pill px-5 py-3 fw-medium md-secondary-btn">
                 <i class="bx bx-arrow-back me-2"></i>Cancel
               </a>
-              <button type="submit" class="md-filled-button px-6 py-3">
+              <button type="submit" class="md-filled-button  py-3">
                 <i class="bx bx-{% if object %}edit{% else %}user-plus{% endif %} me-2"></i>
                 {% if object %}Update Member{% else %}Create Member{% endif %}
               </button>

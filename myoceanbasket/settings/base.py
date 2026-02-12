@@ -143,7 +143,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
-ROOT_URLCONF = 'iron_board.urls'
+ROOT_URLCONF = 'myoceanbasket.urls'
 
 TEMPLATES = [
     {
@@ -166,13 +166,13 @@ AUTHENTICATION_BACKENDS = (
     "allauth.account.auth_backends.AuthenticationBackend",
 )
 
-WSGI_APPLICATION = 'iron_board.wsgi.application'
+WSGI_APPLICATION = 'myoceanbasket.wsgi.application'
 
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'), 
-        'NAME': os.getenv('DB_NAME', 'iron_board_db'), 
-        'USER': os.getenv('DB_USER', 'iron_board_admin'),
+        'NAME': os.getenv('DB_NAME', 'myoceanbasket_db'), 
+        'USER': os.getenv('DB_USER', 'myoceanbasket_admin'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'xPL7y6qe1gLHAg2B9SWvW06vXSC8lxSe'),
         'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
@@ -215,7 +215,7 @@ STATICFILES_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'iron_board'),
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'myoceanbasket'),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY', ''),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', ''),
 }

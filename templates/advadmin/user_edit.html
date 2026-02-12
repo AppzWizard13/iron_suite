@@ -3,8 +3,8 @@
 
 {% block content %}
 <!-- Load custom theme CSS -->
-<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
-<link rel="stylesheet" href="{% static 'mob-custom/theme-enh1.css' %}">
+ <link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
+<link rel="stylesheet" href="{% static 'mob-custom/theme-enh1.css' %}"> 
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
@@ -69,7 +69,7 @@
               <i class="bx bx-user-circle me-2 text-primary"></i>Member Details
             </h5>
           </div>
-          <div class="card-body p-5">
+          <div class="card-body p-3">
             <form method="post" novalidate>
               {% csrf_token %}
               

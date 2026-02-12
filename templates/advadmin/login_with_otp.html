@@ -1,4 +1,4 @@
-{% extends 'vendor_ui/iron_board/index.html' %}
+{% extends 'myoceanbasket/index.html' %}
 {% block content %}
 {% load static %}
 
@@ -17,26 +17,29 @@
                         {% csrf_token %}
                         <div class="row g-4">
                             {% if messages %}
-                                <div class="col-12">
-                                    {% for message in messages %}
-                                        <div class="alert alert-{{ message.tags }} text-center mb-2" role="alert">
-                                            {{ message }}
-                                        </div>
-                                    {% endfor %}
+                            <div class="col-12">
+                                {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} text-center mb-2" role="alert">
+                                    {{ message }}
                                 </div>
+                                {% endfor %}
+                            </div>
                             {% endif %}
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control" id="phone_number" name="phone_number" placeholder="+91XXXXXXXXXX" required>
+                                    <input type="tel" class="form-control" id="phone_number" name="phone_number"
+                                        placeholder="+91XXXXXXXXXX" required>
                                     <label for="phone_number">Enter your mobile number</label>
                                 </div>
                             </div>
                             <div class="col-12 text-center">
-                                <button class="btn btn-primary-gradient rounded-pill py-3 px-5 w-100" type="submit">Send OTP</button>
+                                <button class="btn btn-primary-gradient rounded-pill py-3 px-5 w-100" type="submit">Send
+                                    OTP</button>
                             </div>
                             <div class="col-12 text-center">
                                 <div class="my-3 text-muted">or</div>
-                                <a href="{% url 'login' %}" class="btn btn-outline-secondary rounded-pill py-3 px-5 w-100 my-1">
+                                <a href="{% url 'login' %}"
+                                    class="btn btn-outline-secondary rounded-pill py-3 px-5 w-100 my-1">
                                     Back to Login
                                 </a>
                             </div>
@@ -49,25 +52,25 @@
 </div>
 <!-- OTP Login End -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    fetch('/api/company-data/')
-        .then(response => response.json())
-        .then(data => {
-            const logoImg = document.getElementById('company-logo-svg');
-            const faviconLink = document.querySelector("link[rel='icon']");
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/company-data/')
+            .then(response => response.json())
+            .then(data => {
+                const logoImg = document.getElementById('company-logo-svg');
+                const faviconLink = document.querySelector("link[rel='icon']");
 
-            if (data.company_logo_svg_url && logoImg) {
-                logoImg.src = data.company_logo_svg_url;
-                logoImg.alt = data.company_name + " Logo";
-                logoImg.style.display = "block";
-            }
+                if (data.company_logo_svg_url && logoImg) {
+                    logoImg.src = data.company_logo_svg_url;
+                    logoImg.alt = data.company_name + " Logo";
+                    logoImg.style.display = "block";
+                }
 
-            if (data.company_favicon_url && faviconLink) {
-                faviconLink.href = data.company_favicon_url;
-            }
-        })
-        .catch(error => console.error('Company data fetch failed', error));
-});
+                if (data.company_favicon_url && faviconLink) {
+                    faviconLink.href = data.company_favicon_url;
+                }
+            })
+            .catch(error => console.error('Company data fetch failed', error));
+    });
 </script>
 
 {% endblock %}

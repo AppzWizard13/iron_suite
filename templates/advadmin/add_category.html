@@ -1,77 +1,162 @@
 {% extends 'advadmin/index.html' %}
 {% load static %}
+
 {% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-semi-bold py-3 mb-4"><span class="text-muted fw-light">Manage /</span> Add Category</h4>
+    
+    <!-- Material Design Header -->
+    <div class="md-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-0">Add Category</h1>
+          <p class="md-subtitle">Create a new product category</p>
+        </div>
+        <a href="{% url 'category_list' %}" class="md-filled-button">
+          <i class="bx bx-arrow-back me-2"></i>Back to Categories
+        </a>
+      </div>
+    </div>
 
-    <!-- Toast Messages -->
+    <!-- Toast Messages - Material Design Style -->
     {% if messages %}
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
       {% for message in messages %}
-      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ message }}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}var(--md-sys-color-error){% else %}var(--md-sys-color-success){% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}var(--md-sys-color-error){% else %}var(--md-sys-color-success){% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
           </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
         </div>
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    <div class="card mb-4">
-      <h5 class="card-header">Add New Category</h5>
-      <div class="card-body">
-        
-        <!-- Show Form Errors -->
+    <!-- Main Content Card - SLIGHT BLUE CANVAS -->
+    <div class="md-card md-form-canvas">
+      <div class="md-card-header">
+        <h5 class="mb-0 fw-semibold" style="color: var(--md-sys-color-on-surface); font-size: 24px;">
+          New Category Details
+        </h5>
+      </div>
+
+      <div class="card-body p-4">
+        <!-- Show Form Errors - Material Design Style -->
         {% if form.errors %}
-        <div class="alert alert-danger">
-          <ul>
-            {% for field, errors in form.errors.items %}
-              {% for error in errors %}
-                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+        <div class="alert alert-danger d-flex align-items-center gap-3 p-4 mb-4 rounded-4" 
+             style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);">
+          <div class="rounded-circle p-2" style="background: rgba(239,68,68,0.15); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i class="bx bx-error-circle" style="font-size: 20px; color: var(--md-sys-color-error);"></i>
+          </div>
+          <div>
+            <h6 class="fw-semibold mb-2" style="color: var(--md-sys-color-error);">Please correct the following errors:</h6>
+            <ul class="mb-0 ps-3" style="color: var(--md-sys-color-on-surface);">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <li class="fw-medium"><strong>{{ field|title }}:</strong> {{ error }}</li>
+                {% endfor %}
               {% endfor %}
-            {% endfor %}
-          </ul>
+            </ul>
+          </div>
         </div>
         {% endif %}
         
-        <form method="post" action="{% url 'add_category' %}" enctype="multipart/form-data" class="mb-3">
+        <form method="post" action="{% url 'add_category' %}" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
+          
+          <div class="row g-4">
+            <!-- Category Name Field -->
+            <div class="col-lg-6 col-md-6">
+              <label class="form-label fw-semibold mb-2 md-field-label" for="categoryName">
+                Category Name
+              </label>
+              
+              <!-- Material Design Field Wrapper -->
+              <div class="md-field-wrapper">
+                <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}" 
+                       id="categoryName" name="name" value="{{ form.name.value|default:'' }}" required
+                       placeholder="Enter category name">
+              </div>
+              
+              <!-- Error styling -->
+              {% if form.name.errors %}
+              <div class="invalid-feedback d-block mt-2 text-danger fw-medium">
+                {{ form.name.errors.0 }}
+              </div>
+              {% endif %}
+            </div>
 
-          <div class="mb-3">
-            <label for="categoryName" class="form-label">Category Name</label>
-            <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}" 
-                   id="categoryName" name="name" value="{{ form.name.value|default:'' }}" required>
-            <div class="invalid-feedback">
-              {{ form.name.errors.0 }}
+            <!-- Category Image Field -->
+            <div class="col-lg-6 col-md-6">
+              <label class="form-label fw-semibold mb-2 md-field-label" for="categoryImage">
+                Category Image
+              </label>
+              
+              <!-- Material Design Field Wrapper -->
+              <div class="md-field-wrapper">
+                <input type="file" class="form-control {% if form.image.errors %}is-invalid{% endif %}" 
+                       id="categoryImage" name="image" accept="image/*">
+              </div>
+              
+              <!-- Error styling -->
+              {% if form.image.errors %}
+              <div class="invalid-feedback d-block mt-2 text-danger fw-medium">
+                {{ form.image.errors.0 }}
+              </div>
+              {% endif %}
+              
+              <!-- Help text -->
+              <div class="form-text mt-2 fw-medium" style="color: var(--md-sys-color-outline);">
+                Recommended size: 500x500px, max 2MB
+              </div>
+            </div>
+
+            <!-- Category Description Field - Full Width -->
+            <div class="col-12">
+              <label class="form-label fw-semibold mb-2 md-field-label" for="categoryDescription">
+                Description
+              </label>
+              
+              <!-- Material Design Field Wrapper -->
+              <div class="md-field-wrapper">
+                <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                          id="categoryDescription" name="description" rows="4"
+                          placeholder="Enter category description">{{ form.description.value|default:'' }}</textarea>
+              </div>
+              
+              <!-- Error styling -->
+              {% if form.description.errors %}
+              <div class="invalid-feedback d-block mt-2 text-danger fw-medium">
+                {{ form.description.errors.0 }}
+              </div>
+              {% endif %}
             </div>
           </div>
 
-          <div class="mb-3">
-            <label for="categoryDescription" class="form-label">Description</label>
-            <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
-                      id="categoryDescription" name="description" rows="3">{{ form.description.value|default:'' }}</textarea>
-            <div class="invalid-feedback">
-              {{ form.description.errors.0 }}
+          <!-- Form Actions -->
+          <div class="mt-6 pt-4 border-top">
+            <div class="d-flex justify-content-end gap-3 flex-wrap">
+              <a href="{% url 'category_list' %}" class="btn btn-outline-secondary rounded-pill px-5 py-3 fw-medium md-secondary-btn">
+                <i class="bx bx-x me-2"></i>Cancel
+              </a>
+              <button type="submit" class="md-filled-button py-3">
+                <i class="bx bx-plus-circle me-2"></i>
+                Add Category
+              </button>
             </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="categoryImage" class="form-label">Category Image</label>
-            <input type="file" class="form-control {% if form.image.errors %}is-invalid{% endif %}" 
-                   id="categoryImage" name="image" accept="image/*">
-            <div class="invalid-feedback">
-              {{ form.image.errors.0 }}
-            </div>
-          </div>
-
-          <div class="mt-4">
-            <button type="submit" class="btn btn-primary me-2">Add Category</button>
-            <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">Cancel</a>
           </div>
         </form>
       </div>
@@ -80,18 +165,198 @@
 </div>
 
 <script>
-  // Auto-dismiss toast messages after 5 seconds
-  document.addEventListener('DOMContentLoaded', function() {
-    var toastElements = document.querySelectorAll('.toast');
-    toastElements.forEach(function(toastEl) {
-      setTimeout(function() {
-        var toast = bootstrap.Toast.getInstance(toastEl);
-        if (toast) {
-          toast.hide();
+// Enhanced Material Design Form Interactions
+document.addEventListener("DOMContentLoaded", function() {
+  // Auto-show Material Design toasts
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 6000 }).show();
+  });
+
+  // Material Design input enhancement
+  document.querySelectorAll('.md-field-wrapper input, .md-field-wrapper select, .md-field-wrapper textarea').forEach(input => {
+    const wrapper = input.closest('.md-field-wrapper');
+    
+    if (input) {
+      // Add focus class to wrapper
+      input.addEventListener('focus', function() {
+        wrapper.classList.add('focused');
+      });
+      
+      input.addEventListener('blur', function() {
+        wrapper.classList.remove('focused');
+      });
+      
+      // Error state detection
+      if (input.classList.contains('is-invalid')) {
+        wrapper.classList.add('error');
+      }
+      
+      // Add value class if input has value
+      if (input.value) {
+        wrapper.classList.add('has-value');
+      }
+      
+      input.addEventListener('change', function() {
+        if (this.value) {
+          wrapper.classList.add('has-value');
+        } else {
+          wrapper.classList.remove('has-value');
         }
-      }, 5000);
+      });
+    }
+  });
+
+  // Form submission state
+  const form = document.querySelector('form');
+  const submitBtn = document.querySelector('.md-filled-button[type="submit"]');
+  
+  if (form && submitBtn) {
+    form.addEventListener('submit', function() {
+      submitBtn.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Adding Category...
+      `;
+      submitBtn.disabled = true;
+    });
+  }
+
+  // Material ripple effect
+  document.querySelectorAll('.md-filled-button, .md-secondary-btn, .btn-outline-secondary').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.cssText = `
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        transform: scale(0);
+        animation: md-ripple 0.6s linear;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        pointer-events: none;
+        z-index: 1000;
+      `;
+      
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
     });
   });
+
+  // File input enhancement - show filename
+  const fileInput = document.getElementById('categoryImage');
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      const wrapper = this.closest('.md-field-wrapper');
+      if (this.files.length > 0) {
+        const fileName = this.files[0].name;
+        // Create or update filename display
+        let fileNameDisplay = wrapper.querySelector('.file-name-display');
+        if (!fileNameDisplay) {
+          fileNameDisplay = document.createElement('span');
+          fileNameDisplay.className = 'file-name-display mt-2 d-block fw-medium';
+          fileNameDisplay.style.cssText = 'color: var(--md-sys-color-primary); font-size: 13px;';
+          wrapper.appendChild(fileNameDisplay);
+        }
+        fileNameDisplay.textContent = `Selected: ${fileName}`;
+      } else {
+        const fileNameDisplay = wrapper.querySelector('.file-name-display');
+        if (fileNameDisplay) {
+          fileNameDisplay.remove();
+        }
+      }
+    });
+  }
+});
 </script>
+
+<style>
+/* Ensure proper form styling */
+.md-form-canvas {
+  background: linear-gradient(135deg, #f9fcff 0%, #f5faff 100%) !important;
+}
+
+.md-field-wrapper {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-field-wrapper.focused {
+  transform: translateY(-1px);
+}
+
+.md-field-wrapper.error input,
+.md-field-wrapper.error textarea,
+.md-field-wrapper.error select {
+  border-color: var(--md-sys-color-error) !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Form control overrides */
+.form-control {
+  background: linear-gradient(135deg, #fefefe 0%, #f9fbff 100%) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 2px solid #e8f0fe !important;
+  border-radius: 16px !important;
+  padding: 14px 20px !important;
+  font-size: 14px !important;
+  color: #1a202c !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.08) !important;
+}
+
+.form-control:focus {
+  outline: none !important;
+  border-color: #1976d2 !important;
+  box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.15), 0 12px 32px rgba(25, 118, 210, 0.2) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #fafcff 100%) !important;
+  transform: translateY(-2px) !important;
+}
+
+textarea.form-control {
+  min-height: 120px !important;
+  resize: vertical !important;
+}
+
+/* File input styling */
+input[type="file"].form-control {
+  padding: 12px 20px !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border: 2px dashed #e2e8f0 !important;
+}
+
+input[type="file"].form-control:hover {
+  border-color: #1976d2 !important;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e6edf5) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .md-card-header h5 {
+    font-size: 20px !important;
+  }
+  
+  .form-control {
+    padding: 12px 16px !important;
+    font-size: 13px !important;
+  }
+  
+  .md-filled-button,
+  .md-secondary-btn {
+    width: 100%;
+  }
+  
+  .d-flex.gap-3 {
+    flex-direction: column-reverse;
+  }
+}
+</style>
 
 {% endblock %}

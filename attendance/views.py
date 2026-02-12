@@ -126,7 +126,7 @@ class ScheduleListView(LoginRequiredMixin, ListView):
         Filter schedules by the logged-in user's Vendor.
         """
         user = self.request.user
-        return super().get_queryset().filter(Vendor=user.Vendor)
+        return super().get_queryset().filter(Vendor=user.vendor)
 
     def get_context_data(self, **kwargs):
         """
@@ -148,7 +148,7 @@ class ScheduleCreateView(LoginRequiredMixin,CreateView):
 
     def form_valid(self, form):
         # Automatically set the Vendor from the current user
-        form.instance.Vendor = self.request.user.Vendor
+        form.instance.Vendor = self.request.user.vendor
         return super().form_valid(form)
 
 
@@ -235,7 +235,7 @@ class QRTokenListView(LoginRequiredMixin, ListView):
         Filter QR tokens by the logged-in user's Vendor via schedule.
         """
         user = self.request.user
-        return super().get_queryset().select_related('schedule').filter(schedule__vendor=user.Vendor)
+        return super().get_queryset().select_related('schedule').filter(schedule__vendor=user.vendor)
 
     def get_context_data(self, **kwargs):
         """

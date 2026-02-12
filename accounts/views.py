@@ -9,25 +9,20 @@ import smtplib
 import calendar
 from io import BytesIO
 from datetime import timedelta
+from collections import defaultdict
 
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.shortcuts import render, redirect
-from django.http import (
-    HttpResponse, JsonResponse, FileResponse
-)
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.conf import settings
-from django.db.models import (
-    Q, Sum, Count, Min, Max
-)
+from django.db.models import Q, Sum, Count, Min, Max
 from django.db.models.functions import TruncMonth
 from django.utils.decorators import method_decorator
-
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -35,22 +30,25 @@ from django.views.generic import (
     TemplateView, ListView, CreateView, UpdateView,
     DetailView, DeleteView
 )
-from django.views.generic.edit import CreateView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth import (
-    login, logout, authenticate, get_user_model
-)
+from django.contrib.auth import login, logout, authenticate, get_user_model
+from django.utils.dateparse import parse_datetime
 
-# # Get User model
-# User = get_user_model()
-# CustomUser = User
+# Email
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 # Twilio
-from core.choices import GenderChoice, PaymentStatusChoice  , StaffRoleChoice, SubscriptionStatusChoice, TransactionCategoryChoice, TransactionStatusChoice, TransactionTypeChoice
 from twilio.rest import Client
-from collections import defaultdict
+
+# Core Choices
+from core.choices import (
+    GenderChoice, PaymentStatusChoice, StaffRoleChoice,
+    SubscriptionStatusChoice, TransactionCategoryChoice,
+    TransactionStatusChoice, TransactionTypeChoice
+)
 
 # Models
 from core.models import BusinessDetails, Configuration
@@ -60,32 +58,21 @@ from orders.models import Order, SubscriptionOrder
 from payments.models import Payment, Transaction
 from attendance.models import Attendance, Schedule
 from accounts.models import CustomUser, Banner, Review, SocialMedia, PasswordResetOTP
+from accounts.models import Vendor, MonthlyMembershipTrend
 
 # Forms
 from .forms import (
     CustomUserForm, CustomerRegistrationForm, MemberRegistrationForm,
     ReviewForm, BannerForm, ProfileUpdateForm, SocialMediaForm, UserLoginForm,
-    PasswordResetRequestForm, PasswordResetOTPForm
+    PasswordResetRequestForm, PasswordResetOTPForm, UserEditForm, VendorForm
 )
 
 # Logging setup
 logger = logging.getLogger(__name__)
 
-
-
-from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView,CreateView, UpdateView, DeleteView
-from .models import Vendor, MonthlyMembershipTrend
-from .forms import VendorForm  
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from django.contrib import messages
-from django.db.models import Q
-from master.models import Vendor
-from .forms import VendorForm
-
+# ============================================================================
+# VENDOR MANAGEMENT VIEWS
+# ============================================================================
 
 class VendorListView(LoginRequiredMixin, ListView):
     model = Vendor
@@ -100,16 +87,11 @@ class VendorListView(LoginRequiredMixin, ListView):
         - Regular user: See only their vendor
         """
         queryset = Vendor.objects.all().order_by('-created_at')
-        
-        # If not superuser, show only their vendor
+
         if not self.request.user.is_superuser:
             vendor = getattr(self.request.user, 'vendor_profile', None)
-            if vendor:
-                queryset = queryset.filter(id=vendor.id)
-            else:
-                queryset = queryset.none()
-        
-        # Search functionality
+            queryset = queryset.filter(id=vendor.id) if vendor else queryset.none()
+
         search = self.request.GET.get('search', '').strip()
         if search:
             queryset = queryset.filter(
@@ -119,7 +101,6 @@ class VendorListView(LoginRequiredMixin, ListView):
                 Q(city__icontains=search) |
                 Q(gstin__icontains=search)
             )
-        
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -136,7 +117,6 @@ class VendorCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('vendor_list')
 
     def dispatch(self, request, *args, **kwargs):
-        """Only superusers can create vendors"""
         if not request.user.is_superuser:
             messages.error(request, "You don't have permission to create vendors.")
             return redirect('vendor_list')
@@ -158,18 +138,10 @@ class VendorUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('vendor_list')
 
     def get_queryset(self):
-        """
-        Filter vendors user can edit:
-        - Superuser: Can edit all vendors
-        - Regular user: Can only edit their own vendor
-        """
         queryset = super().get_queryset()
         if not self.request.user.is_superuser:
             vendor = getattr(self.request.user, 'vendor_profile', None)
-            if vendor:
-                queryset = queryset.filter(id=vendor.id)
-            else:
-                queryset = queryset.none()
+            queryset = queryset.filter(id=vendor.id) if vendor else queryset.none()
         return queryset
 
     def form_valid(self, form):
@@ -186,7 +158,6 @@ class VendorDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('vendor_list')
 
     def dispatch(self, request, *args, **kwargs):
-        """Only superusers can delete vendors"""
         if not request.user.is_superuser:
             messages.error(request, "You don't have permission to delete vendors.")
             return redirect('vendor_list')
@@ -200,12 +171,14 @@ class VendorDeleteView(LoginRequiredMixin, DeleteView):
         return response
 
 
+# ============================================================================
+# USER MANAGEMENT VIEWS
+# ============================================================================
+
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = CustomUser
     form_class = CustomUserForm
     success_url = reverse_lazy('user_list')
-
-    # Redirect unauthenticated users to login page
     login_url = 'login'
     redirect_field_name = 'next'
 
@@ -228,14 +201,13 @@ class UserCreateView(LoginRequiredMixin, CreateView):
             return ['advadmin/create_user.html']
         elif admin_mode == 'standard':
             return ['admin_panel/authentication-register-standard.html']
-        else:
-            return ['admin_panel/add_user.html']
+        return ['admin_panel/add_user.html']
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['hide_staff_role'] = getattr(self, 'hide_staff_role', False)
         kwargs['default_staff_role'] = getattr(self, 'default_staff_role', None)
-        kwargs['is_superuser'] = self.request.user.is_superuser  # <--- add this line
+        kwargs['is_superuser'] = self.request.user.is_superuser
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -248,7 +220,6 @@ class UserCreateView(LoginRequiredMixin, CreateView):
         try:
             user = form.save(commit=False)
 
-            # Auto set staff_role if hidden in form
             if getattr(form, 'default_staff_role', None):
                 user.staff_role = form.default_staff_role
 
@@ -258,144 +229,42 @@ class UserCreateView(LoginRequiredMixin, CreateView):
             max_member_id = CustomUser.objects.aggregate(Max('member_id'))['member_id__max'] or 0
             user.member_id = max_member_id + 1
 
-            # Determine redirect_to early to pass into generate_username
             redirect_to = self.request.GET.get('next') or self.success_url
-            self.redirect_to = redirect_to  # store on instance for use in generate_username
-
+            self.redirect_to = redirect_to
             user.username = self.generate_username(user.member_id)
-
-            user.Vendor = self.request.user.Vendor
+            user.vendor = self.request.user.vendor
             user.save()
-            messages.success(self.request, "User added successfully.")
 
+            messages.success(self.request, "User added successfully.")
             return redirect(redirect_to)
+
         except Exception as e:
             messages.error(self.request, f"An error occurred: {str(e)}")
             return self.form_invalid(form)
 
     def generate_username(self, member_id):
         redirect_to = getattr(self, 'redirect_to', '')
-
         if 'Trainer' in redirect_to:
             prefix = "TRAINER"
         elif 'Manager' in redirect_to:
             prefix = "MANAGER"
         elif 'Admin' in redirect_to:
             prefix = "ADMIN"
+        elif 'Vendor' in redirect_to:
+            prefix = "VENDOR"
         else:
             prefix = "MEMBER"
-
         return f"{prefix}{str(member_id).zfill(5)}"
 
 
-from django import forms
-class UserEditForm(forms.ModelForm):
-    password1 = forms.CharField(
-        required=False,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter New Password (leave blank if not changing)'
-        }),
-        label="New Password"
-    )
-    password2 = forms.CharField(
-        required=False,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Confirm New Password'
-        }),
-        label="Confirm New Password"
-    )
-
-    class Meta:
-        model = CustomUser
-        fields = [
-            'first_name', 'last_name', 'phone_number', 'email', 'staff_role',
-            'address', 'city', 'state', 'pincode', 'date_of_birth', 'gender',
-            'is_active', 'is_staff', 'password1', 'password2',
-        ]
-        widgets = {
-            'first_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter First Name'
-            }),
-            'last_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Last Name'
-            }),
-            'phone_number': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Phone Number'
-            }),
-            'email': forms.EmailInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Email'
-            }),
-            'address': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Address',
-                'rows': 2
-            }),
-            'city': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter City'
-            }),
-            'state': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter State'
-            }),
-            'pincode': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Pincode'
-            }),
-            'date_of_birth': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'form-control'
-            }),
-            'gender': forms.Select(attrs={
-                'class': 'form-control'
-            }, choices=GenderChoice.choices  ),
-            'staff_role': forms.Select(attrs={
-                'class': 'form-control'
-            }, choices=StaffRoleChoice.choices),
-            'is_active': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
-            'is_staff': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
-        }
-
-    def clean_password2(self):
-        password1 = self.cleaned_data.get('password1')
-        password2 = self.cleaned_data.get('password2')
-
-        if password1 and not password2:
-            raise forms.ValidationError("Please confirm your new password.")
-        if password2 and not password1:
-            raise forms.ValidationError("Please enter a new password first.")
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords do not match.")
-        return password2
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        password = self.cleaned_data.get('password1')
-        if password:
-            user.set_password(password)
-        if commit:
-            user.save()
-        return user
-
 class UserUpdateView(LoginRequiredMixin, UpdateView):
     model = get_user_model()
-    form_class = UserEditForm  # <-- Use UserEditForm here
+    form_class = UserEditForm
     template_name = 'advadmin/user_edit.html'
     success_url = reverse_lazy('user_list')
     slug_field = "username"
     slug_url_kwarg = "username"
 
-    # Your view logic here (debug prints, etc.)
     def form_valid(self, form):
         user = form.save(commit=False)
         password = form.cleaned_data.get('password1')
@@ -405,56 +274,6 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, "User updated successfully.")
         return super().form_valid(form)
 
-class CustomLoginView(LoginView):
-    template_name = "admin_panel/authentication-login.html"
-    form_class = UserLoginForm
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect('dashboard')
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_template_names(self):
-        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        if admin_mode == 'advanced':
-            return ['advadmin/ironsuite-auth-login-basic.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/authentication-login-standard.html']
-        else:
-            return ['admin_panel/authentication-login-basic.html']
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Pass the page name to the context
-        context['page_name'] = 'Login'
-        return context
-
-    def form_valid(self, form):
-        user = form.get_user()
-        login(self.request, user)
-
-        # ✅ Remember Me functionality
-        remember_me = self.request.POST.get('remember_me')
-        if not remember_me:
-            self.request.session.set_expiry(0)  # Expires on browser close
-        else:
-            self.request.session.set_expiry(60 * 60 * 24 * 30)  # 30 days
-
-        messages.success(self.request, "Login successful!")
-        return redirect(self.get_success_url())
-
-    def form_invalid(self, form):
-        print("formformformform", form)
-        messages.error(
-            self.request,
-            "Invalid credentials. Please try again.",
-            extra_tags='danger'
-        )
-        # page_name will still be in context using get_context_data
-        return self.render_to_response(self.get_context_data(form=form))
-
-
-from django.db.models import Q
 
 class UserListView(LoginRequiredMixin, ListView):
     model = CustomUser
@@ -464,19 +283,12 @@ class UserListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = super().get_queryset()
 
-        # Base queryset
-        queryset = super().get_queryset().filter(
-            # staff_role__iexact='Member'
-        )
-
-        # Apply Vendor filtering only for non-superusers
         if not user.is_superuser:
-            queryset = queryset.filter(Vendor=user.Vendor)
+            queryset = queryset.filter(Vendor=user.vendor)
 
-        # Search
         search_query = self.request.GET.get('q')
-        sort_param = self.request.GET.get('sort')
         if search_query:
             queryset = queryset.filter(
                 Q(username__icontains=search_query) |
@@ -487,7 +299,7 @@ class UserListView(LoginRequiredMixin, ListView):
                 Q(email__icontains=search_query)
             )
 
-        # Sorting
+        sort_param = self.request.GET.get('sort')
         if sort_param == 'name':
             queryset = queryset.order_by('first_name', 'last_name')
         elif sort_param == '-name':
@@ -519,19 +331,12 @@ class CustomerListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = super().get_queryset().filter(staff_role__iexact='Customer')
 
-        # Base queryset
-        queryset = super().get_queryset().filter(
-            staff_role__iexact='Customer'
-        )
-
-        # Apply Vendor filtering only for non-superusers
         if not user.is_superuser:
-            queryset = queryset.filter(Vendor=user.Vendor)
+            queryset = queryset.filter(Vendor=user.vendor)
 
-        # Search
         search_query = self.request.GET.get('q')
-        sort_param = self.request.GET.get('sort')
         if search_query:
             queryset = queryset.filter(
                 Q(username__icontains=search_query) |
@@ -542,7 +347,7 @@ class CustomerListView(LoginRequiredMixin, ListView):
                 Q(email__icontains=search_query)
             )
 
-        # Sorting
+        sort_param = self.request.GET.get('sort')
         if sort_param == 'name':
             queryset = queryset.order_by('first_name', 'last_name')
         elif sort_param == '-name':
@@ -575,16 +380,12 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         role = self.kwargs.get('role')
         user = self.request.user
-
         queryset = CustomUser.objects.filter(staff_role__iexact=role)
 
-        # Apply Vendor filtering only for non-superusers
         if not user.is_superuser:
-            queryset = queryset.filter(Vendor=user.Vendor)
+            queryset = queryset.filter(Vendor=user.vendor)
 
-        # Search
         search_query = self.request.GET.get('q')
-        sort_param = self.request.GET.get('sort')
         if search_query:
             queryset = queryset.filter(
                 Q(username__icontains=search_query) |
@@ -595,7 +396,7 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
                 Q(email__icontains=search_query)
             )
 
-        # Sorting
+        sort_param = self.request.GET.get('sort')
         if sort_param == 'name':
             queryset = queryset.order_by('first_name', 'last_name')
         elif sort_param == '-name':
@@ -606,7 +407,6 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
             queryset = queryset.order_by('-member_id')
         else:
             queryset = queryset.order_by('-date_joined')
-
         return queryset
 
     def get_template_names(self):
@@ -620,7 +420,6 @@ class UserStaffRoleListView(LoginRequiredMixin, ListView):
         return context
 
 
-from django.shortcuts import redirect
 class UserDeleteView(LoginRequiredMixin, DeleteView):
     model = CustomUser
     slug_field = "username"
@@ -628,113 +427,41 @@ class UserDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('user_list')
 
     def get(self, request, *args, **kwargs):
-        # Delete object immediately on GET request (bypass confirmation)
         return self.delete(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'User has been deleted successfully.')
         response = super().delete(request, *args, **kwargs)
-
-        # Get the previous page URL from the HTTP_REFERER header
-        next_url = request.META.get('HTTP_REFERER')
-        # Fallback to success_url if no referer found
-        if not next_url:
-            next_url = self.success_url
-
+        next_url = request.META.get('HTTP_REFERER') or self.success_url
         return redirect(next_url)
-
-    
-
-# Home Page View
-class HomePageView(TemplateView):
-    template_name = "vendor_ui/iron_board/index.html"
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        total_categories = Category.objects.all().prefetch_related('products')
-        products = Product.objects.values('category').distinct()
-        reviews = Review.objects.all()
-        banners = Banner.objects.all().order_by('series')
-
-        product_list = []
-        category_products = []
-        for item in products:
-            product_list = Product.objects.filter(category=item['category']).order_by('price')[:4]
-
-
-        # Step 1: Fetch all products with valid category (ForeignKey)
-        all_products = Product.objects.select_related('category').filter(category__isnull=False).order_by('-category__name', 'price')
-        from collections import defaultdict
-        # Step 2: Group by category object (not string)
-        grouped = defaultdict(list)
-
-        for product in all_products:
-            category_obj = product.category
-            if len(grouped[category_obj]) < 20:
-                grouped[category_obj].append(product)
-
-        # Step 3: Prepare context list
-        category_products = [
-            {'category': category, 'products': prods}
-            for category, prods in grouped.items()
-        ]
-
-
-        category_data = {}
-        for category in total_categories:
-            products = category.products.filter(is_active=True).distinct().values('id', 'name', 'price')[:4]
-            category_data[category.id] = list(products)
-
-        context.update({
-            'is_mobile': self.request.user_agent.is_mobile,
-            'reviews': reviews,
-            'total_categories': total_categories,
-            'products': product_list,
-            'category_data': category_data,
-            'banners': banners,
-            'category_products': category_products
-        })
-        return context
-    
 
 
 @require_POST
 @login_required
-@csrf_exempt  # Only needed if you're still having CSRF issues
+@csrf_exempt
 def toggle_user_active(request):
     try:
-        # Parse JSON data from request body
         data = json.loads(request.body)
         user_id = data.get('user_id')
         action = data.get('action')
-        
+
         if not user_id or action not in ['block', 'unblock']:
-            return JsonResponse({
-                'success': False,
-                'message': 'Invalid parameters'
-            }, status=400)
-        
+            return JsonResponse({'success': False, 'message': 'Invalid parameters'}, status=400)
+
         user = CustomUser.objects.get(username=user_id)
         user.is_active = (action == 'unblock')
         user.save()
-        
+
         return JsonResponse({
             'success': True,
             'message': f'User {"unblocked" if user.is_active else "blocked"} successfully',
             'is_active': user.is_active
         })
-        
-    except CustomUser.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'User not found'
-        }, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
-    
 
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
 class BlockedUserListView(LoginRequiredMixin, ListView):
@@ -746,7 +473,7 @@ class BlockedUserListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return CustomUser.objects.filter(
             is_active=False,
-            vendor=self.request.user.vendor,  # Multi-tenant filter
+            vendor=self.request.user.vendor,
             staff_role="Customer"
         ).order_by('-date_joined')
 
@@ -754,6 +481,7 @@ class BlockedUserListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['page_name'] = "blocked_users"
         return context
+
 
 class InactiveUserListView(LoginRequiredMixin, ListView):
     model = CustomUser
@@ -773,9 +501,10 @@ class InactiveUserListView(LoginRequiredMixin, ListView):
         context['page_name'] = "inactive_users"
         return context
 
+
 class UnblockUserView(LoginRequiredMixin, View):
     permission_required = 'auth.change_user'
-    
+
     def post(self, request, *args, **kwargs):
         username = kwargs.get('username')
         try:
@@ -787,26 +516,126 @@ class UnblockUserView(LoginRequiredMixin, View):
                 'message': f'User {username} has been unblocked successfully'
             })
         except CustomUser.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'message': 'User not found'
-            }, status=404)
+            return JsonResponse({'success': False, 'message': 'User not found'}, status=404)
         except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': str(e)
-            }, status=500)
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
-# API View
-class FetchProductsView(View):
-    def get(self, request, *args, **kwargs):
-        category_id = self.kwargs['category_id']
-        products = Product.objects.filter(
-            category_id=category_id, 
-            is_active=True
-        ).values('id', 'name', 'price', 'sku')
-        return JsonResponse(list(products), safe=False)
 
+# ============================================================================
+# MEMBER REGISTRATION VIEWS
+# ============================================================================
+
+class MemberRegisterView(LoginRequiredMixin, CreateView):
+    model = CustomUser
+    form_class = MemberRegistrationForm
+    success_url = reverse_lazy('user_list')
+
+    def get_template_names(self):
+        return ['advadmin/member_registration.html']
+
+    def form_valid(self, form):
+        try:
+            user = form.save(commit=False)
+            user.staff_role = 'Member'
+            user.vendor = self.request.user.vendor
+
+            if form.cleaned_data.get('password1'):
+                user.set_password(form.cleaned_data['password1'])
+            user.save()
+
+            package = form.cleaned_data['package']
+            self.request.session['pending_member_member_id'] = user.member_id
+            self.request.session['pending_package_id'] = package.id
+
+            messages.success(self.request, "Please complete package payment to activate membership.")
+            return redirect('registration_next_steps')
+
+        except Exception as e:
+            messages.error(self.request, f"Error: {str(e)}")
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role = self.kwargs.get('role', '').capitalize()
+        context['page_name'] = "member_registration"
+        return context
+
+
+class CustomerCreateView(View):
+    template_name = 'advadmin/customer_registration.html'
+
+    def get(self, request):
+        users = CustomUser.objects.all()
+        form = CustomerRegistrationForm()
+        return render(request, self.template_name, {'form': form, 'users': users})
+
+    def post(self, request):
+        form = CustomerRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Customer created successfully!")
+            return redirect('customer_registration')
+        else:
+            messages.error(request, "Error creating customer.")
+            print("Form errors:", form.errors)
+        return render(request, self.template_name, {'form': form, 'users': CustomUser.objects.all()})
+
+
+class RegistrationNextStepsView(View):
+    def get(self, request):
+        member_id = request.session.get("pending_member_member_id")
+        package_id = request.session.get("pending_package_id")
+        print("package_idpackage_idpackage_idpackage_id", package_id)
+        print("member_idmember_idmember_idmember_idmember_id", member_id)
+
+        if not member_id or not package_id:
+            return redirect('register_member')
+
+        return render(request, "advadmin/registration_next_steps.html")
+
+
+# ============================================================================
+# AUTHENTICATION VIEWS
+# ============================================================================
+
+class CustomLoginView(LoginView):
+    template_name = "admin_panel/authentication-login.html"
+    form_class = UserLoginForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('dashboard')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_template_names(self):
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
+        if admin_mode == 'advanced':
+            return ['advadmin/auth-login-basic.html']
+        elif admin_mode == 'standard':
+            return ['admin_panel/authentication-login-standard.html']
+        return ['admin_panel/authentication-login-basic.html']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_name'] = 'Login'
+        return context
+
+    def form_valid(self, form):
+        user = form.get_user()
+        login(self.request, user)
+
+        remember_me = self.request.POST.get('remember_me')
+        if not remember_me:
+            self.request.session.set_expiry(0)
+        else:
+            self.request.session.set_expiry(60 * 60 * 24 * 30)
+
+        messages.success(self.request, "Login successful!")
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid credentials. Please try again.", extra_tags='danger')
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class LogoutView(LoginRequiredMixin, View):
@@ -815,24 +644,342 @@ class LogoutView(LoginRequiredMixin, View):
         return redirect('login')
 
 
+class PasswordResetRequestView(View):
+    template_name = 'advadmin/auth-forgot-password-basic.html'
 
-# from django.views.generic import TemplateView
-# from django.contrib.auth.mixins import LoginRequiredMixin
-# from django.utils import timezone
-# from django.db.models import Sum, Count, Min, Q
-# from django.db.models.functions import TruncMonth
-# from django.conf import settings
-# from collections import defaultdict
-# import calendar
-# import json
+    def get(self, request):
+        return render(request, self.template_name, {'form': PasswordResetRequestForm()})
 
-# from accounts.models import CustomUser
-# from master.models import Vendor
-# from .models import (
-#     Configuration, Attendance, Payment, Transaction, 
-#     SubscriptionOrder, Enquiry, Schedule, MonthlyMembershipTrend
-# )
+    def post(self, request):
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                user = CustomUser.objects.get(email=email)
 
+                PasswordResetOTP.objects.filter(user=user, is_used=False).delete()
+
+                otp = ''.join(random.choices(string.digits, k=6))
+                expires_at = timezone.now() + timezone.timedelta(minutes=15)
+                otp_obj = PasswordResetOTP.objects.create(
+                    user=user,
+                    otp=otp,
+                    expires_at=expires_at
+                )
+
+                subject = f"Password Reset OTP for {settings.SITE_NAME}"
+                body = f"""
+                Dear {user.get_full_name() or user.username},
+
+                You have requested to reset your password. Please use the following OTP:
+
+                OTP: {otp_obj.otp}
+
+                This OTP is valid for 15 minutes.
+
+                If you didn't request this, please ignore this email.
+
+                Best regards,
+                {settings.SITE_NAME} Team
+                """
+
+                smtp_server = "smtp.gmail.com"
+                smtp_port = 587
+                smtp_username = settings.EMAIL_HOST_USER
+                smtp_password = settings.EMAIL_HOST_PASSWORD
+
+                msg = MIMEMultipart()
+                msg['From'] = settings.DEFAULT_FROM_EMAIL
+                msg['To'] = email
+                msg['Subject'] = subject
+                msg.attach(MIMEText(body, 'plain'))
+
+                try:
+                    with smtplib.SMTP(smtp_server, smtp_port) as server:
+                        server.starttls()
+                        server.login(smtp_username, smtp_password)
+                        server.send_message(msg)
+
+                    messages.success(request, "An OTP has been sent to your email address.")
+                    logger.info(f"Password reset OTP sent to {email}")
+                    return redirect(reverse('password_reset_verify', kwargs={'user_username': user.username}))
+
+                except smtplib.SMTPAuthenticationError:
+                    error_msg = "SMTP authentication failed. Please check email credentials."
+                    logger.error(error_msg)
+                    messages.error(request, "Email service temporarily unavailable. Please try later.")
+                except smtplib.SMTPException as e:
+                    error_msg = f"SMTP error occurred: {str(e)}"
+                    logger.error(error_msg)
+                    messages.error(request, "Failed to send email. Please try again.")
+                except Exception as e:
+                    error_msg = f"Unexpected error: {str(e)}"
+                    logger.error(error_msg)
+
+                return redirect('password_reset_request')
+
+            except CustomUser.DoesNotExist:
+                messages.success(request, "If an account exists with this email, we've sent an OTP.")
+                logger.info(f"Password reset requested for non-existent email: {email}")
+                return redirect('password_reset_request')
+
+        logger.warning(f"Invalid form submission: {form.errors}")
+        return render(request, self.template_name, {'form': form})
+
+
+class PasswordResetVerifyView(View):
+    template_name = 'advadmin/auth-reset-password-basic.html'
+
+    def get(self, request, user_username):
+        try:
+            user = CustomUser.objects.get(username=user_username)
+            return render(request, self.template_name, {
+                'form': PasswordResetOTPForm(),
+                'user_username': user_username
+            })
+        except CustomUser.DoesNotExist:
+            messages.error(request, "Invalid user.")
+            return redirect('password_reset_request')
+
+    def post(self, request, user_username):
+        form = PasswordResetOTPForm(request.POST)
+        if form.is_valid():
+            otp = form.cleaned_data['otp']
+            new_password1 = form.cleaned_data['new_password1']
+            new_password2 = form.cleaned_data['new_password2']
+
+            if new_password1 != new_password2:
+                messages.error(request, "Passwords don't match.")
+                return render(request, self.template_name, {
+                    'form': form,
+                    'user_username': user_username
+                })
+
+            try:
+                user = CustomUser.objects.get(username=user_username)
+                otp_obj = PasswordResetOTP.objects.get(
+                    user=user,
+                    otp=otp,
+                    is_used=False,
+                    expires_at__gt=timezone.now()
+                )
+
+                user.set_password(new_password1)
+                user.save()
+
+                otp_obj.is_used = True
+                otp_obj.save()
+
+                PasswordResetOTP.objects.filter(user=user, is_used=False).update(is_used=True)
+
+                messages.success(request, "Password reset successfully. You can now login with your new password.")
+                return redirect('login')
+
+            except CustomUser.DoesNotExist:
+                messages.error(request, "Invalid user.")
+                return redirect('password_reset_request')
+            except PasswordResetOTP.DoesNotExist:
+                messages.error(request, "Invalid or expired OTP.")
+                return render(request, self.template_name, {
+                    'form': form,
+                    'user_username': user_username
+                })
+
+        return render(request, self.template_name, {
+            'form': form,
+            'user_username': user_username
+        })
+
+
+class LoginWithOTPView(View):
+    template_name = 'advadmin/login_with_otp.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        phone_number = request.POST.get('phone_number')
+        if not phone_number:
+            messages.error(request, "Phone number is required")
+            return render(request, self.template_name)
+
+        try:
+            user = CustomUser.objects.get(phone_number=phone_number)
+        except CustomUser.DoesNotExist:
+            messages.error(request, "No user found with the corresponding phone number.")
+            return render(request, self.template_name)
+
+        email = user.email
+        otp = str(random.randint(100000, 999999))
+        valid_until = timezone.now() + timedelta(minutes=5)
+
+        request.session['otp'] = otp
+        request.session['otp_valid_until'] = valid_until.isoformat()
+        request.session['phone_number'] = phone_number
+
+        configs = Configuration.objects.filter(
+            config__in=["enable-emailotp", "enable-smsotp"]
+        )
+        config_values = {config.config: config.value for config in configs}
+
+        def str_to_bool(value):
+            return value.lower() in ("true", "1", "yes", "on")
+
+        if str_to_bool(config_values.get("enable-emailotp", "False")):
+            self.send_otp_via_email(email, otp)
+        if str_to_bool(config_values.get("enable-smsotp", "False")):
+            self.send_otp_via_twilio(phone_number, otp)
+
+        return redirect('verify_otp')
+
+    def send_otp_via_email(self, email, otp):
+        subject = f"OTP for {settings.SITE_NAME}"
+        body = (
+            f"Dear User,\n\n"
+            f"Your OTP for logging in to {settings.SITE_NAME} is:\n\n"
+            f"OTP: {otp}\n\n"
+            f"This OTP is valid for 5 minutes.\n\n"
+            f"If you didn't request this, please ignore this email.\n\n"
+            f"Best regards,\n{settings.SITE_NAME} Team"
+        )
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+            messages.success(self.request, "OTP has been sent to your email. Please check your inbox.")
+        except Exception as e:
+            messages.error(self.request, "Failed to send OTP via email. Please try again.")
+            print(f"Error sending email: {e}")
+
+    def send_otp_via_twilio(self, phone_number, otp):
+        try:
+            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+            message = client.messages.create(
+                body=f"Your OTP for login is: {otp}. Valid for 5 minutes.",
+                from_=settings.TWILIO_PHONE_NUMBER,
+                to=phone_number
+            )
+            print("message response from twilio:", message)
+            return True
+        except Exception as e:
+            print(f"Error sending OTP: {e}")
+            return False
+
+
+class VerifyOTPView(View):
+    template_name = 'advadmin/verify_otp.html'
+
+    def get(self, request):
+        if 'phone_number' not in request.session:
+            messages.error(request, "Session expired. Please request OTP again.")
+            return redirect('login_with_otp')
+        return render(request, self.template_name)
+
+    def post(self, request):
+        user_otp = request.POST.get('otp', '').strip()
+        phone_number = request.session.get('phone_number')
+        stored_otp = request.session.get('otp')
+        otp_valid_until = request.session.get('otp_valid_until')
+
+        if not all([user_otp, stored_otp, otp_valid_until]):
+            messages.error(request, "Session expired. Please request OTP again.")
+            return redirect('login_with_otp')
+
+        otp_expiry = parse_datetime(otp_valid_until)
+        if otp_expiry is not None and timezone.is_naive(otp_expiry):
+            otp_expiry = timezone.make_aware(otp_expiry)
+
+        if timezone.now() > otp_expiry:
+            messages.error(request, "OTP has expired. Please request a new one.")
+            return redirect('login_with_otp')
+
+        if user_otp == stored_otp:
+            try:
+                user = CustomUser.objects.get(phone_number=phone_number)
+            except CustomUser.DoesNotExist:
+                messages.error(request, "No user found with the corresponding phone number.")
+                return render(request, self.template_name)
+
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, user)
+
+            for k in ('otp', 'otp_valid_until', 'phone_number'):
+                request.session.pop(k, None)
+
+            return redirect('otp_login_success')
+        else:
+            messages.error(request, "Invalid OTP. Please try again.")
+            return render(request, self.template_name)
+
+
+class OTPLoginSuccessView(View):
+    template_name = 'advadmin/otp_login_success.html'
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('login_with_otp')
+        return redirect('dashboard')
+
+
+def login_redirect(request):
+    return redirect('/accounts/google/login/?process=login')
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class GoogleSSOCallbackView(View):
+    def get(self, request):
+        code = request.GET.get('code')
+        if not code:
+            messages.error(request, "Authorization code not found.")
+            return redirect('/login/')
+
+        token_url = 'https://oauth2.googleapis.com/token'
+        token_data = {
+            'code': code,
+            'client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
+            'client_secret': settings.GOOGLE_OAUTH_CLIENT_SECRET,
+            'redirect_uri': settings.GOOGLE_OAUTH_REDIRECT_URI,
+            'grant_type': 'authorization_code',
+        }
+
+        token_response = requests.post(token_url, data=token_data)
+        token_json = token_response.json()
+        access_token = token_json.get('access_token')
+
+        if not access_token:
+            messages.error(request, "Failed to retrieve access token.")
+            return redirect('/login/')
+
+        user_info_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+        user_info_response = requests.get(
+            user_info_url,
+            params={'alt': 'json'},
+            headers={'Authorization': f'Bearer {access_token}'}
+        )
+        user_info = user_info_response.json()
+        email = user_info.get('email')
+        name = user_info.get('name')
+
+        if not email:
+            messages.error(request, "Email not found in Google profile.")
+            return redirect('/login/')
+
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            messages.error(request, "User not registered. Please sign up first.")
+            return redirect('/login/')
+
+        if user.first_name != name:
+            user.first_name = name
+            user.save()
+
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        return redirect('/dashboard')
+
+
+# ============================================================================
+# DASHBOARD & ANALYTICS VIEWS
+# ============================================================================
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     """
@@ -870,19 +1017,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         today = timezone.now().date()
         membership_trends = defaultdict(lambda: [0] * 12)
 
-        # Build query filters
         filters = Q(year__in=years, month__lte=12)
         if vendor_filter:
             filters &= Q(vendor=vendor_filter)
 
-        # Query all relevant records upfront for efficiency
         trends = MonthlyMembershipTrend.objects.filter(filters).order_by('year', 'month')
 
-        # Build a quick lookup dictionary {(year, month): member_count}
         if vendor_filter:
             trends_dict = {(t.year, t.month): t.member_count for t in trends}
         else:
-            # For superuser, aggregate across all vendors
             trends_aggregated = trends.values('year', 'month').annotate(
                 total_count=Sum('member_count')
             )
@@ -890,10 +1033,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         for year in years:
             for month in range(1, 13):
-                # Ignore future months beyond current month in current year
                 if year > today.year or (year == today.year and month > today.month):
                     continue
-
                 count = trends_dict.get((year, month), 0)
                 membership_trends[year][month - 1] = count
 
@@ -918,7 +1059,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             for conf in configs
         }
 
-        # Build base query filters
         def apply_vendor_filter(queryset, vendor_field='vendor_profile'):
             """Helper to apply vendor filter to querysets"""
             if vendor_filter:
@@ -947,8 +1087,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             attendance_query = attendance_query.filter(user__vendor_profile=vendor_filter)
         attended_today = attendance_query.values('user').distinct().count()
         attendance_rate = round((attended_today / total_members * 100), 1) if total_members else 0
-
-        expiring_memberships = 0  # Placeholder for expiring membership logic
+        expiring_memberships = 0
 
         # Monthly Revenue
         payment_query = Payment.objects.filter(
@@ -975,9 +1114,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             status=TransactionStatusChoice.COMPLETED
         ).aggregate(total=Sum('amount'))['total'] or 0
 
-        total_transaction_amount = transactions_query.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
+        total_transaction_amount = transactions_query.aggregate(total=Sum('amount'))['total'] or 0
 
         total_income = transactions_query.filter(
             transaction_type=TransactionTypeChoice.INCOME,
@@ -995,7 +1132,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         orders_query = SubscriptionOrder.objects.all()
         if vendor_filter:
             orders_query = orders_query.filter(vendor=vendor_filter)
-        
+
         orders = orders_query.values('status').annotate(count=Count('id'))
         status_map = {
             'pending': 'pending_orders',
@@ -1031,7 +1168,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         )
         if vendor_filter:
             upcoming_renewals_query = upcoming_renewals_query.filter(vendor=vendor_filter)
-        
+
         upcoming_renewals_result = upcoming_renewals_query.aggregate(
             renewals_count=Count('id'),
             renewals_amount=Sum('total')
@@ -1048,7 +1185,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         )
         if vendor_filter:
             pending_dues_query = pending_dues_query.filter(vendor=vendor_filter)
-        
+
         pending_dues_result = pending_dues_query.aggregate(
             pending_dues_count=Count('id'),
             pending_dues_amount=Sum('total')
@@ -1074,10 +1211,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         )
         if vendor_filter:
             earliest_year_query = earliest_year_query.filter(vendor_profile=vendor_filter)
-        
-        earliest_year = earliest_year_query.aggregate(
-            earliest=Min('join_date')
-        )['earliest']
+
+        earliest_year = earliest_year_query.aggregate(earliest=Min('join_date'))['earliest']
         base_year = earliest_year.year if earliest_year else today.year - 2
         years = list(range(base_year, today.year + 1))
 
@@ -1095,7 +1230,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )
             if vendor_filter:
                 year_payment_query = year_payment_query.filter(vendor=vendor_filter)
-            
             amount = year_payment_query.aggregate(total=Sum('amount'))['total'] or 0
             yearly_earnings[year] = float(amount)
 
@@ -1109,7 +1243,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )
             if vendor_filter:
                 monthly_payments_query = monthly_payments_query.filter(vendor=vendor_filter)
-            
+
             monthly_payments = (
                 monthly_payments_query
                 .annotate(month=TruncMonth('created_at'))
@@ -1117,6 +1251,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 .annotate(total=Sum('amount'))
                 .order_by('month')
             )
+
             for month_data in monthly_payments:
                 month = month_data['month'].month
                 monthly_amounts[month - 1] = float(month_data['total'] or 0)
@@ -1126,7 +1261,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         schedule_update_query = Schedule.objects.filter(schedule_date=today)
         if vendor_filter:
             schedule_update_query = schedule_update_query.filter(vendor=vendor_filter)
-        
         schedule_update_query.select_related('trainer').prefetch_related(
             'enrollments', 'attendances'
         ).update(status='upcoming')
@@ -1134,7 +1268,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         schedules_today_query = Schedule.objects.filter(schedule_date=today)
         if vendor_filter:
             schedules_today_query = schedules_today_query.filter(vendor=vendor_filter)
-        
+
         schedules_today = schedules_today_query
         for schedule in schedules_today:
             schedule.update_status()
@@ -1143,7 +1277,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         running_classes_query = Schedule.objects.filter(
             schedule_date=today, status='live'
         ).select_related('trainer').prefetch_related('enrollments', 'attendances')
-        
+
         if vendor_filter:
             running_classes_query = running_classes_query.filter(vendor=vendor_filter)
 
@@ -1156,10 +1290,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 'end_time': cls.end_time.strftime('%I:%M %p'),
                 'current_attendance': cls.attendances.filter(date=today).count(),
                 'max_capacity': cls.capacity,
-                'location': 'Main Hall',  # Optional: replace with cls.location
+                'location': 'Main Hall',
             })
 
-        # Pages group (for optional navigation or chart purposes)
+        # Pages group
         PAGES_GROUP = [
             'about-us', 'class-timetable', 'bmi-calculator',
             'team', 'gallery', 'blog', '404'
@@ -1167,18 +1301,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Yearly and Monthly growth calculation
         growth_per_month = {}
-        current_month_index = today.month - 1  # zero-based index
+        current_month_index = today.month - 1
 
         for year in years:
             months_list = membership_trends.get(year, [0] * 12)
             for month_idx in range(len(months_list)):
-                # Skip future months beyond current month this year
                 if year == today.year and month_idx > current_month_index:
                     break
-
                 curr = months_list[month_idx]
 
-                # Find previous month value:
                 if month_idx == 0:
                     prev_year = year - 1
                     prev_month_val = membership_trends.get(prev_year, [0] * 12)[11] if prev_year in membership_trends else 0
@@ -1193,7 +1324,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 key = f"{year}-{month_idx + 1:02d}"
                 growth_per_month[key] = {"percent": percent, "count": curr}
 
-        # Get only the last two months data in JSON format
         month_keys = list(growth_per_month.keys())
         last_two = month_keys[-2:] if len(month_keys) >= 2 else month_keys
         last_two_dict = {k: growth_per_month[k] for k in last_two}
@@ -1240,7 +1370,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
-
 class DashboardSearchView(LoginRequiredMixin, TemplateView):
     template_name = 'admin_panel/index.html'
 
@@ -1275,42 +1404,22 @@ class DashboardSearchView(LoginRequiredMixin, TemplateView):
         })
         return context
 
-# Static Pages
-class ServicesView(LoginRequiredMixin,TemplateView):
-    template_name = 'vendor_ui/services.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['total_categories'] = Category.objects.all()
-        return context
+# ============================================================================
+# REVIEW MANAGEMENT VIEWS
+# ============================================================================
 
-class AboutView(LoginRequiredMixin,TemplateView):
-    template_name = 'vendor_ui/about-us.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        context['total_categories'] = Category.objects.all()
-        return context
-
-# Review Management Views
 class ReviewListView(LoginRequiredMixin, ListView):
     model = Review
     template_name = 'admin_panel/review_list.html'
     context_object_name = 'reviews'
 
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/review_list.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/review_list.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/review_list.html']
+        return ['admin_panel/review_list.html']
+
 
 class ReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
@@ -1321,23 +1430,17 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, "Review added successfully!")
         return super().form_valid(form)
-    
+
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/review_form.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/review_form.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/review_form.html']
+        return ['admin_panel/review_form.html']
 
     def form_invalid(self, form):
         messages.error(self.request, "There was an error adding the review. Please check the form.")
         return super().form_invalid(form)
+
 
 class ReviewDetailView(LoginRequiredMixin, DetailView):
     model = Review
@@ -1345,17 +1448,11 @@ class ReviewDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'review'
 
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/review_detail.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/review_detail.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/review_detail.html']
+        return ['admin_panel/review_detail.html']
+
 
 class ReviewUpdateView(LoginRequiredMixin, UpdateView):
     model = Review
@@ -1366,19 +1463,12 @@ class ReviewUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, "Review updated successfully!")
         return super().form_valid(form)
-    
+
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/review_form.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/review_form.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/review_form.html']
+        return ['admin_panel/review_form.html']
 
     def form_invalid(self, form):
         messages.error(self.request, "Error updating review. Please check the form.")
@@ -1388,39 +1478,30 @@ class ReviewUpdateView(LoginRequiredMixin, UpdateView):
 class ReviewDeleteView(LoginRequiredMixin, DeleteView):
     model = Review
     success_url = reverse_lazy('review_list')
-    template_name = None  # This tells Django not to look for a template
+    template_name = None
 
     def get(self, request, *args, **kwargs):
-        """
-        Skip the confirmation template and go straight to deletion
-        """
         return self.delete(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
-        """
-        Handle the actual deletion and show success message
-        """
         messages.success(request, "Review deleted successfully!")
         return super().delete(request, *args, **kwargs)
 
-# Banner Management Views
+
+# ============================================================================
+# BANNER MANAGEMENT VIEWS
+# ============================================================================
+
 class BannerListView(LoginRequiredMixin, ListView):
     model = Banner
     template_name = 'admin_panel/banner_list.html'
     context_object_name = 'banners'
 
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/banner_list.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/banner_list.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/banner_list.html']
+        return ['admin_panel/banner_list.html']
 
 
 class BannerCreateView(LoginRequiredMixin, CreateView):
@@ -1432,23 +1513,17 @@ class BannerCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, "Banner added successfully!")
         return super().form_valid(form)
-    
+
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/banner_form.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/banner_form.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/banner_form.html']
+        return ['admin_panel/banner_form.html']
 
     def form_invalid(self, form):
         messages.error(self.request, "There was an error adding the banner. Please check the form.")
         return super().form_invalid(form)
+
 
 class BannerDetailView(LoginRequiredMixin, DetailView):
     model = Banner
@@ -1456,17 +1531,11 @@ class BannerDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'banner'
 
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/banner_form.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/banner_form.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/banner_form.html']
+        return ['admin_panel/banner_form.html']
+
 
 class BannerUpdateView(LoginRequiredMixin, UpdateView):
     model = Banner
@@ -1477,28 +1546,22 @@ class BannerUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, "Banner updated successfully!")
         return super().form_valid(form)
-    
+
     def get_template_names(self):
-        """
-        Determine which template to use based on ADMIN_PANEL_MODE
-        """
         admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        
         if admin_mode == 'advanced':
             return ['advadmin/banner_form.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/banner_form.html']  # Add if you have this
-        else:  # basic or any other value
-            return ['admin_panel/banner_form.html']
+        return ['admin_panel/banner_form.html']
 
     def form_invalid(self, form):
         messages.error(self.request, "Error updating banner. Please check the form.")
         return super().form_invalid(form)
 
+
 class BannerDeleteView(LoginRequiredMixin, DeleteView):
     model = Banner
     success_url = reverse_lazy('banner_list')
-    template_name = None  # This tells Django not to look for a template
+    template_name = None
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
@@ -1506,211 +1569,97 @@ class BannerDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Banner deleted successfully!")
         return super().delete(request, *args, **kwargs)
-    
-# Utility Views
-class DownloadDatabaseView(LoginRequiredMixin, View):
-    def get(self, request):
-        db_path = os.path.join(settings.BASE_DIR, 'db.sqlite3')
-        if os.path.exists(db_path):
-            response = FileResponse(open(db_path, 'rb'), as_attachment=True, filename="database.sqlite3")
-            return response
-        return HttpResponse("Database file not found.", status=404)
-
-class DownloadAllMediaView(LoginRequiredMixin, View):
-    def get(self, request):
-        try:
-            memory_buffer = BytesIO()
-            with zipfile.ZipFile(memory_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                media_root = str(settings.MEDIA_ROOT)
-                for root, _, files in os.walk(media_root):
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        if file_path.startswith(media_root):
-                            arcname = os.path.relpath(file_path, media_root)
-                            zipf.write(file_path, arcname)
-
-            memory_buffer.seek(0)
-            response = HttpResponse(memory_buffer.getvalue(), content_type='application/zip')
-            response['Content-Disposition'] = 'attachment; filename="all_media_files.zip"'
-            memory_buffer.close()
-            return response
-            
-        except Exception as e:
-            if 'memory_buffer' in locals():
-                memory_buffer.close()
-            return HttpResponse(f"Error creating archive: {str(e)}", status=500, content_type='text/plain')
-        
 
 
+# ============================================================================
+# SOCIAL MEDIA MANAGEMENT VIEWS
+# ============================================================================
+
+class SocialMediaListView(LoginRequiredMixin, ListView):
+    model = SocialMedia
+    template_name = 'admin_panel/socialmedia_list.html'
+    context_object_name = 'social_links'
+
+    def get_queryset(self):
+        return SocialMedia.objects.filter(user=self.request.user)
+
+    def get_template_names(self):
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
+        if admin_mode == 'advanced':
+            return ['advadmin/socialmedia_list.html']
+        return ['admin_panel/socialmedia_list.html']
 
 
-class PasswordResetRequestView(View):
-    template_name = 'advadmin/auth-forgot-password-basic.html'
-    
-    def get(self, request):
-        return render(request, self.template_name, {'form': PasswordResetRequestForm()})
-    
-    def post(self, request):
-        form = PasswordResetRequestForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            try:
-                user = User.objects.get(email=email)
-                
-                # Delete any existing unused OTPs for this user
-                PasswordResetOTP.objects.filter(
-                    user=user,
-                    is_used=False
-                ).delete()
-                
-                # Generate new OTP
-                otp = ''.join(random.choices(string.digits, k=6))  # 6-digit OTP
-                expires_at = timezone.now() + timezone.timedelta(minutes=15)
-                otp_obj = PasswordResetOTP.objects.create(
-                    user=user,
-                    otp=otp,
-                    expires_at=expires_at
-                )
-                
-                # Email content
-                subject = f"Password Reset OTP for {settings.SITE_NAME}"
-                body = f"""
-                Dear {user.get_full_name() or user.username},
-                
-                You have requested to reset your password. Please use the following OTP:
-                
-                OTP: {otp_obj.otp}
-                
-                This OTP is valid for 15 minutes.
-                
-                If you didn't request this, please ignore this email.
-                
-                Best regards,
-                {settings.SITE_NAME} Team
-                """
-                
-                # SMTP Configuration
-                smtp_server = "smtp.gmail.com"
-                smtp_port = 587
-                smtp_username = settings.EMAIL_HOST_USER
-                smtp_password = settings.EMAIL_HOST_PASSWORD
-                
-                # Create message
-                msg = MIMEMultipart()
-                msg['From'] = settings.DEFAULT_FROM_EMAIL
-                msg['To'] = email
-                msg['Subject'] = subject
-                msg.attach(MIMEText(body, 'plain'))
-                
-                try:
-                    # Send email using SMTP
-                    with smtplib.SMTP(smtp_server, smtp_port) as server:
-                        server.starttls()
-                        server.login(smtp_username, smtp_password)
-                        server.send_message(msg)
-                    
-                    messages.success(request, "An OTP has been sent to your email address.")
-                    logger.info(f"Password reset OTP sent to {email}")
-                    return redirect(reverse('password_reset_verify', kwargs={'user_username': user.username}))
-                
-                except smtplib.SMTPAuthenticationError:
-                    error_msg = "SMTP authentication failed. Please check email credentials."
-                    logger.error(error_msg)
-                    messages.error(request, "Email service temporarily unavailable. Please try later.")
-                except smtplib.SMTPException as e:
-                    error_msg = f"SMTP error occurred: {str(e)}"
-                    logger.error(error_msg)
-                    messages.error(request, "Failed to send email. Please try again.")
-                except Exception as e:
-                    error_msg = f"Unexpected error: {str(e)}"
-                    logger.error(error_msg)
-                
-                return redirect('password_reset_request')
-            
-            except User.DoesNotExist:
-                # Don't reveal whether email exists or not for security
-                messages.success(request, "If an account exists with this email, we've sent an OTP.")
-                logger.info(f"Password reset requested for non-existent email: {email}")
-                return redirect('password_reset_request')
-        
-        # Form is invalid
-        logger.warning(f"Invalid form submission: {form.errors}")
-        return render(request, self.template_name, {'form': form})
+class SocialMediaCreateView(LoginRequiredMixin, CreateView):
+    model = SocialMedia
+    form_class = SocialMediaForm
+    template_name = 'admin_panel/socialmedia_form.html'
+    success_url = reverse_lazy('socialmedia_list')
 
-class PasswordResetVerifyView(View):
-    template_name = 'advadmin/auth-reset-password-basic.html'
-    
-    def get(self, request, user_username):
-        try:
-            # Use username field instead of pk
-            user = CustomUser.objects.get(username=user_username)
-            return render(request, self.template_name, {
-                'form': PasswordResetOTPForm(),
-                'user_username': user_username
-            })
-        except CustomUser.DoesNotExist:
-            messages.error(request, "Invalid user.")
-            return redirect('password_reset_request')
-    
-    def post(self, request, user_username):
-        form = PasswordResetOTPForm(request.POST)
-        if form.is_valid():
-            otp = form.cleaned_data['otp']
-            new_password1 = form.cleaned_data['new_password1']
-            new_password2 = form.cleaned_data['new_password2']
-            
-            if new_password1 != new_password2:
-                messages.error(request, "Passwords don't match.")
-                return render(request, self.template_name, {
-                    'form': form,
-                    'user_username': user_username
-                })
-            
-            try:
-                # Use username field instead of pk
-                user = User.objects.get(username=user_username)
-                otp_obj = PasswordResetOTP.objects.get(
-                    user=user,
-                    otp=otp,
-                    is_used=False,
-                    expires_at__gt=timezone.now()
-                )
-                
-                # Update password
-                user.set_password(new_password1)
-                user.save()
-                
-                # Mark OTP as used
-                otp_obj.is_used = True
-                otp_obj.save()
-                
-                # Invalidate all other OTPs for this user
-                PasswordResetOTP.objects.filter(
-                    user=user,
-                    is_used=False
-                ).update(is_used=True)
-                
-                messages.success(request, "Password reset successfully. You can now login with your new password.")
-                return redirect('login')
-            
-            except CustomUser.DoesNotExist:
-                messages.error(request, "Invalid user.")
-                return redirect('password_reset_request')
-            except PasswordResetOTP.DoesNotExist:
-                messages.error(request, "Invalid or expired OTP.")
-                return render(request, self.template_name, {
-                    'form': form,
-                    'user_username': user_username
-                })
-        
-        return render(request, self.template_name, {
-            'form': form,
-            'user_username': user_username
-        })
-    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_template_names(self):
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
+        if admin_mode == 'advanced':
+            return ['advadmin/socialmedia_form.html']
+        return ['admin_panel/socialmedia_form.html']
+
+    def form_valid(self, form):
+        if not self.request.user.is_superuser:
+            form.instance.user = self.request.user
+        messages.success(self.request, "Social media link added successfully!")
+        return super().form_valid(form)
 
 
+class SocialMediaDetailView(LoginRequiredMixin, DetailView):
+    model = SocialMedia
+    template_name = 'admin_panel/socialmedia_detail.html'
+    context_object_name = 'social_link'
 
+    def get_template_names(self):
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
+        if admin_mode == 'advanced':
+            return ['advadmin/socialmedia_detail.html']
+        return ['admin_panel/socialmedia_detail.html']
+
+
+class SocialMediaUpdateView(LoginRequiredMixin, UpdateView):
+    model = SocialMedia
+    form_class = SocialMediaForm
+    template_name = 'admin_panel/socialmedia_form.html'
+    success_url = reverse_lazy('socialmedia_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_template_names(self):
+        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
+        if admin_mode == 'advanced':
+            return ['advadmin/socialmedia_form.html']
+        return ['admin_panel/socialmedia_form.html']
+
+    def form_valid(self, form):
+        messages.success(self.request, "Social media link updated successfully!")
+        return super().form_valid(form)
+
+
+class SocialMediaDeleteView(LoginRequiredMixin, DeleteView):
+    model = SocialMedia
+    success_url = reverse_lazy('socialmedia_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Social media link deleted successfully!")
+        return super().delete(request, *args, **kwargs)
+
+
+# ============================================================================
+# ACCOUNT & PROFILE VIEWS
+# ============================================================================
 
 class AccountSettingsView(LoginRequiredMixin, TemplateView):
     template_name = 'advadmin/pages-account-settings-account.html'
@@ -1719,6 +1668,7 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
         return context
+
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = CustomUser
@@ -1741,101 +1691,54 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
         return context
-  
 
 
-class SocialMediaListView(LoginRequiredMixin, ListView):
-    model = SocialMedia
-    template_name = 'admin_panel/socialmedia_list.html'
-    context_object_name = 'social_links'
+# ============================================================================
+# API & UTILITY VIEWS
+# ============================================================================
 
-    def get_queryset(self):
-        return SocialMedia.objects.filter(user=self.request.user)
-
-    def get_template_names(self):
-        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        if admin_mode == 'advanced':
-            return ['advadmin/socialmedia_list.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/socialmedia_list.html']
-        else:
-            return ['admin_panel/socialmedia_list.html']
+class FetchProductsView(View):
+    def get(self, request, *args, **kwargs):
+        category_id = self.kwargs['category_id']
+        products = Product.objects.filter(
+            category_id=category_id,
+            is_active=True
+        ).values('id', 'name', 'price', 'sku')
+        return JsonResponse(list(products), safe=False)
 
 
-class SocialMediaCreateView(LoginRequiredMixin, CreateView):
-    model = SocialMedia
-    form_class = SocialMediaForm
-    template_name = 'admin_panel/socialmedia_form.html'
-    success_url = reverse_lazy('socialmedia_list')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
-        return kwargs
-
-    def get_template_names(self):
-        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        if admin_mode == 'advanced':
-            return ['advadmin/socialmedia_form.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/socialmedia_form.html']
-        else:
-            return ['admin_panel/socialmedia_form.html']
-
-    def form_valid(self, form):
-        if not self.request.user.is_superuser:
-            form.instance.user = self.request.user
-        messages.success(self.request, "Social media link added successfully!")
-        return super().form_valid(form)
+class DownloadDatabaseView(LoginRequiredMixin, View):
+    def get(self, request):
+        db_path = os.path.join(settings.BASE_DIR, 'db.sqlite3')
+        if os.path.exists(db_path):
+            response = FileResponse(open(db_path, 'rb'), as_attachment=True, filename="database.sqlite3")
+            return response
+        return HttpResponse("Database file not found.", status=404)
 
 
-class SocialMediaDetailView(LoginRequiredMixin, DetailView):
-    model = SocialMedia
-    template_name = 'admin_panel/socialmedia_detail.html'
-    context_object_name = 'social_link'
+class DownloadAllMediaView(LoginRequiredMixin, View):
+    def get(self, request):
+        try:
+            memory_buffer = BytesIO()
+            with zipfile.ZipFile(memory_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                media_root = str(settings.MEDIA_ROOT)
+                for root, _, files in os.walk(media_root):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        if file_path.startswith(media_root):
+                            arcname = os.path.relpath(file_path, media_root)
+                            zipf.write(file_path, arcname)
 
-    def get_template_names(self):
-        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        if admin_mode == 'advanced':
-            return ['advadmin/socialmedia_detail.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/socialmedia_detail.html']
-        else:
-            return ['admin_panel/socialmedia_detail.html']
+            memory_buffer.seek(0)
+            response = HttpResponse(memory_buffer.getvalue(), content_type='application/zip')
+            response['Content-Disposition'] = 'attachment; filename="all_media_files.zip"'
+            memory_buffer.close()
+            return response
 
-
-class SocialMediaUpdateView(LoginRequiredMixin, UpdateView):
-    model = SocialMedia
-    form_class = SocialMediaForm
-    template_name = 'admin_panel/socialmedia_form.html'
-    success_url = reverse_lazy('socialmedia_list')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
-        return kwargs
-
-    def get_template_names(self):
-        admin_mode = getattr(settings, 'ADMIN_PANEL_MODE', 'basic').lower()
-        if admin_mode == 'advanced':
-            return ['advadmin/socialmedia_form.html']
-        elif admin_mode == 'standard':
-            return ['admin_panel/socialmedia_form.html']
-        else:
-            return ['admin_panel/socialmedia_form.html']
-
-    def form_valid(self, form):
-        messages.success(self.request, "Social media link updated successfully!")
-        return super().form_valid(form)
-
-
-class SocialMediaDeleteView(LoginRequiredMixin, DeleteView):
-    model = SocialMedia
-    success_url = reverse_lazy('socialmedia_list')
-
-    def delete(self, request, *args, **kwargs):
-        messages.success(request, "Social media link deleted successfully!")
-        return super().delete(request, *args, **kwargs)
+        except Exception as e:
+            if 'memory_buffer' in locals():
+                memory_buffer.close()
+            return HttpResponse(f"Error creating archive: {str(e)}", status=500, content_type='text/plain')
 
 
 def get_company_data(request):
@@ -1877,358 +1780,126 @@ def get_company_data(request):
             'company_facebook': company.company_facebook,
             'company_email_ceo': company.company_email_ceo,
             'opening_time': (
-                company.opening_time.strftime('%H:%M:%S')
-                if company.opening_time else None
+                company.opening_time.strftime('%H:%M:%S') if company.opening_time else None
             ),
             'closing_time': (
-                company.closing_time.strftime('%H:%M:%S')
-                if company.closing_time else None
+                company.closing_time.strftime('%H:%M:%S') if company.closing_time else None
             ),
             'closed_days': (
                 company.closed_days.split(',') if company.closed_days else []
             ),
             'category_names': category_names
         }
-
         return JsonResponse(data)
 
     except ObjectDoesNotExist as e:
-        logger.error(
-            f"ObjectDoesNotExist Error: {str(e)} - Failed to fetch company data."
-        )
-        return JsonResponse(
-            {'error': 'Company data not found or missing fields'}, status=500
-        )
-
+        logger.error(f"ObjectDoesNotExist Error: {str(e)} - Failed to fetch company data.")
+        return JsonResponse({'error': 'Company data not found or missing fields'}, status=500)
     except Exception as e:
         logger.error(f"Error while processing company data: {str(e)}")
-        return JsonResponse(
-            {'error': 'An unexpected error occurred while processing company data'},
-            status=500
-        )
+        return JsonResponse({'error': 'An unexpected error occurred while processing company data'}, status=500)
 
 
-class CustomerCreateView(View):
-    template_name = 'advadmin/customer_registration.html'
+# ============================================================================
+# STATIC PAGE VIEWS (VENDOR UI)
+# ============================================================================
 
-    def get(self, request):
-        users = User.objects.all()
-        form = CustomerRegistrationForm()
-        return render(request, self.template_name, {'form': form, 'users': users})
-
-    def post(self, request):
-        form = CustomerRegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Customer created successfully!")
-            return redirect('customer_registration')
-        else:
-            messages.error(request, "Error creating customer.")
-            print("Form errors:", form.errors)
-        return render(
-            request, self.template_name,
-            {'form': form, 'users': User.objects.all()}
-        )
-
-
-class MemberRegisterView(LoginRequiredMixin,CreateView):
-    model = CustomUser
-    form_class = MemberRegistrationForm
-    success_url = reverse_lazy('user_list')
-
-    def get_template_names(self):
-        return ['advadmin/member_registration.html']
-
-    def form_valid(self, form):
-        try:
-            user = form.save(commit=False)
-            user.staff_role = 'Member'
-
-            # ✅ Set Vendor from current logged-in user (assuming you're logged in as a manager/admin tied to a Vendor)
-            user.Vendor = self.request.user.Vendor
-
-            if form.cleaned_data.get('password1'):
-                user.set_password(form.cleaned_data['password1'])
-            user.save()
-
-            package = form.cleaned_data['package']
-
-            self.request.session['pending_member_member_id'] = user.member_id
-            self.request.session['pending_package_id'] = package.id
-
-            messages.success(
-                self.request,
-                "Please complete package payment to activate membership."
-            )
-
-            return redirect('registration_next_steps')
-
-        except Exception as e:
-            messages.error(self.request, f"Error: {str(e)}")
-            return self.form_invalid(form)
-
+class HomePageView(TemplateView):
+    template_name = "myoceanbasket/index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        role = self.kwargs.get('role', '').capitalize()
-        context['page_name'] = "member_registration"
-        # Example: 'Admin Users', 'Manager Users', etc.
+
+        total_categories = Category.objects.all().prefetch_related('products')
+        products = Product.objects.values('category').distinct()
+        reviews = Review.objects.all()
+        banners = Banner.objects.all().order_by('series')
+
+        product_list = []
+        for item in products:
+            product_list = Product.objects.filter(category=item['category']).order_by('price')[:4]
+
+        all_products = Product.objects.select_related('category').filter(
+            category__isnull=False
+        ).order_by('-category__name', 'price')
+
+        grouped = defaultdict(list)
+        for product in all_products:
+            category_obj = product.category
+            if len(grouped[category_obj]) < 20:
+                grouped[category_obj].append(product)
+
+        category_products = [
+            {'category': category, 'products': prods}
+            for category, prods in grouped.items()
+        ]
+
+        category_data = {}
+        for category in total_categories:
+            products = category.products.filter(is_active=True).distinct().values('id', 'name', 'price')[:4]
+            category_data[category.id] = list(products)
+
+        context.update({
+            'is_mobile': self.request.user_agent.is_mobile,
+            'reviews': reviews,
+            'total_categories': total_categories,
+            'products': product_list,
+            'category_data': category_data,
+            'banners': banners,
+            'category_products': category_products
+        })
         return context
 
 
-class LoginWithOTPView(View):
-    template_name = 'advadmin/login_with_otp.html'
+class ServicesView(LoginRequiredMixin, TemplateView):
+    template_name = 'vendor_ui/services.html'
 
-    def get(self, request):
-        return render(request, self.template_name)
-
-    def post(self, request):
-        phone_number = request.POST.get('phone_number')
-
-        if not phone_number:
-            messages.error(request, "Phone number is required")
-            return render(request, self.template_name)
-        try:
-            user = User.objects.get(phone_number=phone_number)
-        except User.DoesNotExist:
-            messages.error(request, "No user found with the corresponding phone number.")
-            return render(request, self.template_name)
-
-        email = user.email
-        otp = str(random.randint(100000, 999999))
-        valid_until = timezone.now() + timedelta(minutes=5)
-
-        request.session['otp'] = otp
-        request.session['otp_valid_until'] = valid_until.isoformat()
-        request.session['phone_number'] = phone_number
-
-        configs = Configuration.objects.filter(
-            config__in=["enable-emailotp", "enable-smsotp"]
-        )
-        config_values = {config.config: config.value for config in configs}
-
-        def str_to_bool(value):
-            return value.lower() in ("true", "1", "yes", "on")
-
-        if str_to_bool(config_values.get("enable-emailotp", "False")):
-            self.send_otp_via_email(email, otp)
-
-        if str_to_bool(config_values.get("enable-smsotp", "False")):
-            self.send_otp_via_twilio(phone_number, otp)
-
-        return redirect('verify_otp')
-
-    def send_otp_via_email(self, email, otp):
-        subject = f"OTP for {settings.SITE_NAME}"
-        body = (
-            f"Dear User,\n\n"
-            f"Your OTP for logging in to {settings.SITE_NAME} is:\n\n"
-            f"OTP: {otp}\n\n"
-            f"This OTP is valid for 5 minutes.\n\n"
-            f"If you didn't request this, please ignore this email.\n\n"
-            f"Best regards,\n{settings.SITE_NAME} Team"
-        )
-        try:
-            send_mail(
-                subject, body, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False
-            )
-            messages.success(
-                self.request,
-                "OTP has been sent to your email. Please check your inbox."
-            )
-        except Exception as e:
-            messages.error(self.request, "Failed to send OTP via email. Please try again.")
-            print(f"Error sending email: {e}")
-
-    def send_otp_via_twilio(self, phone_number, otp):
-        try:
-            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-            message = client.messages.create(
-                body=f"Your OTP for login is: {otp}. Valid for 5 minutes.",
-                from_=settings.TWILIO_PHONE_NUMBER,
-                to=phone_number
-            )
-            print("message response from twilio:", message)
-            return True
-        except Exception as e:
-            print(f"Error sending OTP: {e}")
-            return False
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_categories'] = Category.objects.all()
+        return context
 
 
+class AboutView(LoginRequiredMixin, TemplateView):
+    template_name = 'vendor_ui/about-us.html'
 
-# from django.views import View
-# from django.shortcuts import render, redirect
-# from django.contrib import messages
-# from django.contrib.auth import login
-# from django.utils import timezone
-from django.utils.dateparse import parse_datetime
-# from .models import User
-
-class VerifyOTPView(View):
-    template_name = 'advadmin/verify_otp.html'
-
-    def get(self, request):
-        if 'phone_number' not in request.session:
-            messages.error(request, "Session expired. Please request OTP again.")
-            return redirect('login_with_otp')
-        return render(request, self.template_name)
-
-    def post(self, request):
-        user_otp = request.POST.get('otp', '').strip()
-        phone_number = request.session.get('phone_number')
-        stored_otp = request.session.get('otp')
-        otp_valid_until = request.session.get('otp_valid_until')
-
-        if not all([user_otp, stored_otp, otp_valid_until]):
-            messages.error(request, "Session expired. Please request OTP again.")
-            return redirect('login_with_otp')
-
-        otp_expiry = parse_datetime(otp_valid_until)
-        if otp_expiry is not None and timezone.is_naive(otp_expiry):
-            otp_expiry = timezone.make_aware(otp_expiry)
-
-        if timezone.now() > otp_expiry:
-            messages.error(request, "OTP has expired. Please request a new one.")
-            return redirect('login_with_otp')
-
-        if user_otp == stored_otp:
-            try:
-                user = User.objects.get(phone_number=phone_number)
-            except User.DoesNotExist:
-                messages.error(request, "No user found with the corresponding phone number.")
-                return render(request, self.template_name)
-
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(request, user)
-
-            # Clear OTP session values
-            for k in ('otp', 'otp_valid_until', 'phone_number'):
-                request.session.pop(k, None)
-
-            return redirect('otp_login_success')
-        else:
-            messages.error(request, "Invalid OTP. Please try again.")
-            return render(request, self.template_name)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_categories'] = Category.objects.all()
+        return context
 
 
-
-class OTPLoginSuccessView(View):
-    template_name = 'advadmin/otp_login_success.html'
-
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return redirect('login_with_otp')
-        return redirect('dashboard')
-
-
-def login_redirect(request):
-    return redirect('/accounts/google/login/?process=login')
-
-
-@method_decorator(csrf_exempt, name='dispatch')
-class GoogleSSOCallbackView(View):
-    def get(self, request):
-        code = request.GET.get('code')
-        if not code:
-            messages.error(request, "Authorization code not found.")
-            return redirect('/login/')
-
-        # Step 1: Exchange code for access token
-        token_url = 'https://oauth2.googleapis.com/token'
-        token_data = {
-            'code': code,
-            'client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
-            'client_secret': settings.GOOGLE_OAUTH_CLIENT_SECRET,
-            'redirect_uri': settings.GOOGLE_OAUTH_REDIRECT_URI,
-            'grant_type': 'authorization_code',
-        }
-
-        token_response = requests.post(token_url, data=token_data)
-        token_json = token_response.json()
-        access_token = token_json.get('access_token')
-
-        if not access_token:
-            messages.error(request, "Failed to retrieve access token.")
-            return redirect('/login/')
-
-        # Step 2: Fetch user info
-        user_info_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
-        user_info_response = requests.get(
-            user_info_url,
-            params={'alt': 'json'},
-            headers={'Authorization': f'Bearer {access_token}'}
-        )
-        user_info = user_info_response.json()
-
-        email = user_info.get('email')
-        name = user_info.get('name')
-
-        if not email:
-            messages.error(request, "Email not found in Google profile.")
-            return redirect('/login/')
-
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            messages.error(request, "User not registered. Please sign up first.")
-            return redirect('/login/')
-
-        if user.first_name != name:
-            user.first_name = name
-            user.save()
-
-        user.backend = 'django.contrib.auth.backends.ModelBackend'
-        login(request, user)
-
-        return redirect('/dashboard')
-
-
-class BlogDetailsView(LoginRequiredMixin,TemplateView):
+class BlogDetailsView(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/blog-details.html'
 
-class BlogView(LoginRequiredMixin,TemplateView):
+
+class BlogView(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/blog.html'
 
-class BMICalculatorView(LoginRequiredMixin,TemplateView):
+
+class BMICalculatorView(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/bmi-calculator.html'
 
-class ClassDetailsView(LoginRequiredMixin,TemplateView):
+
+class ClassDetailsView(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/class-details.html'
 
-class ClassTimetableView(LoginRequiredMixin,TemplateView):
+
+class ClassTimetableView(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/class-timetable.html'
 
-class ContactView(LoginRequiredMixin,TemplateView):
+
+class ContactView(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/contact.html'
 
-class GalleryView(LoginRequiredMixin,TemplateView):
+
+class GalleryView(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/gallery.html'
 
 
-class ServicesView(LoginRequiredMixin,TemplateView):
-    template_name = 'vendor_ui/services.html'
-
-class TeamView(LoginRequiredMixin,TemplateView):
+class TeamView(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/team.html'
 
-class Error404View(LoginRequiredMixin,TemplateView):
+
+class Error404View(LoginRequiredMixin, TemplateView):
     template_name = 'vendor_ui/404.html'
-
-
-from django.views import View
-from django.shortcuts import render, redirect
-from django.urls import reverse
-
-class RegistrationNextStepsView(View):
-    def get(self, request):
-        # Make sure the user has a pending registration
-        member_id = request.session.get("pending_member_member_id")
-        package_id = request.session.get("pending_package_id")
-
-        print("package_idpackage_idpackage_idpackage_id", package_id)
-        print("member_idmember_idmember_idmember_idmember_id", member_id)
-        if not member_id or not package_id:
-            # Session expired or incomplete, send back to register
-            return redirect('register_member')
-
-        return render(request, "advadmin/registration_next_steps.html")

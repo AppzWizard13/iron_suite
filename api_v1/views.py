@@ -952,14 +952,14 @@ def initiate_subscription_payment_api(request):
             payment_status=SubscriptionOrder.PaymentStatus.PENDING,
             start_date=timezone.now().date(),
             end_date=timezone.now().date() + timedelta(days=package.duration_days),
-            Vendor=request.user.Vendor
+            Vendor=request.user.vendor
         )
         
         # Create payment record
         payment, created = Payment.objects.get_or_create(
             content_type=ContentType.objects.get_for_model(subscription_order),
             object_id=subscription_order.id,
-            Vendor=request.user.Vendor,
+            Vendor=request.user.vendor,
             defaults={
                 'payment_method': 'cashfree',
                 'amount': subscription_order.total,
@@ -1581,7 +1581,7 @@ class TransactionListAPIView(generics.ListAPIView):
         # Get Vendor from user (adjust field name as per your User model)
         Vendor = None
         if hasattr(user, 'Vendor'):
-            Vendor = user.Vendor
+            Vendor = user.vendor
         elif hasattr(user, 'vendor_id'):
             vendor_id = user.vendor_id
             return Transaction.objects.filter(vendor_id=vendor_id).select_related('Vendor', 'content_type').prefetch_related('content_object')

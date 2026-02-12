@@ -1,29 +1,18 @@
 from django import forms
-from django.contrib.auth.mixins import LoginRequiredMixin
-from core.choices import CountryChoice, GenderChoice  , StaffRoleChoice
-from .models import CustomUser, Customer
-from .utils import generate_username  # Import generate_username function.
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
 from django.contrib.auth.hashers import make_password
-from django.db.models import Max
-from django import forms
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import get_user_model
-
-
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.db.models import Max
-from .models import CustomUser, SocialMedia
-
 from django.core.exceptions import ValidationError
-from django import forms
-from .models import Vendor
-from django import forms
-from django.contrib.auth import get_user_model
-from django.db.models import Q
-from master.models import Vendor
+from django.core.validators import FileExtensionValidator
+from django.db.models import Max, Q
+from django.utils.crypto import get_random_string
 
-CustomUser = get_user_model()
+from core.choices import CountryChoice, GenderChoice, StaffRoleChoice
+from .models import CustomUser, Customer, SocialMedia, Vendor, Review, Banner
+
+# ============================================================================
+# VENDOR FORMS
+# ============================================================================
 
 class VendorForm(forms.ModelForm):
     class Meta:
@@ -44,14 +33,14 @@ class VendorForm(forms.ModelForm):
         # Restrict the admin field choices to users with staff_role='Admin'
         self.fields['admin'].queryset = CustomUser.objects.filter(staff_role='Admin')
 
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.db.models import Max
-from accounts.models import CustomUser
 
-
+# ============================================================================
+# USER MANAGEMENT FORMS
+# ============================================================================
 
 class CustomUserForm(UserCreationForm):
+    """Custom user creation form with optional password and dynamic staff role"""
+    
     # Convert country_code to ChoiceField
     country_code = forms.ChoiceField(
         choices=CountryChoice.choices,
@@ -88,38 +77,24 @@ class CustomUserForm(UserCreationForm):
             "state": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter State"}),
             "pincode": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter Pincode"}),
             "date_of_birth": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "gender": forms.Select(attrs={"class": "form-control"}, choices=GenderChoice.choices  ),
-            "staff_role": forms.Select(attrs={"class": "form-control"}, choices= StaffRoleChoice.choices),
+            "gender": forms.Select(attrs={"class": "form-control"}, choices=GenderChoice.choices),
+            "staff_role": forms.Select(attrs={"class": "form-control"}, choices=StaffRoleChoice.choices),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
     def __init__(self, *args, **kwargs):
-        print("kwargskwargskwargskwargskwargskwargskwargskwargskwargs", kwargs)
         self.hide_staff_role = kwargs.pop("hide_staff_role", False)
         self.default_staff_role = kwargs.pop("default_staff_role", None)
         is_superuser = kwargs.pop("is_superuser", False)
         super().__init__(*args, **kwargs)
 
         # Dynamically set staff_role choices based on is_superuser
-        print("self.fields")
         if "staff_role" in self.fields:
             if is_superuser:
-                self.fields["staff_role"].choices = [
-                    ("Admin", "Admin"),
-                    ("Manager", "Manager"), 
-                    ("Employee", "Employee"),
-                    ("Member", "Member"),
-                    ("Trainer", "Trainer")
-                ]
+                self.fields["staff_role"].choices = StaffRoleChoice.choices
             else:
-                # Exclude 'Admin'
-                self.fields["staff_role"].choices = [
-                    ("Manager", "Manager"), 
-                    ("Employee", "Employee"),
-                    ("Member", "Member"),
-                    ("Trainer", "Trainer")
-                ]
+                self.fields["staff_role"].choices = StaffRoleChoice.choices
 
         if self.hide_staff_role:
             self.fields.pop("staff_role", None)
@@ -155,10 +130,182 @@ class CustomUserForm(UserCreationForm):
             instance.save()
         return instance
 
-User = get_user_model()
+
+class UserEditForm(forms.ModelForm):
+    """Form for editing existing users with optional password change"""
+    
+    password1 = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter New Password (leave blank if not changing)'
+        }),
+        label="New Password"
+    )
+    password2 = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm New Password'
+        }),
+        label="Confirm New Password"
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'first_name', 'last_name', 'phone_number', 'email', 'staff_role',
+            'address', 'city', 'state', 'pincode', 'date_of_birth', 'gender',
+            'is_active', 'is_staff', 'password1', 'password2',
+        ]
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter First Name'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Last Name'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Phone Number'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Email'
+            }),
+            'address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Address',
+                'rows': 2
+            }),
+            'city': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter City'
+            }),
+            'state': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter State'
+            }),
+            'pincode': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Pincode'
+            }),
+            'date_of_birth': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+            'gender': forms.Select(attrs={
+                'class': 'form-control'
+            }, choices=GenderChoice.choices),
+            'staff_role': forms.Select(attrs={
+                'class': 'form-control'
+            }, choices=StaffRoleChoice.choices),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'is_staff': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+
+        if password1 and not password2:
+            raise forms.ValidationError("Please confirm your new password.")
+        if password2 and not password1:
+            raise forms.ValidationError("Please enter a new password first.")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords do not match.")
+        return password2
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get('password1')
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user
+
+
+class MemberRegistrationForm(CustomUserForm):
+    """Form specifically for member registration"""
+    
+    class Meta(CustomUserForm.Meta):
+        base_fields = CustomUserForm.Meta.fields + ['package']
+        fields = [f for f in base_fields if f not in ['is_active', 'is_staff', 'on_subscription']]
+        widgets = CustomUserForm.Meta.widgets.copy()
+        widgets['package'] = forms.Select(attrs={'class': 'form-control'})
+        widgets['staff_role'] = forms.HiddenInput()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['staff_role'].initial = 'Member'
+        self.fields['staff_role'].required = False
+        self.fields['staff_role'].label = ""  # hides the label text
+        self.fields['package'].required = True
+
+
+class CustomerRegistrationForm(forms.ModelForm):
+    """Form for registering customers"""
+    
+    username = forms.CharField(label="Username", required=True)
+    phone = forms.CharField(max_length=20, required=False)
+    shipping_address = forms.CharField(widget=forms.Textarea, required=False)
+    billing_address = forms.CharField(widget=forms.Textarea, required=False)
+    date_of_birth = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    loyalty_points = forms.IntegerField(required=False, min_value=0)
+    first_name = forms.CharField(max_length=30, required=False)
+    last_name = forms.CharField(max_length=30, required=False)
+    state = forms.CharField(max_length=100, required=False)
+    country = forms.CharField(max_length=100, required=False)
+    pincode = forms.CharField(max_length=10, required=False)
+
+    class Meta:
+        model = Customer
+        fields = [
+            'username', 'phone', 'shipping_address', 'billing_address', 
+            'date_of_birth', 'loyalty_points', 'first_name', 'last_name', 
+            'state', 'country', 'pincode'
+        ]
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if not CustomUser.objects.filter(username=username).exists():
+            raise forms.ValidationError("User with this username does not exist.")
+        return username
+
+    def save(self, commit=True):
+        customer = super().save(commit=False)
+        username = self.cleaned_data['username']
+        user = CustomUser.objects.get(username=username)
+        customer.user = user
+        if not customer.customer_username:
+            customer.customer_username = self.generate_unique_customer_username()
+        if commit:
+            customer.save()
+        return customer
+
+    def generate_unique_customer_username(self):
+        base_username = "CUST"
+        while True:
+            random_string = get_random_string(length=5, allowed_chars='0123456789')
+            customer_username = f"{base_username}{random_string}"
+            if not Customer.objects.filter(customer_username=customer_username).exists():
+                return customer_username
+
+
+# ============================================================================
+# AUTHENTICATION FORMS
+# ============================================================================
 
 class UserLoginForm(AuthenticationForm):
-    # We name this 'username' so AuthenticationForm.clean() can find it
+    """Login form using phone number as username"""
+    
     username = forms.CharField(
         label="Phone Number",
         widget=forms.TextInput(attrs={
@@ -177,63 +324,12 @@ class UserLoginForm(AuthenticationForm):
     )
 
     def clean(self):
-        # The parent AuthenticationForm handles authentication using 'username' 
-        # and 'password'. Since your model's USERNAME_FIELD is 'phone_number', 
-        # it will automatically check the phone_number column.
         return super().clean()
 
-from django import forms
-from .models import Review
-
-class ReviewForm(forms.ModelForm):
-    class Meta:
-        model = Review
-        fields = ['customer_name', 'review_rating', 'review_content', 'review_date']
-        widgets = {
-            'review_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super(ReviewForm, self).__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            self.fields['review_date'].initial = self.instance.review_date
-
-
-from django import forms
-from .models import Banner
-
-class BannerForm(forms.ModelForm):
-    class Meta:
-        model = Banner
-        fields = [
-            'name', 'series', 'image',
-            'tagline', 'title_main', 'title_highlight',
-            'subtitle', 'button_text'
-        ]
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'series': forms.NumberInput(attrs={'class': 'form-control'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'tagline': forms.TextInput(attrs={'class': 'form-control'}),
-            'title_main': forms.TextInput(attrs={'class': 'form-control'}),
-            'title_highlight': forms.TextInput(attrs={'class': 'form-control'}),
-            'subtitle': forms.TextInput(attrs={'class': 'form-control'}),
-            'button_text': forms.TextInput(attrs={'class': 'form-control'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super(BannerForm, self).__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
-
-
-from django import forms
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-
-User = get_user_model()
 
 class PasswordResetRequestForm(forms.Form):
+    """Form for requesting password reset OTP"""
+    
     email = forms.EmailField(
         label="Email",
         widget=forms.EmailInput(attrs={
@@ -245,11 +341,14 @@ class PasswordResetRequestForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        if not User.objects.filter(email=email).exists():
+        if not CustomUser.objects.filter(email=email).exists():
             raise ValidationError("No user exists with this email address.")
         return email
 
+
 class PasswordResetOTPForm(forms.Form):
+    """Form for verifying OTP and setting new password"""
+    
     otp = forms.CharField(
         label="OTP",
         max_length=6,
@@ -283,14 +382,15 @@ class PasswordResetOTPForm(forms.Form):
             raise ValidationError("Passwords don't match")
         
         return cleaned_data
-    
 
-from django import forms
-from django.contrib.auth.forms import UserChangeForm
-from django.core.validators import FileExtensionValidator
-User = get_user_model()
+
+# ============================================================================
+# PROFILE FORMS
+# ============================================================================
 
 class ProfileUpdateForm(UserChangeForm):
+    """Form for users to update their own profile"""
+    
     password = None  # Remove the password field
     profile_image = forms.ImageField(
         required=False,
@@ -299,19 +399,10 @@ class ProfileUpdateForm(UserChangeForm):
     )
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = [
-            'first_name', 
-            'last_name',
-            'email',
-            'phone_number',
-            'staff_role',
-            'address',
-            'city',
-            'state',
-            'pincode',
-            'date_of_birth',
-            'gender',
+            'first_name', 'last_name', 'email', 'phone_number', 'staff_role',
+            'address', 'city', 'state', 'pincode', 'date_of_birth', 'gender',
             'profile_image'
         ]
         widgets = {
@@ -319,15 +410,64 @@ class ProfileUpdateForm(UserChangeForm):
         }
 
 
+# ============================================================================
+# REVIEW FORMS
+# ============================================================================
+
+class ReviewForm(forms.ModelForm):
+    """Form for creating and editing reviews"""
+    
+    class Meta:
+        model = Review
+        fields = ['customer_name', 'review_rating', 'review_content', 'review_date']
+        widgets = {
+            'review_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(ReviewForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['review_date'].initial = self.instance.review_date
 
 
-from django import forms
-from .models import SocialMedia
-from django.contrib.auth import get_user_model
+# ============================================================================
+# BANNER FORMS
+# ============================================================================
 
-User = get_user_model()
+class BannerForm(forms.ModelForm):
+    """Form for creating and editing banners"""
+    
+    class Meta:
+        model = Banner
+        fields = [
+            'name', 'series', 'image',
+            'tagline', 'title_main', 'title_highlight',
+            'subtitle', 'button_text'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'series': forms.NumberInput(attrs={'class': 'form-control'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'tagline': forms.TextInput(attrs={'class': 'form-control'}),
+            'title_main': forms.TextInput(attrs={'class': 'form-control'}),
+            'title_highlight': forms.TextInput(attrs={'class': 'form-control'}),
+            'subtitle': forms.TextInput(attrs={'class': 'form-control'}),
+            'button_text': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(BannerForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+
+
+# ============================================================================
+# SOCIAL MEDIA FORMS
+# ============================================================================
 
 class SocialMediaForm(forms.ModelForm):
+    """Form for social media links with minimal validation"""
+    
     class Meta:
         model = SocialMedia
         fields = ['user', 'platform', 'url', 'is_active']
@@ -345,7 +485,7 @@ class SocialMediaForm(forms.ModelForm):
             self.fields['user'].initial = self.request.user
             self.fields['user'].widget = forms.HiddenInput()
         else:
-            self.fields['user'].queryset = User.objects.all().order_by('username')
+            self.fields['user'].queryset = CustomUser.objects.all().order_by('username')
         
         # Remove all validators and patterns
         self.fields['url'].validators = []
@@ -365,71 +505,3 @@ class SocialMediaForm(forms.ModelForm):
     def clean(self):
         # No validation performed at all
         return super().clean()
-    
-from django import forms
-from django.contrib.auth import get_user_model
-from .models import Customer
-from django.utils.crypto import get_random_string
-
-CustomUser = get_user_model()
-
-class CustomerRegistrationForm(forms.ModelForm):
-    username = forms.CharField(label="Username", required=True)
-    phone = forms.CharField(max_length=20, required=False)
-    shipping_address = forms.CharField(widget=forms.Textarea, required=False)
-    billing_address = forms.CharField(widget=forms.Textarea, required=False)
-    date_of_birth = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
-    loyalty_points = forms.IntegerField(required=False, min_value=0)
-    first_name = forms.CharField(max_length=30, required=False)
-    last_name = forms.CharField(max_length=30, required=False)
-    state = forms.CharField(max_length=100, required=False)
-    country = forms.CharField(max_length=100, required=False)
-    pincode = forms.CharField(max_length=10, required=False)
-
-    class Meta:
-        model = Customer
-        fields = ['username', 'phone', 'shipping_address', 'billing_address', 'date_of_birth', 'loyalty_points', 'first_name', 'last_name', 'state', 'country', 'pincode']
-
-    def clean_username(self):
-        username = self.cleaned_data['username']
-        if not CustomUser.objects.filter(username=username).exists():
-            raise forms.ValidationError("User with this username does not exist.")
-        return username
-
-    def save(self, commit=True):
-        customer = super().save(commit=False)
-        username = self.cleaned_data['username']
-        user = CustomUser.objects.get(username=username)
-        customer.user = user
-        if not customer.customer_username:
-            customer.customer_username = self.generate_unique_customer_username()
-        if commit:
-            customer.save()
-        return customer
-
-    def generate_unique_customer_username(self):
-        base_username = "CUST"
-        while True:
-            random_string = get_random_string(length=5, allowed_chars='0123456789')
-            customer_username = f"{base_username}{random_string}"
-            if not Customer.objects.filter(customer_username=customer_username).exists():
-                return customer_username
-            
-
-
-class MemberRegistrationForm(CustomUserForm):
-    class Meta(CustomUserForm.Meta):
-        base_fields = CustomUserForm.Meta.fields + ['package']
-        fields = [f for f in base_fields if f not in ['is_active', 'is_staff', 'on_subscription']]
-
-        widgets = CustomUserForm.Meta.widgets.copy()
-        widgets['package'] = forms.Select(attrs={'class': 'form-control'})
-        widgets['staff_role'] = forms.HiddenInput()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fields['staff_role'].initial = 'Member'
-        self.fields['staff_role'].required = False
-        self.fields['staff_role'].label = ""  # <<< hides the label text
-        self.fields['package'].required = True

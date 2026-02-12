@@ -1,4 +1,4 @@
-{% extends 'vendor_ui/iron_board/index.html' %}
+{% extends 'myoceanbasket/index.html' %}
 {% block content %}
 {% load static %}
 
@@ -15,26 +15,27 @@
             <div class="col-lg-6 col-md-8">
                 <div class="wow fadeInUp" data-wow-delay="0.3s">
                     {% if messages %}
-                        <div class="mb-3">
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} text-center">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
+                    <div class="mb-3">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} text-center">
+                            {{ message }}
                         </div>
+                        {% endfor %}
+                    </div>
                     {% endif %}
 
                     <form method="post" action="{% url 'account_login' %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary-gradient rounded-pill py-3 px-5 mx-5 w-100 d-flex align-items-center justify-content-center">
+                        <button type="submit"
+                            class="btn btn-primary-gradient rounded-pill py-3 px-5 mx-5 w-100 d-flex align-items-center justify-content-center">
                             Continue with Google
                         </button>
                     </form>
 
                     <div class="text-center mt-4">
                         <p class="text-muted mb-1" style="font-size: 0.9rem;">
-                            By continuing, you agree to our 
-                            <a href="/terms" class="text-primary">Terms</a> & 
+                            By continuing, you agree to our
+                            <a href="/terms" class="text-primary">Terms</a> &
                             <a href="/privacy" class="text-primary">Privacy Policy</a>.
                         </p>
                         <p class="mt-2">

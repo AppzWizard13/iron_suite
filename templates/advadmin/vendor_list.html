@@ -3,7 +3,7 @@
 
 {% block content %}
 <!-- Load custom theme CSS -->
-<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+ <link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
@@ -43,7 +43,7 @@
           {% if is_superuser %}
           <div class="col-lg-4 col-xl-3">
             <div class="d-flex justify-content-lg-end justify-content-center">
-              <a href="{% url 'vendor_add' %}" class="md-filled-button px-6 py-3 flex-fill flex-lg-grow-0">
+              <a href="{% url 'vendor_add' %}" class="md-filled-button  py-3 flex-fill flex-lg-grow-0">
                 <i class="bx bx-plus me-2"></i>
                 <span class="d-none d-sm-inline">Add New Vendor</span>
                 <span class="d-inline d-sm-none">+</span>
@@ -88,7 +88,7 @@
               <i class="bx bx-search me-2"></i>Search Vendors
             </h5>
           </div>
-          <div class="card-body p-5">
+          <div class="card-body p-3">
             <form method="GET" action="{% url 'vendor_list' %}" class="row g-4 align-items-end">
               <div class="col-lg-10 col-md-8">
                 <label class="form-label fw-semibold mb-2 md-field-label">Search Vendors</label>
@@ -131,10 +131,7 @@
       <div class="md-card-header">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
           <h5 class="mb-0 fw-semibold" style="color: #acaeb1; font-size: 24px;">
-            <i class="bx bx-store me-2 text-primary"></i>Vendor List
-            <span class="badge ms-3 px-4 py-2 fw-semibold rounded-pill bg-primary bg-opacity-20  border">
-              {{ page_obj.paginator.count|default:0 }} Total
-            </span>
+            <i class="bx bx-store me-2 text-primary"></i>Vendor List - {{ page_obj.paginator.count|default:0 }} 
           </h5>
         </div>
       </div>

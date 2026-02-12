@@ -556,8 +556,6 @@
         }
         
         .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 3rem;
             padding-top: 2rem;
             text-align: center;
             color: rgba(255, 255, 255, 0.7);

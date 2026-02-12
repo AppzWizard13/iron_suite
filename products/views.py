@@ -389,7 +389,7 @@ class PackageListView(LoginRequiredMixin, ListView):
         query = self.request.GET.get('search', '')
 
         # Only fetch packages belonging to the user's Vendor
-        qs = Package.objects.filter(Vendor=user.Vendor)
+        qs = Package.objects.filter(Vendor=user.vendor)
 
         if query:
             qs = qs.filter(name__icontains=query)

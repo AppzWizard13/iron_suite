@@ -3,7 +3,7 @@
 
 {% block content %}
 <!-- Load custom theme CSS -->
-<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+ <link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
@@ -100,9 +100,6 @@
                   <h5 class="mb-4 fw-semibold" style="color: var(--md-sys-color-on-surface);">
                     No blocked users found
                   </h5>
-                  <a href="{% url 'user_list' %}" class="md-filled-button">
-                    <i class="bx bx-arrow-back me-2"></i>View All Users
-                  </a>
                 </div>
               </td>
             </tr>
@@ -190,9 +187,6 @@ document.addEventListener("DOMContentLoaded", function() {
                   <h5 class="mb-4 fw-semibold" style="color: var(--md-sys-color-on-surface);">
                     No blocked users found
                   </h5>
-                  <a href="{% url 'user_list' %}" class="md-filled-button px-6">
-                    <i class="bx bx-arrow-back me-2"></i>View All Users
-                  </a>
                 </div>
               </td>
             </tr>

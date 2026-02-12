@@ -8,10 +8,10 @@ class StaffRoleChoice(models.TextChoices):
     ADMIN = 'Admin', 'Admin'
     MANAGER = 'Manager', 'Manager'
     EMPLOYEE = 'Employee', 'Employee'
-    VENDOR_ADMIN = 'Vendor_Admin', 'Vendor Admin'
+    VENDOR = 'Vendor', 'Vendor'
     CUSTOMER = 'Customer', 'Customer'
     MEMBER = 'Member', 'Member'
-    TRAINER = 'Trainer', 'Trainer'
+    RIDER = 'Rider', 'Rider'
 
 class GenderChoice(models.TextChoices):
     MALE = 'male', 'Male'

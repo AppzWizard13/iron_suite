@@ -1,128 +1,262 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
     <title>Dashboard - Analytics | CodespikeStudio</title>
-
     <meta name="description" content="" />
-
     <!-- Favicon -->
     {% comment %} <link rel="icon" type="image/png" href="{% static 'images/favicon.jpg' %}"> {% endcomment %}
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/fonts/boxicons.css' %}" />
-
     <!-- Core CSS -->
     <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/core.css' %}" class="template-customizer-core-css" />
     <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/theme-default.css' %}" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{% static 'advadmin/assets/css/demo.css' %}" />
-
     <link rel="stylesheet" href="{% static 'mob-custom/theme-index.css' %}">
-
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}" />
-
     <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/libs/apex-charts/apex-charts.css' %}" />
-
     <!-- Page CSS -->
-
     <!-- Helpers -->
     <script src="{% static 'advadmin/assets/vendor/js/helpers.js' %}"></script>
-
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <!--? Config: Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file. -->
     <script src="{% static 'advadmin/assets/js/config.js' %}"></script>
-    
+   
   </head>
-
   <style>
-		
-		/* Define Theme Variables */
+    /* Define Theme Variables */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden !important;
+    }
+
     body {
       font-family: 'Poppins', sans-serif !important;
-			width: 100%; /* Adjust width to compensate for the scale */
-			height: 90%;
-			transform-origin: top left; /* Ensure the scaling starts from the top-left corner */
-			zoom: 0.8; 
-			margin: 0; /* Remove default margin */
-			overflow: auto; /* Prevent scrollbars from appearing */
-			margin-bottom: -1437px;
-		}
-    .container-xxl{
-      max-width: 2850px  !important;
-      
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
     }
-    .toast{
-      margin-top: 70px !important;
+
+    /* Layout wrapper - full height flex container */
+    .layout-wrapper {
+      height: 100vh !important;
+      width: 100%;
+      display: flex;
+      overflow: hidden !important;
+      position: relative;
     }
-    .modal-backdrop {
-			background-color: transparent !important;
-		}
 
+    .layout-container {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
 
+    /* Sidebar - sticky and fixed */
+    .layout-menu {
+      position: sticky !important;
+      top: 0 !important;
+      left: 0 !important;
+      height: 100vh !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      flex-shrink: 0 !important;
+      width: 240px !important;
+      min-width: 240px !important;
+      max-width: 240px !important;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      z-index: 1050;
+    }
+
+    /* Fix for app brand sticky */
+    .app-brand {
+      position: sticky !important;
+      top: 0 !important;
+      {% comment %} background: white !important; {% endcomment %}
+      z-index: 1001 !important;
+      padding: 10px 0 !important;
+      border-bottom: 1px solid #f0f0f0 !important;
+    }
+
+    /* Adjust logo size */
+    #company-logo-svg,
+    .dot-loader {
+      width: 170px !important;
+      height: 55px !important;
+      margin-left: 0 !important;
+    }
+
+    /* Menu inner scroll */
+    .menu-inner {
+      padding-top: 0 !important;
+      margin-top: 0 !important;
+      padding-bottom: 20px !important;
+    }
+
+    /* Custom scrollbar for sidebar */
+    .layout-menu::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .layout-menu::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .layout-menu::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    .layout-menu::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Layout page - main content area */
+    .layout-page {
+      flex: 1 1 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      height: 100vh !important;
+      overflow: hidden !important;
+      position: relative;
+      width: calc(100% - 240px) !important;
+    }
+
+    /* Navbar - sticky at top */
+    .layout-navbar {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 1000 !important;
+      flex-shrink: 0 !important;
+      width: 100%;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    /* Content wrapper - scrollable area */
+    .content-wrapper {
+      flex: 1 1 auto !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      height: calc(100vh - 60px) !important;
+      padding: 20px;
+    }
+
+    /* Custom scrollbar for content */
+    .content-wrapper::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .content-wrapper::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .content-wrapper::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 6px;
+    }
+
+    .content-wrapper::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Container adjustments */
+    .container-xxl {
+      max-width: 100% !important;
+      width: 100%;
+      padding-right: 15px;
+      padding-left: 15px;
+      margin-right: auto;
+      margin-left: auto;
+    }
+
+    /* Remove any conflicting styles */
     .container, .container-fluid, .container-xxl, .container-xl, .container-lg, .container-md, .container-sm {
       width: 100%;
-      /* padding-right: var(--bs-gutter-x, 1.625rem); */
-      /* padding-left: var(--bs-gutter-x, 1.625rem); */
-      /* margin-right: 0px !important;
-      /* margin-left: 0px !important;
     }
 
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+    }
 
-		h1, h2, h3, h4, h5, h6 {
-		font-family: 'Poppins', sans-serif;
-		font-weight: 600;
-		}
-		
-		p, span, a, button {
-		font-family: 'Poppins', sans-serif;
-		font-weight: 400;
-		}
+    p, span, a, button {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 400;
+    }
 
-  
+    /* Toast positioning fix */
+    .toast {
+      margin-top: 70px !important;
+      position: fixed !important;
+      top: 0 !important;
+      right: 20px !important;
+      z-index: 9999 !important;
+    }
 
+    .modal-backdrop {
+      background-color: transparent !important;
+    }
 
-  </style>
+    /* Fix for cards and content */
+    .card {
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
 
-  <style>
+    /* Ensure footer stays at bottom */
+    .content-footer {
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+
     .dot-loader {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 6px;
-      height: 65px; /* Same as image height */
+      width: 170px !important;
+      height: 55px !important;
     }
-  
+
     .dot-loader span {
       width: 10px;
       height: 10px;
-      background-color: #28a745; /* Green dots */
+      background-color: #28a745;
       border-radius: 50%;
       animation: dotBounce 1.4s infinite ease-in-out both;
     }
-  
+
     .dot-loader span:nth-child(1) {
       animation-delay: -0.32s;
     }
-  
+
     .dot-loader span:nth-child(2) {
       animation-delay: -0.16s;
     }
-  
+
     .dot-loader span:nth-child(3) {
       animation-delay: 0;
     }
-  
+
     @keyframes dotBounce {
       0%, 80%, 100% {
         transform: scale(0);
@@ -134,33 +268,168 @@
       }
     }
 
-    
-  </style>
-    <!-- Toast Messages -->
-    {% if messages %}
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
-      {% for message in messages %}
-      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ message }}
-          </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
+    /* ===== FIXED RESPONSIVE STYLES ===== */
+    @media (max-width: 1200px) {
+      .layout-menu {
+        width: 220px !important;
+        min-width: 220px !important;
+        max-width: 220px !important;
+      }
+      .layout-page {
+        width: calc(100% - 220px) !important;
+      }
+    }
 
+    @media (max-width: 992px) {
+      .layout-menu {
+        position: fixed !important;
+        left: -240px !important;
+        top: 0 !important;
+        width: 240px !important;
+        min-width: 240px !important;
+        max-width: 240px !important;
+        transition: left 0.3s ease !important;
+        z-index: 9999 !important;
+        box-shadow: 2px 0 20px rgba(0,0,0,0.15) !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      .layout-menu.show {
+        left: 0 !important;
+      }
+      
+      .layout-page {
+        width: 100% !important;
+        margin-left: 0 !important;
+      }
+      
+      .layout-menu-toggle {
+        display: block !important;
+        cursor: pointer !important;
+      }
+      
+      /* Overlay when sidebar is open */
+      .layout-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0,0,0,0.5) !important;
+        z-index: 9998 !important;
+        display: none !important;
+      }
+      
+      .layout-overlay.show {
+        display: block !important;
+      }
+      
+      .content-wrapper {
+        padding: 15px;
+      }
+      
+      /* Make toggle button clickable */
+      .layout-menu-toggle a {
+        display: inline-block !important;
+        padding: 10px !important;
+        cursor: pointer !important;
+        z-index: 10000 !important;
+        position: relative !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 10px;
+      }
+      
+      .layout-navbar {
+        padding: 8px 15px;
+      }
+      
+      .layout-menu {
+        width: 220px !important;
+        min-width: 220px !important;
+        max-width: 220px !important;
+        left: -220px !important;
+      }
+      
+      #company-logo-svg,
+      .dot-loader {
+        width: 150px !important;
+        height: 50px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .layout-menu {
+        width: 200px !important;
+        min-width: 200px !important;
+        max-width: 200px !important;
+        left: -200px !important;
+      }
+      
+      #company-logo-svg,
+      .dot-loader {
+        width: 130px !important;
+        height: 45px !important;
+      }
+      
+      .content-wrapper {
+        padding: 8px;
+      }
+    }
+
+    /* Fix for status indicator */
+    .status-indicator {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+
+    .status-indicator.online {
+      background-color: #28a745;
+    }
+
+    .status-indicator.offline {
+      background-color: #dc3545;
+    }
+
+    /* Ensure sidebar is always on top */
+    .layout-menu {
+      z-index: 9999 !important;
+    }
+  </style>
+  
+  <!-- Toast Messages - Fixed positioning -->
+  {% if messages %}
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+    {% for message in messages %}
+    <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ message }}
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  
   <body>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
-        <!-- Menu -->
-
+        <!-- Menu - Sticky Sidebar -->
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
           <div class="app-brand demo">
-
             <a href="{% url 'dashboard' %}" class="app-brand-link">
               <span class="app-brand-logo demo m-3">
                 <!-- Dot Loader -->
@@ -169,20 +438,19 @@
                   <span></span>
                   <span></span>
                 </div>
-            
+           
                 <!-- Hidden Image (Will be shown after loading) -->
                 <img id="company-logo-svg"
-                     alt="Company Logo" 
-                     style="width: 185px; height: 65px; object-fit: contain; display: none; margin-left: -5px;" />
+                     alt="Company Logo"
+                     style="width: 170px; height: 55px; object-fit: contain; display: none; margin-left: 0;" />
               </span>
             </a>
-            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none" onclick="toggleSidebar()">
               <i class="bx bx-chevron-left bx-sm align-middle"></i>
             </a>
           </div>
-
           <div class="menu-inner-shadow"></div>
-          <ul class="menu-inner py-1" style ="margin-bottom: 0px;">
+          <ul class="menu-inner py-1" style="margin-bottom: 0px;">
           <!-- Dashboard -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Main {{page_name}}</span>
@@ -193,7 +461,6 @@
               <div data-i18n="Analytics">Dashboard</div>
             </a>
           </li>
-
           <!-- Members -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Members</span>
@@ -228,220 +495,21 @@
               <div data-i18n="Blocked Users">Inactive Members</div>
             </a>
           </li>
-          <li class="menu-item {% if page_name == 'manager_Users' %}active{% endif %}">
-            <a href="{% url 'staff_by_role' role='Manager' %}" class="menu-link">
+          <li class="menu-item {% if page_name == 'riders_Users' %}active{% endif %}">
+            <a href="{% url 'staff_by_role' role='Riders' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-id-card"></i>
-              <div data-i18n="Staff Members">Staff Members</div>
+              <div data-i18n="Staff Members">Manage Riders</div>
             </a>
           </li>
-          <li class="menu-item {% if page_name == 'trainer_Users' %}active{% endif %}">
-            <a href="{% url 'staff_by_role' role='Trainer' %}" class="menu-link">
+          <li class="menu-item {% if page_name == 'vendor_admin' %}active{% endif %}">
+            <a href="{% url 'staff_by_role' role='Vendor' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-run"></i>
-              <div data-i18n="Trainers">Trainers</div>
+              <div data-i18n="Manage Vendor">Manage Vendor</div>
             </a>
           </li>
-
-          <!-- Monitoring -->
-          {% comment %} <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Monitoring</span>
-          </li>
-          <li class="menu-item {% if page_name == 'view_attendance' %}active{% endif %}">
-            <a href="{% url 'view_attendance' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-calendar-check"></i>
-              <div data-i18n="Attendance">Attendance Monitor</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'attendance_report' %}active{% endif %}">
-            <a href="{% url 'attendance_report' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
-              <div data-i18n="Attendance Report">Attendance Report</div>
-            </a>
-          </li>
-
-          <li class="menu-item {% if page_name == 'enrollment_list' %}active{% endif %}">
-            <a href="{% url 'enrollment_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-user-plus"></i>
-              <div data-i18n="Enrollments">Enrollments</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'qr_token_list' %}active{% endif %}">
-            <a href="{% url 'qr_token_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-qr-scan"></i>
-              <div data-i18n="QR Tokens">QR Tokens</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'qr_generator' %}active{% endif %}">
-            <a href="{% url 'qr_generator' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-qr-scan"></i>
-              <div data-i18n="QR generator">QR generator</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'checkin_log_list' %}active{% endif %}">
-            <a href="{% url 'checkin_log_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-log-in-circle"></i>
-              <div data-i18n="Check-in Logs">Check-in Logs</div>
-            </a>
-          </li> {% endcomment %}
-
-          {% comment %} <!-- Operations -->
-          <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">WORKOUT MANAGEMENT</span>
-          </li>
-
-          <!-- Trainer Dashboard -->
-          <li class="menu-item {% if page_name == 'trainer_dashboard' %}active{% endif %}">
-            <a href="{% url 'workout:trainer_dashboard' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-tachometer"></i>
-              <div data-i18n="Trainer Dashboard">Trainer Dashboard</div>
-            </a>
-          </li>
-
-          <!-- Weekly Templates -->
-          <li class="menu-item {% if page_name == 'template_list' or page_name == 'create_template' or page_name == 'template_detail' %}active open{% endif %}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-calendar-week"></i>
-              <div data-i18n="Weekly Templates">Weekly Templates</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'template_list' %}active{% endif %}">
-                <a href="{% url 'workout:template_list' %}" class="menu-link">
-                  <div data-i18n="All Templates">All Templates</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'create_template' %}active{% endif %}">
-                <a href="{% url 'workout:create_template' %}" class="menu-link">
-                  <div data-i18n="Create Template">Create Template</div>
-                </a>
-              </li>
-            </ul>
-          </li>
-
-          <!-- Workout Assignments -->
-          <li class="menu-item {% if page_name == 'assignment_list' %}active{% endif %}">
-            <a href="{% url 'workout:assignment_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-user-check"></i>
-              <div data-i18n="Assignments">User Assignments</div>
-            </a>
-          </li>
-
-          <!-- Exercise Management -->
-          <li class="menu-item {% if page_name == 'exercise_list' or page_name == 'create_exercise' %}active open{% endif %}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-dumbbell"></i>
-              <div data-i18n="Exercises">Exercise Management</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'exercise_list' %}active{% endif %}">
-                <a href="{% url 'workout:exercise_list' %}" class="menu-link">
-                  <div data-i18n="All Exercises">All Exercises</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'create_exercise' %}active{% endif %}">
-                <a href="{% url 'workout:create_exercise' %}" class="menu-link">
-                  <div data-i18n="Add Exercise">Add Exercise</div>
-                </a>
-              </li>
-            </ul>
-          </li>
-
-          <!-- Equipment Management -->
-          <li class="menu-item {% if page_name == 'equipment_list' or page_name == 'create_equipment' %}active open{% endif %}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-wrench"></i>
-              <div data-i18n="Equipment">Equipment Management</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'equipment_list' %}active{% endif %}">
-                <a href="{% url 'workout:equipment_list' %}" class="menu-link">
-                  <div data-i18n="All Equipment">All Equipment</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'create_equipment' %}active{% endif %}">
-                <a href="{% url 'workout:create_equipment' %}" class="menu-link">
-                  <div data-i18n="Add Equipment">Add Equipment</div>
-                </a>
-              </li>
-            </ul>
-          </li> {% endcomment %}
-
-          {% comment %} <!-- User Workouts (for users) -->
-          <li class="menu-item {% if page_name == 'user_dashboard' or page_name == 'workout_calendar' or page_name == 'session_history' %}active open{% endif %}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-run"></i>
-              <div data-i18n="My Workouts">My Workouts</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'user_dashboard' %}active{% endif %}">
-                <a href="{% url 'workout:user_dashboard' %}" class="menu-link">
-                  <div data-i18n="Dashboard">My Dashboard</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'workout_calendar' %}active{% endif %}">
-                <a href="{% url 'workout:workout_calendar' %}" class="menu-link">
-                  <div data-i18n="Calendar">Workout Calendar</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'session_history' %}active{% endif %}">
-                <a href="{% url 'workout:session_history' %}" class="menu-link">
-                  <div data-i18n="History">Session History</div>
-                </a>
-              </li>
-            </ul>
-          </li> {% endcomment %}
-
-
-
-
-
-
-{% comment %} 
-
-
-          <li class="menu-item {% if page_name == 'diet_plans' %}active{% endif %}">
-            <a href="#" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-food-tag"></i>
-              <div data-i18n="Diet Plans">Diet Plans</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'class_schedules' %}active{% endif %}">
-            <a href="{% url 'schedule_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-time"></i>
-              <div data-i18n="Class Schedules">Class Schedules</div>
-            </a>
-          </li>
-          <!-- Finance -->
-          <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Finance</span>
-          </li>
-          <li class="menu-item {% if page_name == 'package_list' %}active{% endif %}">
-            <a href="{% url 'package_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-credit-card"></i>
-              <div data-i18n="Payments">Packages</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'subscription_orders' %}active{% endif %}">
-            <a href="{% url 'subscription_orders' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-bookmark"></i>
-              <div data-i18n="Payments">Subscription Orders</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'payment_list' %}active{% endif %}">
-            <a href="{% url 'payment_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-credit-card"></i>
-              <div data-i18n="Payments">Payments</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'renewals' %}active{% endif %}">
-            <a href="{% url 'upcoming_renewal_members' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-refresh"></i>
-              <div data-i18n="Renewals">Renewals</div>
-            </a>
-          </li> {% endcomment %}
-
-
           <!-- Accounts Management -->
           <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">ACCOUNTS MANAGEMENT</span>
+            <span class="menu-header-text">ACCOUNTS</span>
           </li>
           <li class="menu-item {% if page_name == 'income_transactions' %}active{% endif %}">
             <a href="{% url 'transaction_list' 'income' %}" class="menu-link">
@@ -455,24 +523,22 @@
               <div data-i18n="Manage Reviews">Expense Transactions</div>
             </a>
           </li>
-
-          <!-- Communication -->
           <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Communication</span>
+            <span class="menu-header-text">E Commerce</span>
           </li>
-          <li class="menu-item {% if page_name == 'notifications' %}active{% endif %}">
-            <a href="{% url 'notification_log_list' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-bell"></i>
-              <div data-i18n="Notifications">Notifications</div>
+          <li class="menu-item {% if page_name == 'category_list' %}active{% endif %}">
+            <a href="{% url 'master:category_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
+              <div data-i18n="Settings">Manage Category</div>
             </a>
           </li>
-          <li class="menu-item {% if page_name == 'email_sms' %}active{% endif %}">
-            <a href="#" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-envelope"></i>
-              <div data-i18n="Email & SMS">Email & SMS</div>
+          <li class="menu-item {% if page_name == 'subcategory_list' %}active{% endif %}">
+            <a href="{% url 'master:subcategory_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
+              <div data-i18n="Settings">Manage Subcategory</div>
             </a>
           </li>
-          {% if request.user.is_superuser  %}
+          {% if request.user.is_superuser %}
           <!-- Administration -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Admin</span>
@@ -481,12 +547,6 @@
             <a href="{% url 'vendor_list' %}" class="menu-link">
               <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
               <div data-i18n="Roles & Permissions">Manage Stall</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'vendor_admin' %}active{% endif %}">
-            <a href="{% url 'staff_by_role' role='Admin' %}" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-run"></i>
-              <div data-i18n="Manage GYM Admin">Manage Vendor</div>
             </a>
           </li>
 
@@ -508,8 +568,22 @@
               <div data-i18n="Settings">Manage Review</div>
             </a>
           </li>
-
-          
+          <!-- Communication -->
+          <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Communication</span>
+          </li>
+          <li class="menu-item {% if page_name == 'notifications' %}active{% endif %}">
+            <a href="{% url 'notification_log_list' %}" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-bell"></i>
+              <div data-i18n="Notifications">Notifications</div>
+            </a>
+          </li>
+          <li class="menu-item {% if page_name == 'email_sms' %}active{% endif %}">
+            <a href="#" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-envelope"></i>
+              <div data-i18n="Email & SMS">Email & SMS</div>
+            </a>
+          </li>
           <li class="menu-item {% if page_name == 'settings' %}active{% endif %}">
             <a href="#" class="menu-link">
               <i class="menu-icon tf-icons bx bx-cog"></i>
@@ -522,7 +596,6 @@
               <div data-i18n="System Logs">System Logs</div>
             </a>
           </li>
-
           <!-- Backups -->
           <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Master Settings</span>
@@ -552,41 +625,6 @@
               <div data-i18n="System Reset">System Reset</div>
             </a>
           </li>
-
-          {% comment %} <!-- Layouts -->
-          <li class="menu-item {% if page_name == 'layouts' %}active{% endif %}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-layout"></i>
-              <div data-i18n="Layouts">Layouts</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'layouts_without_menu' %}active{% endif %}">
-                <a href="layouts-without-menu.html" class="menu-link">
-                  <div data-i18n="Without menu">Without menu</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'layouts_without_navbar' %}active{% endif %}">
-                <a href="layouts-without-navbar.html" class="menu-link">
-                  <div data-i18n="Without navbar">Without navbar</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'layouts_container' %}active{% endif %}">
-                <a href="layouts-container.html" class="menu-link">
-                  <div data-i18n="Container">Container</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'layouts_fluid' %}active{% endif %}">
-                <a href="layouts-fluid.html" class="menu-link">
-                  <div data-i18n="Fluid">Fluid</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'layouts_blank' %}active{% endif %}">
-                <a href="layouts-blank.html" class="menu-link">
-                  <div data-i18n="Blank">Blank</div>
-                </a>
-              </li>
-            </ul>
-          </li> {% endcomment %}
           <li class="menu-item {% if page_name == 'account_settings' %}active{% endif %}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
               <i class="menu-icon tf-icons bx bx-dock-top"></i>
@@ -691,9 +729,6 @@
               </li>
             </ul>
           </li>
-
-
-
           <li class="menu-item {% if page_name == 'misc' %}active{% endif %}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
               <i class="menu-icon tf-icons bx bx-cube-alt"></i>
@@ -712,190 +747,6 @@
               </li>
             </ul>
           </li>
-          {% comment %} <li class="menu-header small text-uppercase"><span class="menu-header-text">Components</span></li>
-          <li class="menu-item {% if page_name == 'cards' %}active{% endif %}">
-            <a href="cards-basic.html" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-collection"></i>
-              <div data-i18n="Basic">Cards</div>
-            </a>
-          </li>
-          <li class="menu-item {% if page_name == 'user_interface' %}active{% endif %}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-box"></i>
-              <div data-i18n="User interface">User interface</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'ui_accordion' %}active{% endif %}">
-                <a href="ui-accordion.html" class="menu-link">
-                  <div data-i18n="Accordion">Accordion</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_alerts' %}active{% endif %}">
-                <a href="ui-alerts.html" class="menu-link">
-                  <div data-i18n="Alerts">Alerts</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_badges' %}active{% endif %}">
-                <a href="ui-badges.html" class="menu-link">
-                  <div data-i18n="Badges">Badges</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_buttons' %}active{% endif %}">
-                <a href="ui-buttons.html" class="menu-link">
-                  <div data-i18n="Buttons">Buttons</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_carousel' %}active{% endif %}">
-                <a href="ui-carousel.html" class="menu-link">
-                  <div data-i18n="Carousel">Carousel</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_collapse' %}active{% endif %}">
-                <a href="ui-collapse.html" class="menu-link">
-                  <div data-i18n="Collapse">Collapse</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_dropdowns' %}active{% endif %}">
-                <a href="ui-dropdowns.html" class="menu-link">
-                  <div data-i18n="Dropdowns">Dropdowns</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_footer' %}active{% endif %}">
-                <a href="ui-footer.html" class="menu-link">
-                  <div data-i18n="Footer">Footer</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_list_groups' %}active{% endif %}">
-                <a href="ui-list-groups.html" class="menu-link">
-                  <div data-i18n="List Groups">List groups</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_modals' %}active{% endif %}">
-                <a href="ui-modals.html" class="menu-link">
-                  <div data-i18n="Modals">Modals</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_navbar' %}active{% endif %}">
-                <a href="ui-navbar.html" class="menu-link">
-                  <div data-i18n="Navbar">Navbar</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_offcanvas' %}active{% endif %}">
-                <a href="ui-offcanvas.html" class="menu-link">
-                  <div data-i18n="Offcanvas">Offcanvas</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_pagination_breadcrumbs' %}active{% endif %}">
-                <a href="ui-pagination-breadcrumbs.html" class="menu-link">
-                  <div data-i18n="Pagination &amp; Breadcrumbs">Pagination &amp; Breadcrumbs</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_progress' %}active{% endif %}">
-                <a href="ui-progress.html" class="menu-link">
-                  <div data-i18n="Progress">Progress</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_spinners' %}active{% endif %}">
-                <a href="ui-spinners.html" class="menu-link">
-                  <div data-i18n="Spinners">Spinners</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_tabs_pills' %}active{% endif %}">
-                <a href="ui-tabs-pills.html" class="menu-link">
-                  <div data-i18n="Tabs &amp; Pills">Tabs &amp; Pills</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_toasts' %}active{% endif %}">
-                <a href="ui-toasts.html" class="menu-link">
-                  <div data-i18n="Toasts">Toasts</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_tooltips_popovers' %}active{% endif %}">
-                <a href="ui-tooltips-popovers.html" class="menu-link">
-                  <div data-i18n="Tooltips & Popovers">Tooltips &amp; popovers</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'ui_typography' %}active{% endif %}">
-                <a href="ui-typography.html" class="menu-link">
-                  <div data-i18n="Typography">Typography</div>
-                </a>
-              </li>
-            </ul>
-          </li>
-
-          <!-- Extended UI -->
-          <li class="menu-item {% if page_name == 'extended_ui' %}active{% endif %}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-copy"></i>
-              <div data-i18n="Extended UI">Extended UI</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'extended_ui_perfect_scrollbar' %}active{% endif %}">
-                <a href="extended-ui-perfect-scrollbar.html" class="menu-link">
-                  <div data-i18n="Perfect Scrollbar">Perfect scrollbar</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'extended_ui_text_divider' %}active{% endif %}">
-                <a href="extended-ui-text-divider.html" class="menu-link">
-                  <div data-i18n="Text Divider">Text Divider</div>
-                </a>
-              </li>
-            </ul>
-          </li>
-
-          <li class="menu-item {% if page_name == 'boxicons' %}active{% endif %}">
-            <a href="icons-boxicons.html" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-crown"></i>
-              <div data-i18n="Boxicons">Boxicons</div>
-            </a>
-          </li>
-
-          <!-- Forms & Tables -->
-          <li class="menu-header small text-uppercase"><span class="menu-header-text">Forms &amp; Tables</span></li>
-          <li class="menu-item {% if page_name == 'form_elements' %}active{% endif %}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-detail"></i>
-              <div data-i18n="Form Elements">Form Elements</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'forms_basic_inputs' %}active{% endif %}">
-                <a href="forms-basic-inputs.html" class="menu-link">
-                  <div data-i18n="Basic Inputs">Basic Inputs</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'forms_input_groups' %}active{% endif %}">
-                <a href="forms-input-groups.html" class="menu-link">
-                  <div data-i18n="Input groups">Input groups</div>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="menu-item {% if page_name == 'form_layouts' %}active{% endif %}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-detail"></i>
-              <div data-i18n="Form Layouts">Form Layouts</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item {% if page_name == 'form_layouts_vertical' %}active{% endif %}">
-                <a href="form-layouts-vertical.html" class="menu-link">
-                  <div data-i18n="Vertical Form">Vertical Form</div>
-                </a>
-              </li>
-              <li class="menu-item {% if page_name == 'form_layouts_horizontal' %}active{% endif %}">
-                <a href="form-layouts-horizontal.html" class="menu-link">
-                  <div data-i18n="Horizontal Form">Horizontal Form</div>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="menu-item {% if page_name == 'tables' %}active{% endif %}">
-            <a href="tables-basic.html" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-table"></i>
-              <div data-i18n="Tables">Tables</div>
-            </a>
-          </li>
-           {% endcomment %}
-
           <!-- Misc -->
           <li class="menu-header small text-uppercase"><span class="menu-header-text">Misc</span></li>
           <li class="menu-item {% if page_name == 'support' %}active{% endif %}">
@@ -915,60 +766,36 @@
             </a>
           </li>
           {% endif %}
-
-
           </ul>
         </aside>
         <!-- / Menu -->
-
+        
         <!-- Layout container -->
         <div class="layout-page">
-          <!-- Navbar -->
-
-          <nav
-            class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
-            id="layout-navbar"
-          >
+          <!-- Navbar - Sticky -->
+          <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme sticky-top" id="layout-navbar">
             <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-              <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)" onclick="toggleSidebar()">
                 <i class="bx bx-menu bx-sm"></i>
               </a>
             </div>
-
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-              <!-- Search -->
-              {% comment %} <div class="navbar-nav align-items-center">
-                <div class="nav-item d-flex align-items-center">
-                  <i class="bx bx-search fs-4 lh-0"></i>
-                  <input
-                    type="text"
-                    class="form-control border-0 shadow-none"
-                    placeholder="Search..."
-                    aria-label="Search..."
-                  />
-                </div>
-              </div> {% endcomment %}
-              <!-- /Search -->
-
               <ul class="navbar-nav flex-row align-items-center ms-auto">
-                <!-- Place this tag where you want the button to render. -->
                 <li class="nav-item lh-1 me-3">
                   <a class="dropdown-item" href="{% url 'home' %}">
                     <i class="bx bx-home me-2"></i>
                     <span class="align-middle">Home</span>
                   </a>
                 </li>
-
                 <!-- User -->
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                   <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online" style="position: relative; display: inline-block;">
-                      <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}" 
-                           class="rounded-circle border border-2" 
-                           style="width: 40px; height: 40px; object-fit: cover;" 
+                      <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}"
+                           class="rounded-circle border border-2"
+                           style="width: 40px; height: 40px; object-fit: cover;">
                       <span class="status-indicator {% if user.is_active %}online{% else %}offline{% endif %}"></span>
-                  </div>
-                  
+                    </div>
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end">
                     <li>
@@ -977,9 +804,8 @@
                           <div class="flex-shrink-0 me-3">
                             <div class="avatar avatar-online">
                               <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'advadmin/assets/img/avatars/default-avatar.png' %}{% endif %}"
-                              class="rounded-circle border border-2" 
-                              style="width: 40px; height: 40px; object-fit: cover;" 
-  
+                                   class="rounded-circle border border-2"
+                                   style="width: 40px; height: 40px; object-fit: cover;">
                             </div>
                           </div>
                           <div class="flex-grow-1">
@@ -1035,14 +861,12 @@
               </ul>
             </div>
           </nav>
-
           <!-- / Navbar -->
-          <!-- Content wrapper -->
+          
+          <!-- Content wrapper - ONLY THIS IS SCROLLABLE -->
           {% block content %}
-
           <div class="content-wrapper">
             <!-- Content -->
-
             <div class="container-xxl flex-grow-1 container-p-y">
               <div class="row">
                 <div class="col-lg-12 mb-4 order-0">
@@ -1050,11 +874,10 @@
                     <div class="d-flex align-items-end row">
                       <div class="col-sm-7">
                         <div class="card-body">
-                          <h5 class="card-title text-primary">Welcome back, {{request.user.first_name}}  {{request.user.last_name}}! 🎉</h5>
+                          <h5 class="card-title text-primary">Welcome back, {{request.user.first_name}} {{request.user.last_name}}! 🎉</h5>
                           <p class="mb-4">
-                            {{new_signups_today}} new signups today,  <span class="fw-bold">{{attendance_rate}}%</span> attendance rate,</br> 2 expiring memberships.
+                            {{new_signups_today}} new signups today, <span class="fw-bold">{{attendance_rate}}%</span> attendance rate,</br> 2 expiring memberships.
                           </p>
-
                           <a href="javascript:;" class="btn btn-sm btn-outline-primary">View Badges</a>
                         </div>
                       </div>
@@ -1108,7 +931,6 @@
                         </div>
                       </div>
                     </div>
-
                     <!-- Total Sales Card -->
                     <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
                       <div class="card">
@@ -1138,12 +960,11 @@
                             </div>
                           </div>
                           <span class="fw-semibold d-block mb-1">Current Month Revenue</span>
-                          <h5 class="card-title text-nowrap mb-1">{{ current_month_income|floatformat:2 }}  INR</h5>
+                          <h5 class="card-title text-nowrap mb-1">{{ current_month_income|floatformat:2 }} INR</h5>
                           <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> {{current_month}}</small>
                         </div>
                       </div>
                     </div>
-
                     <!-- Completed Payments -->
                     <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
                       <div class="card">
@@ -1167,10 +988,8 @@
                         </div>
                       </div>
                     </div>
-
                   </div>
                 </div>
-
                 <div class="col-lg-12 col-md-12 order-1">
                   <div class="row">
                     <!-- Upcoming Dues -->
@@ -1196,7 +1015,6 @@
                         </div>
                       </div>
                     </div>
-
                     <!-- Pending Dues -->
                     <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
                       <div class="card">
@@ -1220,7 +1038,6 @@
                         </div>
                       </div>
                     </div>
-
                     <!-- Payment Done -->
                     <div class="col-lg-4 col-md-12 col-sm-12 mb-4">
                       <div class="card">
@@ -1247,116 +1064,7 @@
                   </div>
                 </div>
               </div>
-
-
-
-
-            <div class="col-lg-12 col-md-12 order-1">
-                {% comment %} <!-- Active Membership Trends -->
-                <style>
-                  #totalRevenueChart,
-                  #growthChart {
-                    min-height: 150px;
-                  }
-                </style>
-                <div class="col-12 col-lg-12 order-2 order-md-3 order-lg-2 mb-4">
-                  <div class="card">
-                    <div class="row row-bordered g-0">
-                      <div class="col-md-8">
-                        <h5 class="card-header m-0 me-2 pb-3">Active Membership Trends</h5>
-                        <div id="totalRevenueChart" class="px-2"></div>
-                      </div>
-                      <div class="col-md-4">
-                        <div class="card-body">
-                          <div class="text-center">
-                           <div class="dropdown">
-                            <button
-                              class="btn btn-sm btn-outline-primary dropdown-toggle"
-                              type="button"
-                              id="growthReportId"
-                              data-bs-toggle="dropdown"
-                              aria-haspopup="true"
-                              aria-expanded="false"
-                            >
-                              {{ growth_month_keys|first }} <!-- Default label showing first full key like '2025-07' -->
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="growthReportId" id="growthDropdownMenu">
-                              {% for key in growth_month_keys %}
-                                <li><a class="dropdown-item" href="#" data-key="{{ key }}">{{ key }}</a></li>
-                              {% endfor %}
-                            </ul>
-                          </div>
-
-                          <script>
-                            // Ensure window.growthYearData is defined as an object mapping full keys "YYYY-MM"
-                            document.addEventListener('DOMContentLoaded', function() {
-                              const dropdownMenu = document.getElementById('growthDropdownMenu');
-                              const dropdownBtn = document.getElementById('growthReportId');
-
-                              dropdownMenu.addEventListener('click', function(e) {
-                                let target = e.target;
-                                if (target.matches('a.dropdown-item')) {
-                                  e.preventDefault();
-                                  let key = target.getAttribute('data-key');
-                                  if (key && window.growthYearData && window.growthYearData[key]) {
-                                    renderGrowthRadialBar(key);
-                                    dropdownBtn.textContent = key;
-                                  }
-                                }
-                              });
-
-                              // Render the latest month key by default on page load
-                              let keys = Object.keys(window.growthYearData || {});
-                              if (keys.length) {
-                                renderGrowthRadialBar(keys[keys.length - 1]);
-                                dropdownBtn.textContent = keys[keys.length - 1];
-                              }
-                            });
-                          </script>
-
-                          </div>
-                        </div>
-
-                        <div id="growthChart" style="min-height: 260px;"></div>
-                        <div class="text-center" id="growthChartLabel" style="font-weight: 500; font-size: 16px;"></div>
-
-                        <div class="text-center fw-semibold pt-3 mb-2">
-                          {{ attendance_rate }}% Monthly Attendance Trend
-                        </div>
-
-                        <div class="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
-                          <div class="d-flex">
-                            <div class="me-2">
-                              <span class="badge bg-label-primary p-2"><i class="bx bx-dollar text-primary"></i></span>
-                            </div>
-                            <div class="d-flex flex-column">
-                              <small id="thisYearLabel">{{ current_year }}</small>
-                              <h6 class="mb-0" id="thisYearEarning">₹{{ this_year_earning|default:0|floatformat:2 }}</h6>
-                            </div>
-                          </div>
-                          <div class="d-flex">
-                            <div class="me-2">
-                              <span class="badge bg-label-info p-2"><i class="bx bx-wallet text-info"></i></span>
-                            </div>
-                            <div class="d-flex flex-column">
-                              <small id="lastYearLabel">{{ current_year|add:"-1" }}</small>
-                              <h6 class="mb-0" id="lastYearEarning">₹{{ last_year_earning|default:0|floatformat:2 }}</h6>
-                            </div>
-                          </div>
-                        </div>
-
-                        <script>
-                          window.growthYearData = {{ growth_per_month_json|safe }};
-                          window.growthYears = {{ years|safe }};
-                          window.yearlyEarnings = {{ yearly_earnings_json|safe }};
-                          window.currentYear = {{ current_year }};
-                        </script>
-                      </div>
-
-                      </div>
-                    </div>
-                  </div>
-                </div> {% endcomment %}
+              
               <div class="row">
                 <!-- Membership & Subscription Overview -->
                 <div class="col-md-4 col-lg-4 col-xl-4 mb-4">
@@ -1383,7 +1091,6 @@
                         </div>
                       </div>
                     </div>
-
                     <div class="card-body">
                       <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="d-flex flex-column align-items-center gap-1">
@@ -1395,7 +1102,6 @@
                           <h6 class="mb-0 text-success">₹{{ current_month_income }}</h6>
                         </div>
                       </div>
-
                       <ul class="p-0 m-0">
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
@@ -1411,7 +1117,6 @@
                             </div>
                           </div>
                         </li>
-
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
                             <span class="avatar-initial rounded bg-label-info"><i class="bx bx-user-plus"></i></span>
@@ -1426,7 +1131,6 @@
                             </div>
                           </div>
                         </li>
-
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
                             <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-timer"></i></span>
@@ -1441,7 +1145,6 @@
                             </div>
                           </div>
                         </li>
-
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
                             <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-credit-card"></i></span>
@@ -1456,7 +1159,6 @@
                             </div>
                           </div>
                         </li>
-
                         <li class="d-flex">
                           <div class="avatar flex-shrink-0 me-3">
                             <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-user-x"></i></span>
@@ -1475,7 +1177,6 @@
                     </div>
                   </div>
                 </div>
-
                 <!-- Revenue - Monthly Overview -->
                 <div class="col-md-8 col-lg-8 col-xl-8 mb-4">
                   <div class="card h-100">
@@ -1501,7 +1202,7 @@
                                     <span>0%</span>
                                   </small>
                                 </div>
-                                <small class="text-muted">Year: 
+                                <small class="text-muted">Year:
                                   <span id="incomeYearLabel">{{ current_year }}</span>
                                   <span class="dropdown">
                                     <a href="#" class="text-primary dropdown-toggle year-select-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:0.9em;">
@@ -1520,27 +1221,18 @@
                           <div class="px-1">
                             <div id="incomeChart"></div>
                           </div>
-                          {% comment %} <div class="d-flex justify-content-center pt-4 gap-2">
-                            <div class="flex-shrink-0">
-                              <div id="expensesOfWeek"></div>
-                            </div>
-                            <div>
-                              <p class="mb-n1 mt-1">Expenses This Week</p>
-                              <small class="text-muted" id="expensesCompare">$39 less than last week</small>
-                            </div>
-                          </div> {% endcomment %}
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
+              
               <!-- Running Class Activities Overview -->
               <div class="col-md-12 col-lg-12 order-2 mb-4">
                 <div class="card h-100">
                   <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="card-title m-0 me-2">Running Class Activities Overview  {{years}}</h5>
+                    <h5 class="card-title m-0 me-2">Running Class Activities Overview {{years}}</h5>
                   </div>
                   <div class="card-body">
                     <ul class="p-0 m-0">
@@ -1568,18 +1260,17 @@
                   </div>
                 </div>
               </div>
-                <!--/ Transactions -->
-              </div>
             </div>
+            
             <script>
               // For income chart etc.
               window.monthlyRevenue = {{ monthly_revenue_json|safe }};
               window.currentYear = {{ current_year }};
               // For growth progress chart:
-          </script>
+            </script>
             <!-- / Content -->
             {% endblock %}
-
+            
             <!-- Footer -->
             <footer class="content-footer footer bg-footer-theme">
               <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
@@ -1591,57 +1282,28 @@
                   , made with ❤️ by
                   <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">CodespikeStudio</a>
                 </div>
-                {% comment %} <div>
-                  <a href="https://themeselection.com/license/" class="footer-link me-4" target="_blank">License</a>
-                  <a href="https://themeselection.com/" target="_blank" class="footer-link me-4">More Themes</a>
-
-                  <a
-                    href="https://themeselection.com/demo/sneat-bootstrap-html-admin-template/documentation/"
-                    target="_blank"
-                    class="footer-link me-4"
-                    >Documentation</a
-                  >
-
-                  <a
-                    href="https://github.com/themeselection/sneat-html-admin-template-free/issues"
-                    target="_blank"
-                    class="footer-link me-4"
-                    >Support</a
-                  >
-                </div> {% endcomment %}
               </div>
             </footer>
             <!-- / Footer -->
-
             <div class="content-backdrop fade"></div>
           </div>
           <!-- Content wrapper -->
         </div>
         <!-- / Layout page -->
       </div>
-
       <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
+      <div class="layout-overlay layout-menu-toggle" onclick="toggleSidebar()"></div>
     </div>
     <!-- / Layout wrapper -->
-
-    {% comment %} <div class="buy-now">
-      <a
-        href="https://themeselection.com/products/sneat-bootstrap-html-admin-template/"
-        target="_blank"
-        class="btn btn-danger btn-buy-now"
-        >Upgrade to Pro</a
-      >
-    </div> {% endcomment %}
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
     <script>
       const orderStatsData = {
         labels: [
-          'Pending', 
-          'Processing', 
-          'Shipped', 
+          'Pending',
+          'Processing',
+          'Shipped',
           'Delivered'
         ],
         series: [
@@ -1652,52 +1314,100 @@
         ]
       };
     </script>
+    
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const logoImg = document.getElementById('company-logo-svg');
         const loader = document.getElementById('logo-loader');
         const faviconLink = document.querySelector("link[rel~='icon']");
-
-    
+        const overlay = document.querySelector('.layout-overlay');
+        
+        // Set initial styles
+        if (logoImg) {
+          logoImg.style.width = '170px';
+          logoImg.style.height = '55px';
+        }
+   
         fetch('/api/company-data/')
           .then(response => response.json())
           .then(data => {
-            console.log("Company Data:", data); // Debugging
-    
-            // ✅ Load the company logo
+            console.log("Company Data:", data);
+   
+            // Load the company logo
             if (data.company_logo_svg_url) {
               logoImg.src = data.company_logo_svg_url;
               logoImg.alt = data.company_name + " Logo";
-              logoImg.style.display = "block"; // Show image
-              loader.style.display = "none"; // Hide loader
+              logoImg.style.display = "block";
+              logoImg.style.width = "170px";
+              logoImg.style.height = "55px";
+              if (loader) loader.style.display = "none";
             } else {
-              loader.innerHTML = "No Logo Available"; // Show text if no logo
+              if (loader) loader.innerHTML = "Logo";
             }
-    
-            // ✅ Load the favicon dynamically
+   
+            // Load the favicon dynamically
             if (faviconLink && data.company_favicon_url) {
               faviconLink.href = data.company_favicon_url;
             }
           })
           .catch(error => {
             console.error('Error fetching company data:', error);
-            loader.innerHTML = "Failed to load logo"; // Show error message
+            if (loader) loader.innerHTML = "CSS";
           });
+
+        // Handle responsive layout
+        function handleResponsive() {
+          const menu = document.querySelector('.layout-menu');
+          if (window.innerWidth <= 992) {
+            menu.classList.remove('show');
+            if (overlay) overlay.classList.remove('show');
+          }
+        }
+
+        window.addEventListener('resize', handleResponsive);
+        handleResponsive();
+      });
+
+      // Function to toggle sidebar on mobile
+      function toggleSidebar() {
+        const menu = document.querySelector('.layout-menu');
+        const overlay = document.querySelector('.layout-overlay');
+        menu.classList.toggle('show');
+        if (overlay) overlay.classList.toggle('show');
+      }
+
+      // Close sidebar when clicking on overlay
+      document.addEventListener('click', function(e) {
+        const menu = document.querySelector('.layout-menu');
+        const toggleBtn = document.querySelector('.layout-menu-toggle a');
+        const overlay = document.querySelector('.layout-overlay');
+        
+        if (window.innerWidth <= 992) {
+          if (menu && menu.classList.contains('show')) {
+            if (!menu.contains(e.target) && toggleBtn && !toggleBtn.contains(e.target)) {
+              menu.classList.remove('show');
+              if (overlay) overlay.classList.remove('show');
+            }
+          }
+        }
       });
     </script>
+    
     {% block extra_js %}
     <script>
         window.membershipTrends = {{ membership_trends_json|safe }};
         window.yearlyEarnings = {{ yearly_earnings_json|safe }};
         window.allYears = {{ years|safe }};
         window.currentYear = {{ current_year }};
+        
         document.querySelectorAll('.year-select').forEach(item => {
-          item.addEventListener('click', function() {
+          item.addEventListener('click', function(e) {
+            e.preventDefault();
             var selectedYear = parseInt(this.getAttribute('data-year'));
             var lastYear = selectedYear - 1;
             var trends = window.membershipTrends;
             var earnings = window.yearlyEarnings;
-
+            
             // Update chart series
             var newSeries = [
               {
@@ -1709,43 +1419,39 @@
                 data: trends[lastYear] || Array(12).fill(0)
               }
             ];
-            window.totalRevenueChart.updateSeries(newSeries);
-
+            
+            if (window.totalRevenueChart) {
+              window.totalRevenueChart.updateSeries(newSeries);
+            }
+            
             // Update labels/amounts
             document.getElementById('thisYearLabel').innerText = selectedYear;
             document.getElementById('lastYearLabel').innerText = lastYear;
             document.getElementById('thisYearEarning').innerText = "₹" + (earnings[selectedYear] || 0).toLocaleString();
             document.getElementById('lastYearEarning').innerText = "₹" + (earnings[lastYear] || 0).toLocaleString();
-
-            // (Optional) Update the button label as well
             document.getElementById('growthReportId').innerText = selectedYear;
           });
         });
-
     </script>
-
-
-
+    
     <script src="{% static 'advadmin/assets/vendor/libs/jquery/jquery.js' %}"></script>
     <script src="{% static 'advadmin/assets/vendor/libs/popper/popper.js' %}"></script>
     <script src="{% static 'advadmin/assets/vendor/js/bootstrap.js' %}"></script>
     <script src="{% static 'advadmin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
-
     <script src="{% static 'advadmin/assets/vendor/js/menu.js' %}"></script>
     <!-- endbuild -->
-
+    
     <!-- Vendors JS -->
     <script src="{% static 'advadmin/assets/vendor/libs/apex-charts/apexcharts.js' %}"></script>
-
+    
     <!-- Main JS -->
     <script src="{% static 'advadmin/assets/js/main.js' %}"></script>
-
+    
     <!-- Page JS -->
     <script src="{% static 'advadmin/assets/js/dashboards-analytics.js' %}"></script>
-
+    
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js' %}"></script>
-
-{% endblock %}
+    {% endblock %}
   </body>
 </html>

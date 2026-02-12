@@ -4,7 +4,7 @@
 set -e
 
 # Set Django Settings here so manage.py knows what to load
-export DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-iron_board.settings.development}
+export DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-myoceanbasket.settings.development}
 
 echo "=== Iron Board Setup Started ==="
 

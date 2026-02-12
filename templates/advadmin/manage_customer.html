@@ -3,8 +3,7 @@
 
 {% block content %}
 <!-- Load custom theme CSS -->
-<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
-
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     
@@ -171,9 +170,6 @@
                   <h5 class="mb-4 fw-semibold" style="color: var(--md-sys-color-on-surface);">
                     No customers found
                   </h5>
-                  <a href="{% url 'user_registration' %}" class="md-filled-button px-6">
-                    <i class="bx bx-user-plus me-2"></i>Create First Customer
-                  </a>
                 </div>
               </td>
             </tr>

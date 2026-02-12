@@ -3,7 +3,7 @@
 services:
   web:
     build: .
-    container_name: iron_board_web
+    container_name: myoceanbasket_web
     entrypoint: ["/app/entrypoint.sh"]
     volumes:
       - .:/app
@@ -16,14 +16,14 @@ services:
     restart: unless-stopped
     environment:
       - DEBUG=1
-      - DJANGO_SETTINGS_MODULE=iron_board.settings.development
+      - DJANGO_SETTINGS_MODULE=myoceanbasket.settings.development
 
   db:
     image: postgres:14
-    container_name: iron_board_db
+    container_name: myoceanbasket_db
     environment:
-      POSTGRES_DB: iron_board_db
-      POSTGRES_USER: iron_board_admin
+      POSTGRES_DB: myoceanbasket_db
+      POSTGRES_USER: myoceanbasket_admin
       POSTGRES_PASSWORD: xPL7y6qe1gLHAg2B9SWvW06vXSC8lxSe
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -33,7 +33,7 @@ services:
 
   adminer:
     image: adminer
-    container_name: iron_board_adminer
+    container_name: myoceanbasket_adminer
     restart: always
     ports:
       - "8080:8080"

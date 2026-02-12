@@ -1,262 +1,135 @@
+{% extends 'myoceanbasket/index.html' %}
+{% block content %}
 {% load static %}
-<!DOCTYPE html>
-<html
-  lang="en"
-  class="light-style customizer-hide"
-  dir="ltr"
-  data-theme="theme-default"
-  data-assets-path="{% static 'advadmin/assets/' %}"
-  data-template="vertical-menu-template-free"
->
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />
 
-    <title>CodespikeStudio - Login</title>
+<section class="py-5 py-md-5">
+    <div class="container-fluid">
+        <div class="rounded-5 py-4 py-md-5"
+             style="background: linear-gradient(135deg, #0d6efd, #0056b3),
+                    url('{% static 'mob/images/bg-leaves-img-pattern.png' %}') no-repeat center/cover;">
+            <div class="container">
+                <div class="row align-items-center">
 
-    <meta name="description" content="" />
+                    <!-- Login Form - comes FIRST on mobile -->
+                    <!-- Login Form - comes FIRST on mobile -->
+                    <div class="col-md-6 p-4 p-md-5 order-first order-md-2">
+                        <!-- Login Form with glassmorphism + animation -->
+                        <form method="post" class="bg-white bg-opacity-10 backdrop-blur-lg p-4 p-md-5 rounded-4 shadow-lg border-opacity-60 animate__animated animate__fadeInUp"
+                              style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+                            {% csrf_token %}
+                            <h3 class="text-center mb-4 fw-bold text-white">Login</h3>
 
-    <!-- Favicon -->
-    
+                            <!-- Phone Number Field -->
+                            <div class="mb-4">
+                                <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold text-white">{{ form.username.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white bg-opacity-25 text-white border-0 rounded-start-pill">+91</span>
+                                    {{ form.username }}
+                                </div>
+                                {% if form.username.errors %}
+                                    <small class="text-danger d-block mt-1">{{ form.username.errors.0 }}</small>
+                                {% endif %}
+                                <small class="text-white opacity-75 d-block mt-1">We'll send order updates on WhatsApp</small>
+                            </div>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+                            <!-- Password Field -->
+                            <div class="mb-4">
+                                <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold text-white">{{ form.password.label }}</label>
+                                {{ form.password }}
+                                {% if form.password.errors %}
+                                    <small class="text-danger d-block mt-1">{{ form.password.errors.0 }}</small>
+                                {% endif %}
+                            </div>
 
-    <!-- Icons -->
-    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/fonts/boxicons.css' %}" />
+                            <!-- Forgot Password Link -->
+                            <div class="text-end mb-4">
+                                <a href="#" class="text-white small text-decoration-none opacity-85 hover-opacity-100">Forgot password?</a>
+                            </div>
 
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/core.css' %}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/theme-default.css' %}" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="{% static 'advadmin/assets/css/demo.css' %}" />
+                            <!-- Login Button -->
+                            <div class="d-grid gap-2 mb-4">
+                                <button type="submit" class="btn btn-dark btn-lg py-3 fw-semibold rounded-pill shadow transition-all hover-scale-105">
+                                    🔐 Login to My Account
+                                </button>
+                            </div>
 
-    <!-- Vendors CSS -->
-    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}" />
+                            <!-- Non-field Errors (e.g. Invalid Login) -->
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger bg-danger bg-opacity-25 text-white border-0 small">
+                                    {{ form.non_field_errors.0 }}
+                                </div>
+                            {% endif %}
 
-    <!-- Page CSS -->
-    <link rel="stylesheet" href="{% static 'advadmin/assets/vendor/css/pages/page-auth.css' %}" />
-    
-    <!-- Helpers -->
-    <script src="{% static 'advadmin/assets/vendor/js/helpers.js' %}"></script>
+                            <!-- Divider -->
+                            <div class="position-relative my-4">
+                                <hr class="text-white opacity-50">
+                                <span class="position-absolute top-50 start-50 translate-middle bg-transparent px-3 text-white small opacity-75">OR</span>
+                            </div>
 
-    <!-- Config -->
-    <script src="{% static 'advadmin/assets/js/config.js' %}"></script>
-    
-    <style>
-      body {
-        font-family: 'Poppins', sans-serif !important;
-        width: 100%; /* Adjust width to compensate for the scale */
-        height: 90%;
-        transform-origin: top left; /* Ensure the scaling starts from the top-left corner */
-        zoom: 0.8; 
-        margin: 0; /* Remove default margin */
-        overflow: auto; /* Prevent scrollbars from appearing */
-        margin-bottom: -1437px;
-      }
-      .logo-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-      .logo-img {
-        max-width: 150px;
-        height: auto;
-      }
-      .authentication-wrapper.authentication-basic .authentication-inner .card .app-brand {
-        margin-bottom: 0.5rem !important;
-    }
+                            <!-- OTP Login Option -->
+                            <div class="d-grid gap-2 mb-4">
+                                <a href="#" class="btn btn-outline-light btn-lg py-3 rounded-pill transition-all hover-bg-white hover-text-dark">
+                                    📱 Login with OTP
+                                </a>
+                            </div>
 
-    </style>
-  </head>
+                            <!-- Seller Login -->
+                            <div class="text-center mt-4">
+                                <small>
+                                    <a href="#" class="text-white opacity-75 text-decoration-underline hover-opacity-100">Are you a seller? Login here →</a>
+                                </small>
+                            </div>
+                        </form>
+                    </div>
 
-  <body>
-    <!-- Toast Messages -->
-    {% if messages %}
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
-      {% for message in messages %}
-      <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ message }}
-          </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
 
-    <!-- Content -->
-    <div class="container-xxl">
-      <div class="authentication-wrapper authentication-basic container-p-y">
-        <div class="authentication-inner">
-          <!-- Login Card -->
-          <div class="card">
-            <div class="card-body">
-              <!-- Logo -->
-              <div class="app-brand justify-content-center">
-                <a href="{% url 'dashboard' %}" class="app-brand-link">
-                  <div class="app-brand demo">
-
-                    <a href="{% url 'dashboard' %}" class="app-brand-link">
-                      <span class="app-brand-logo demo m-3">
-                        <!-- Dot Loader -->
-                        <div id="logo-loader" class="dot-loader">
-                          <span></span>
-                          <span></span>
-                          <span></span>
+                    <!-- Welcome Text + Features - comes SECOND on mobile -->
+                    <div class="col-md-6 p-4 p-md-5 text-white order-md-1">
+                        <div class="section-header">
+                            <h2 class="section-title display-4">Welcome <span class="text-warning">Back!</span></h2>
                         </div>
-                    
-                        <!-- Hidden Image (Will be shown after loading) -->
-                        <img id="company-logo-svg" 
-                             alt="Company Logo" 
-                             style="width: 185px; height: 65px; object-fit: contain; display: none;" />
-                      </span>
-                    </a>
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-                      <i class="bx bx-chevron-left bx-sm align-middle"></i>
-                    </a>
-                  </div>
-                  
-                </a>
-              </div>
-              <!-- /Logo -->
-              <h4 class="mb-2">Adventure starts here 🚀</h4>
-              <p class="mb-4">Make your app management easy and fun!</p>
-              <form id="formAuthentication" class="mb-3" method="POST">
-                {% csrf_token %}
-                <div class="mb-3">
-                  <label for="id_phone_number" class="form-label">Phone Number</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="id_phone_number"
-                    name="phone_number"
-                    placeholder="Enter phone number"
-                    required
-                    autofocus
-                  />
-                </div>
-                <div class="mb-3 form-password-toggle">
-                  <div class="d-flex justify-content-between">
-                    <label class="form-label" for="id_password">Password</label>
-                    <a href="{% url 'password_reset_request' %}">
-                      <small>Forgot Password?</small>
-                    </a>
-                  </div>
-                  <div class="input-group input-group-merge">
-                    <input
-                      type="password"
-                      id="id_password"
-                      class="form-control"
-                      name="password"
-                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                      aria-describedby="password"
-                      required
-                    />
-                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="remember-me" name="remember_me" />
-                    <label class="form-check-label" for="remember-me"> Remember Me </label>
-                  </div>
-                </div>
+                        <p class="mb-4 lead">Login to order fresh seafood from the Arabian Sea. Fresh catch, delivered to your doorstep.</p>
 
-                <div class="mb-3">
-                  <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
-                </div>
-              </form>
-              <div class="mb-3">
-                <a href="{% url 'login_with_otp' %}" class="btn btn-primary d-grid w-100">
-                    Login With OTP
-                </a>
-            </div>
-            <div class="mb-3">
-                <a href="{% url 'account_login' %}" class="btn btn-primary d-grid w-100">
-                    Login With Google
-                </a>
-            </div>
+                        <!-- Features List -->
+                        <div class="mt-4 mt-md-5">
+                            <h5 class="fw-bold mb-3">Why MyOceanBasket?</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-3 d-flex align-items-start">
+                                    <span class="text-warning me-3 fs-4">🐟</span>
+                                    <div>
+                                        <strong>Direct from Fishermen</strong>
+                                        <p class="small mb-0 opacity-75">No middlemen, best prices</p>
+                                    </div>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <span class="text-warning me-3 fs-4">🛒</span>
+                                    <div>
+                                        <strong>Free Delivery</strong>
+                                        <p class="small mb-0 opacity-75">On orders above ₹499</p>
+                                    </div>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <span class="text-warning me-3 fs-4">⏰</span>
+                                    <div>
+                                        <strong>Early Morning Catch</strong>
+                                        <p class="small mb-0 opacity-75">Order before 8 AM for same day delivery</p>
+                                    </div>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <span class="text-warning me-3 fs-4">💎</span>
+                                    <div>
+                                        <strong>Premium Quality</strong>
+                                        <p class="small mb-0 opacity-75">100% fresh, never frozen</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
-              <p class="text-center">
-                <a class="text-primary fw-bold ms-2" href="{% url 'home' %}">Back to Home</a>
-              </p>
-              <p class="text-center">
-                <span>New on our platform?</span>
-                <a href="{% url 'user_registration' %}">
-                  <span>Create an account</span>
-                </a>
-              </p>
+                </div>
             </div>
-          </div>
-          <!-- /Login Card -->
         </div>
-      </div>
     </div>
+</section>
 
-    <!-- / Content -->
-
-    <!-- Core JS -->
-    <script src="{% static 'advadmin/assets/vendor/libs/jquery/jquery.js' %}"></script>
-    <script src="{% static 'advadmin/assets/vendor/libs/popper/popper.js' %}"></script>
-    <script src="{% static 'advadmin/assets/vendor/js/bootstrap.js' %}"></script>
-    <script src="{% static 'advadmin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
-    <script src="{% static 'advadmin/assets/vendor/js/menu.js' %}"></script>
-
-    <!-- Main JS -->
-    <script src="{% static 'advadmin/assets/js/main.js' %}"></script>
-
-    <script>
-      // Auto-dismiss toast messages after 3 seconds
-      document.addEventListener("DOMContentLoaded", function () {
-        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-        var toastList = toastElList.map(function (toastEl) {
-          return new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
-        });
-        toastList.forEach(toast => toast.show());
-      });
-    </script>
-    
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const logoImg = document.getElementById('company-logo-svg');
-        const loader = document.getElementById('logo-loader');
-        const faviconLink = document.querySelector("link[rel='icon']"); // Select favicon link
-    
-        fetch('/api/company-data/')
-          .then(response => response.json())
-          .then(data => {
-            console.log("Company Data:", data); // Debugging
-    
-            // ✅ Load the company logo
-            if (data.company_logo_svg_url) {
-              logoImg.src = data.company_logo_svg_url;
-              logoImg.alt = data.company_name + " Logo";
-              logoImg.style.display = "block"; // Show image
-              loader.style.display = "none"; // Hide loader
-            } else {
-              loader.innerHTML = "No Logo Available"; // Show text if no logo
-            }
-    
-            // ✅ Load the favicon dynamically
-            if (data.company_favicon_url) {
-              faviconLink.href = data.company_favicon_url;
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching company data:', error);
-            loader.innerHTML = "Failed to load logo"; // Show error message
-          });
-      });
-    </script>
-    <!-- Core JS --
-  </body>
-</html>
+{% endblock %}

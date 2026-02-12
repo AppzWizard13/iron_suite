@@ -1,0 +1,305 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    
+    <!-- Toast Messages - Material Design Style -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
+      {% for message in messages %}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}var(--md-sys-color-error){% else %}var(--md-sys-color-success){% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}var(--md-sys-color-error){% else %}var(--md-sys-color-success){% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
+          </div>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Material Design Header -->
+    <div class="md-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-0">Category Management</h1>
+          <p class="md-subtitle">Organize your product categories</p>
+        </div>
+        <a href="{% url 'master:category_create' %}" class="md-filled-button">
+          <i class="bx bx-category me-2"></i>Add Category
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="md-card">
+      <div class="md-card-header">
+        <div class="row align-items-center g-4">
+          <div class="col-lg-7">
+            <h5 class="mb-0 fw-semibold" style="color: var(--md-sys-color-on-surface); font-size: 24px;">
+              Categories
+              <span class="badge ms-3 px-4 py-2 fw-semibold rounded-pill" 
+                    style="background: rgba(25, 118, 210, 0.15); color: var(--md-sys-color-primary); border: 1px solid rgba(25, 118, 210, 0.3);">
+                {{ categories|length }}
+              </span>
+            </h5>
+          </div>
+          <div class="col-lg-5">
+            <form method="GET" action="{% url 'master:category_list' %}" class="d-flex">
+              <div class="input-group flex-grow-1">
+                {% comment %} <span class="input-group-text bg-transparent border-0 ps-4 pe-0">
+                  <i class="bx bx-search fs-5" style="color: var(--md-sys-color-outline);"></i>
+                </span> {% endcomment %}
+                <input type="text" name="search" class="form-control md-search border-start-0 shadow-none ps-0" 
+                       placeholder="Search categories..." value="{{ query }}">
+                {% if query %}
+                <a href="{% url 'master:category_list' %}" class="btn ms-2 rounded-circle p-3 border-0" 
+                   style="background: #f8fafc; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;">
+                  <i class="bx bx-x text-muted fs-5"></i>
+                </a>
+                {% endif %}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Table -->
+      <div class="table-responsive">
+        <table class="table md-table mb-0">
+          <thead>
+            <tr>
+              <th style="width: 80px;">ID</th>
+              <th style="width: 100px;">Image</th>
+              <th style="width: 200px;">Name</th>
+              <th style="width: 300px;">Description</th>
+              <th style="width: 200px;" class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for category in categories %}
+            <tr>
+              <td>
+                <span class="fw-bold text-muted fs-5">#{{ category.id }}</span>
+              </td>
+              <td class="text-center">
+                <div class="md-avatar-wrapper" style="width: 60px; height: 60px; margin: 0 auto;">
+                  {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" class="md-avatar-img">
+                  {% else %}
+                    <img src="{% static 'icons/default-category.png' %}" alt="No Image" class="md-avatar-img">
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <span class="fw-semibold" style="color: var(--md-sys-color-on-surface); font-size: 16px;">
+                  {{ category.name }}
+                </span>
+              </td>
+              <td>
+                <span class="text-muted">{{ category.description|default:"—"|truncatechars:100 }}</span>
+              </td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-3">
+                  <a href="{% url 'master:category_update' category.id %}" 
+                     class="md-icon-button md-icon-button-secondary" 
+                     title="Edit Category">
+                    <i class="bx bx-edit-alt"></i>
+                  </a>
+                  <button class="md-icon-button md-icon-button-danger" 
+                          data-bs-toggle="modal" data-bs-target="#deleteModal"
+                          data-category-id="{{ category.id }}" 
+                          data-category-name="{{ category.name }}"
+                          title="Delete Category">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5">
+                <div class="md-empty-state">
+                  <div class="md-empty-icon">
+                    <i class="bx bx-category" style="color: var(--md-sys-color-on-primary-container);"></i>
+                  </div>
+                  <h5 class="mb-4 fw-semibold" style="color: var(--md-sys-color-on-surface);">
+                    No categories found
+                  </h5>
+                  <a href="{% url 'master:category_create' %}" class="md-filled-button mt-3">
+                    <i class="bx bx-plus-circle me-2"></i>Add your first category
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if is_paginated %}
+      <div class="p-5 pt-4 border-top" style="border-color: rgba(25, 118, 210, 0.1) !important;">
+        <nav aria-label="Page navigation">
+          <ul class="pagination md-pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link fw-semibold" href="?page={{ page_obj.previous_page_number }}{% if query %}&search={{ query }}{% endif %}">
+                <i class="bx bx-chevron-left me-1"></i>Previous
+              </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+              <li class="page-item active">
+                <a class="page-link fw-bold text-white">{{ num }}</a>
+              </li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link fw-semibold" href="?page={{ num }}{% if query %}&search={{ query }}{% endif %}">{{ num }}</a>
+              </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link fw-semibold" href="?page={{ page_obj.next_page_number }}{% if query %}&search={{ query }}{% endif %}">
+                Next<i class="bx bx-chevron-right ms-1"></i>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Material Design Delete Category Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-2xl rounded-4" style="backdrop-filter: blur(20px);">
+      <div class="modal-header bg-gradient text-white rounded-top-4 p-5" 
+           style="background: linear-gradient(135deg, var(--md-sys-color-error), #dc2626) !important;">
+        <h5 class="modal-title fw-semibold mb-0">Delete Category</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-4 px-5">
+        <p class="mb-3">Delete <strong id="categoryName" class="text-danger fw-bold"></strong>?</p>
+        <p class="text-muted small mb-0">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0 px-5 pb-5 gap-3">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-5 py-3 fw-medium" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <a id="confirmDeleteBtn" class="btn btn-danger rounded-pill px-5 py-3 fw-bold shadow-lg">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Auto-show toasts
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 6000 }).show();
+  });
+
+  // Delete Category Modal
+  const deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const categoryId = button.getAttribute('data-category-id');
+      const categoryName = button.getAttribute('data-category-name');
+      
+      document.getElementById('categoryName').textContent = categoryName;
+      const deleteUrl = "{% url 'master:category_delete' 0 %}".replace('0', categoryId);
+      document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+    });
+  }
+
+  // Material ripple effect on buttons
+  document.querySelectorAll('.md-filled-button, .md-icon-button, .btn-danger, .btn-outline-secondary').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.cssText = `
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        transform: scale(0);
+        animation: md-ripple 0.6s linear;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        pointer-events: none;
+        z-index: 1000;
+      `;
+      
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+});
+</script>
+
+<style>
+/* Ensure proper modal styling */
+.modal-content {
+  border: none !important;
+  overflow: hidden !important;
+}
+
+.md-avatar-wrapper {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 2px solid rgba(25, 118, 210, 0.2) !important;
+}
+
+.md-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .md-card-header .row {
+    flex-direction: column;
+  }
+  
+  .md-avatar-wrapper {
+    width: 50px !important;
+    height: 50px !important;
+  }
+  
+  .md-filled-button {
+    width: 100%;
+  }
+}
+</style>
+{% endblock %}

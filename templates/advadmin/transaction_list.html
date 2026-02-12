@@ -3,7 +3,7 @@
 
 {% block content %}
 <!-- Load custom theme CSS -->
-<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}">
+ <link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
@@ -138,7 +138,7 @@
           <div class="md-card-header">
             <h5 class="mb-0 fw-semibold">Filter Transactions</h5>
           </div>
-          <div class="card-body p-5">
+          <div class="card-body p-3">
             <form method="GET" action="{% url 'transaction_list' transaction_type %}" class="row g-4">
               <div class="col-lg-3 col-md-6">
                 <label class="form-label fw-semibold mb-2 md-field-label">Date From</label>
@@ -178,7 +178,7 @@
               </div>
               <div class="col-12">
                 <div class="d-flex justify-content-end gap-3">
-                  <button type="submit" class="md-filled-button px-6 py-3">
+                  <button type="submit" class="md-filled-button  py-3">
                     <i class="bx bx-filter-alt me-2"></i>Apply Filters
                   </button>
                   <a href="{% url 'transaction_list' transaction_type %}" class="md-outlined-button px-6 py-3">
@@ -320,11 +320,6 @@
                     No transactions found
                   </h5>
                   <p class="mb-4 text-muted">No transactions match your current filters</p>
-                  <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    <a href="{% url 'transaction_list' transaction_type %}" class="md-filled-button px-6">
-                      <i class="bx bx-refresh me-2"></i>Clear Filters
-                    </a>
-                  </div>
                 </div>
               </td>
             </tr>

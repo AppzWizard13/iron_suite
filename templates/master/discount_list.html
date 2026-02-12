@@ -1,0 +1,58 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+ <link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="md-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-0">Discounts & Offers</h1>
+          <p class="md-subtitle">Manage promotional coupons and vendor deals</p>
+        </div>
+        <a href="{% url 'master:discount_create' %}" class="md-filled-button">
+          <i class="bx bx-purchase-tag-alt me-2"></i>Create Coupon
+        </a>
+      </div>
+    </div>
+
+    <div class="md-card">
+      <div class="table-responsive">
+        <table class="table md-table mb-0">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Type</th>
+              <th>Value</th>
+              <th>Validity</th>
+              <th>Usage</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for discount in discounts %}
+            <tr>
+              <td><span class="badge bg-label-primary px-3 py-2 fw-bold">{{ discount.code }}</span></td>
+              <td>{{ discount.get_discount_type_display }}</td>
+              <td><span class="fw-bold text-success">{% if discount.discount_type == 'percentage' %}{{ discount.discount_value }}%{% else %}₹{{ discount.discount_value }}{% endif %}</span></td>
+              <td>
+                <small class="d-block text-muted">From: {{ discount.valid_from|date:"d M" }}</small>
+                <small class="d-block text-danger fw-semibold">To: {{ discount.valid_to|date:"d M Y" }}</small>
+              </td>
+              <td><span class="fw-semibold">{{ discount.used_count }}</span> / {{ discount.usage_limit|default:"∞" }}</td>
+              <td>
+                <span class="md-badge md-badge--{% if discount.is_active %}success{% else %}secondary{% endif %}">
+                  {{ discount.is_active|yesno:"Live,Expired" }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -46,10 +46,10 @@ SUBSCRIPTION_ORDER_PREFIX = "SUB-ORDER-DEV-TEST"
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'iron_board_db',
-#         'USER': 'iron_board_admin',
+#         'NAME': 'myoceanbasket_db',
+#         'USER': 'myoceanbasket_admin',
 #         'PASSWORD': 'xPL7y6qe1gLHAg2B9SWvW06vXSC8lxSe',
-#         'HOST': 'db',  # or 'iron_board_db' if your Django app runs in Docker
+#         'HOST': 'db',  # or 'myoceanbasket_db' if your Django app runs in Docker
 #         'PORT': '5432',
 
 #     }

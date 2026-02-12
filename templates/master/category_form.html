@@ -1,0 +1,301 @@
+{% extends 'advadmin/index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Load custom theme CSS -->
+<link rel="stylesheet" href="{% static 'mob-custom/theme.css' %}"> 
+<link rel="stylesheet" href="{% static 'mob-custom/theme-enh1.css' %}"> 
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    
+    <!-- Material Design Header -->
+    <div class="md-header mb-5">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+        <div>
+          <h1 class="md-title mb-1 mb-sm-2">
+            {% if object %}
+              <i class="bx bx-edit-alt text-warning me-3" style="font-size: 32px;"></i>
+              Edit Category
+            {% else %}
+              <i class="bx bx-category text-success me-3" style="font-size: 32px;"></i>
+              Add New Category
+            {% endif %}
+          </h1>
+          <p class="md-subtitle mb-0">
+            {% if object %}
+              Update category information and image
+            {% else %}
+              Create a new product category
+            {% endif %}
+          </p>
+        </div>
+        <a href="{% url 'master:category_list' %}" class="md-outlined-button px-6 py-3">
+          <i class="bx bx-arrow-back me-2"></i>Back to List
+        </a>
+      </div>
+    </div>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-4" style="z-index: 1060">
+      {% for message in messages %}
+      <div class="toast align-items-center border-0 rounded-3 shadow-xl" 
+           style="background: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; 
+                  border-left: 5px solid {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %} !important;" 
+           role="alert" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="d-flex w-100">
+          <div class="toast-body d-flex align-items-center gap-3 p-4">
+            <div class="rounded-circle p-2" style="background: {% if message.tags == 'error' %}rgba(239,68,68,0.15){% else %}rgba(34,197,94,0.15){% endif %}; 
+                         width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="bx {% if message.tags == 'error' %}bx-error-circle{% else %}bx-check-circle{% endif %}" 
+                 style="font-size: 20px; color: {% if message.tags == 'error' %}#ef4444{% else %}#22c55e{% endif %}"></i>
+            </div>
+            <span class="fw-medium fs-6">{{ message }}</span>
+          </div>
+          <button type="button" class="btn-close me-3 m-auto opacity-75" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Form Card -->
+    <div class="row g-5">
+      <div class="col-12">
+        <div class="md-card">
+          <div class="md-card-header">
+            <h5 class="mb-0 fw-semibold" style="color: #1a202c;">
+              <i class="bx bx-category me-2 text-primary"></i>Category Details
+            </h5>
+          </div>
+          <div class="card-body p-3">
+            
+            <!-- Form Errors Display -->
+            {% if form.errors %}
+            <div class="alert alert-danger d-flex align-items-start gap-3 mb-4 p-4" 
+                 style="background: #fef2f2; border-left: 5px solid #ef4444; border-radius: 12px;">
+              <div class="rounded-circle p-2" style="background: rgba(239,68,68,0.15); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <i class="bx bx-error-circle" style="font-size: 20px; color: #ef4444;"></i>
+              </div>
+              <div>
+                <h6 class="fw-semibold mb-2" style="color: #ef4444;">Please correct the following errors:</h6>
+                <ul class="mb-0 ps-3">
+                  {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                      <li class="fw-medium"><strong>{{ field|title }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            {% endif %}
+            
+            <form method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+              
+              <!-- Image Preview Section - Clean & Simple -->
+              <div class="row mb-5">
+                <div class="col-12">
+                  <label class="form-label fw-semibold mb-3 md-field-label">Category Image</label>
+                  <div class="d-flex align-items-center gap-4 flex-wrap">
+                    <!-- Image Preview Container -->
+                    <div id="imagePreviewContainer" 
+                         style="width: 120px; height: 120px; border-radius: 16px; overflow: hidden; 
+                                border: 2px solid rgba(25,118,210,0.2); box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                                background: #f8fafc;">
+                      {% if object and object.image %}
+                        <img id="imagePreview" src="{{ object.image.url }}" alt="{{ object.name }}" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                      {% else %}
+                        <img id="imagePreview" src="{% static 'icons/default-category.png' %}" alt="Default" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                      {% endif %}
+                    </div>
+                    
+                    <!-- Upload Field -->
+                    <div>
+                      <div class="md-field-wrapper" style="width: 250px;">
+                        {{ form.image }}
+                      </div>
+                      <div class="form-text mt-2" style="color: #64748b;">
+                        <i class="bx bx-info-circle me-1"></i> 
+                        {% if object %}Leave empty to keep current. {% endif %}
+                        JPG, PNG, WEBP (Max 2MB)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Fields -->
+              <div class="row g-4">
+                <!-- Category Name -->
+                <div class="col-lg-6 col-md-12">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.name.id_for_label }}">
+                      {{ form.name.label }} <span style="color: #ef4444;">*</span>
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">
+                        {{ form.name.errors|join:", " }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Category Slug (if exists) -->
+                {% if form.slug %}
+                <div class="col-lg-6 col-md-12">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.slug.id_for_label }}">
+                      {{ form.slug.label }}
+                    </label>
+                    {{ form.slug }}
+                    {% if form.slug.help_text %}
+                      <div class="form-text mt-2" style="color: #64748b;">{{ form.slug.help_text }}</div>
+                    {% endif %}
+                    {% if form.slug.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">
+                        {{ form.slug.errors|join:", " }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+
+                <!-- Active Status (if exists) -->
+                {% if form.is_active %}
+                <div class="col-lg-6 col-md-12">
+                  <div class="md-checkbox-wrapper mt-3">
+                    <label class="md-checkbox-label" for="{{ form.is_active.id_for_label }}">
+                      <span class="checkbox-container">
+                        {{ form.is_active }}
+                        <span class="md-checkbox-checkmark"></span>
+                      </span>
+                      <span class="checkbox-text">{{ form.is_active.label }}</span>
+                    </label>
+                    {% if form.is_active.help_text %}
+                      <div class="form-text mt-2" style="color: #64748b; margin-left: 32px;">{{ form.is_active.help_text }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+
+                <!-- Category Description -->
+                <div class="col-12">
+                  <div class="md-field-wrapper">
+                    <label class="form-label fw-semibold mb-2 md-field-label" for="{{ form.description.id_for_label }}">
+                      {{ form.description.label }}
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.help_text %}
+                      <div class="form-text mt-2" style="color: #64748b;">{{ form.description.help_text }}</div>
+                    {% endif %}
+                    {% if form.description.errors %}
+                      <div class="invalid-feedback d-block mt-2" style="color: #ef4444;">
+                        {{ form.description.errors|join:", " }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex justify-content-end gap-3 flex-wrap mt-5 pt-4 border-top">
+                <a href="{% url 'master:category_list' %}" class="md-outlined-button px-6 py-3">
+                  <i class="bx bx-x me-2"></i>Cancel
+                </a>
+                <button type="submit" class="md-filled-button px-8 py-3">
+                  <i class="bx bx-{% if object %}save{% else %}plus-circle{% endif %} me-2"></i>
+                  {% if object %}Update Category{% else %}Create Category{% endif %}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// SIMPLE - Only image preview, NO AJAX, NO loading states, NO form submission handling
+document.addEventListener("DOMContentLoaded", function() {
+  // Auto-show toasts (Bootstrap native)
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 5000 }).show();
+  });
+
+  // SIMPLE Image Preview - Just show selected image
+  const fileInput = document.querySelector('input[type="file"][name="image"]');
+  const preview = document.getElementById('imagePreview');
+  
+  if (fileInput && preview) {
+    fileInput.addEventListener('change', function(e) {
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+        };
+        reader.readAsDataURL(this.files[0]);
+      }
+    });
+  }
+});
+</script>
+
+<style>
+/* Minimal styles - just enough for Material Design */
+.form-control.md-field,
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+  border: 2px solid #e8f0fe !important;
+  border-radius: 12px !important;
+  padding: 14px 20px !important;
+  font-size: 14px !important;
+  width: 100% !important;
+  transition: all 0.2s ease !important;
+}
+
+.form-control.md-field:focus,
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+  border-color: #1976d2 !important;
+  box-shadow: 0 0 0 4px rgba(25,118,210,0.1) !important;
+  outline: none !important;
+}
+
+textarea {
+  min-height: 100px !important;
+  resize: vertical !important;
+}
+
+input[type="file"] {
+  padding: 12px 20px !important;
+  background: #f8fafc !important;
+  border: 2px dashed #e2e8f0 !important;
+}
+
+input[type="file"]:hover {
+  border-color: #1976d2 !important;
+  background: #f1f5f9 !important;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .md-filled-button,
+  .md-outlined-button {
+    width: 100%;
+  }
+  
+  .d-flex.justify-content-end {
+    flex-direction: column-reverse;
+  }
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,3324 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Fish Mart - Free eCommerce Grocery Store HTML Website Template</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'mob/css/vendor.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'mob/css/style.css' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+<style>
+
+:root {
+    /* Light Ocean Palette - Minimal & Clean */
+    --ocean-primary: #1E88E5;          /* Clear ocean blue */
+    --ocean-secondary: #26C6DA;        /* Light cyan */
+    --ocean-accent: #00ACC1;           /* Deep cyan */
+    --ocean-light: #E1F5FE;            /* Pale sky blue */
+    --ocean-ultra-light: #F1F9FE;      /* Almost white blue */
+    --ocean-foam: #FFFFFF;             /* Pure white */
+    
+    /* Neutral Tones */
+    --text-primary: #263238;           /* Deep blue-gray */
+    --text-secondary: #546E7A;         /* Medium gray */
+    --text-light: #78909C;             /* Light gray */
+    --divider: #E0E0E0;                /* Soft divider */
+    
+    /* Accent Colors */
+    --coral-accent: #FF7043;           /* Soft coral */
+    --mint-accent: #26A69A;            /* Fresh mint */
+    --sand-accent: #FFF8E1;            /* Sandy beige */
+    
+    /* Shadows - Soft & Subtle */
+    --shadow-sm: 0 1px 3px rgba(30, 136, 229, 0.08);
+    --shadow-md: 0 4px 12px rgba(30, 136, 229, 0.12);
+    --shadow-lg: 0 8px 24px rgba(30, 136, 229, 0.15);
+    --shadow-xl: 0 12px 40px rgba(30, 136, 229, 0.18);
+    
+    /* Border Radius - Google Material Curves */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --radius-full: 9999px;
+    
+    /* Spacing System */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    
+    /* Typography */
+    --font-display: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    
+    /* Transitions */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============ GLOBAL RESET & BASE ============ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background: var(--ocean-foam);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle gradient background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(30, 136, 229, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(38, 198, 218, 0.03) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body > * {
+    position: relative;
+    z-index: 1;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin: 0;
+}
+
+/* ============ HEADER - CLEAN & MINIMAL ============ */
+header {
+    background: linear-gradient(180deg, #1A237E 0%, #0D47A1 100%);
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(30, 136, 229, 0.08);
+}
+
+header .container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+header .border-bottom {
+    border-bottom: none !important;
+    padding: var(--space-lg) 0;
+}
+
+/* Logo */
+.main-logo img {
+    max-height: 48px;
+    transition: transform var(--transition-base);
+}
+
+.main-logo:hover img {
+    transform: scale(1.02);
+}
+
+
+.search-bar svg {
+    color: var(--ocean-primary);
+}
+
+/* Support Box */
+.support-box {
+    text-align: right;
+}
+
+.support-box span {
+    display: block;
+    font-size: 13px;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.support-box h5 {
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+/* Header Icons - Minimal Circles */
+header .rounded-circle {
+    background: var(--ocean-ultra-light) !important;
+    border: 1px solid rgba(30, 136, 229, 0.12) !important;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+}
+
+header .rounded-circle:hover {
+    background: var(--ocean-light) !important;
+    border-color: var(--ocean-primary) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+header .rounded-circle svg {
+    color: var(--ocean-primary);
+    transition: color var(--transition-base);
+}
+
+/* Cart Display */
+.cart {
+    cursor: pointer;
+}
+
+.cart span {
+    display: block;
+    text-align: right;
+}
+
+.cart .dropdown-toggle {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.cart .cart-total {
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin-top: 2px;
+}
+
+/* ============ NAVIGATION - CLEAN TABS ============ */
+.main-menu {
+    border-top: 1px solid rgba(30, 136, 229, 0.08);
+}
+
+.main-menu .filter-categories,
+.main-menu select {
+    background: white;
+    color:linear-gradient(180deg, #1A237E 0%, #0D47A1 100%); ;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 15px;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.main-menu .filter-categories:hover,
+.main-menu select:hover {
+    background: white;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.navbar-nav .nav-link {
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--ocean-primary);
+    background: var(--ocean-ultra-light);
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--ocean-primary);
+    background: var(--ocean-light);
+}
+
+/* ============ HERO BANNER - FLUID SHAPES ============ */
+.banner-blocks {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--space-lg);
+    margin: var(--space-2xl) 0;
+}
+
+.banner-ad.large {
+    grid-column: span 8;
+    background: linear-gradient(135deg, var(--ocean-primary) 0%, var(--ocean-secondary) 100%);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    position: relative;
+    padding: var(--space-2xl);
+    min-height: 480px;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Organic blob shapes in background */
+.banner-ad.large::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    animation: blob-morph 20s ease-in-out infinite;
+}
+
+.banner-ad.large::after {
+    content: '';
+    position: absolute;
+    bottom: -15%;
+    left: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
+    animation: blob-morph 25s ease-in-out infinite reverse;
+}
+
+@keyframes blob-morph {
+    0%, 100% {
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        transform: rotate(0deg) scale(1);
+    }
+    25% {
+        border-radius: 60% 40% 50% 50% / 30% 60% 70% 40%;
+        transform: rotate(90deg) scale(1.05);
+    }
+    50% {
+        border-radius: 50% 50% 40% 60% / 70% 30% 50% 50%;
+        transform: rotate(180deg) scale(1);
+    }
+    75% {
+        border-radius: 40% 60% 60% 40% / 50% 70% 30% 60%;
+        transform: rotate(270deg) scale(1.05);
+    }
+}
+
+.banner-ad.block-2,
+.banner-ad.block-3 {
+    grid-column: span 4;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
+    min-height: 240px;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+}
+
+.banner-ad.block-2 {
+    background: linear-gradient(135deg, var(--mint-accent) 0%, var(--ocean-secondary) 100%);
+}
+
+.banner-ad.block-3 {
+    background: linear-gradient(135deg, var(--coral-accent) 0%, #FF8A65 100%);
+}
+
+.banner-ad:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.banner-content {
+    position: relative;
+    z-index: 2;
+}
+
+.banner-content h3,
+.banner-title {
+    color: white;
+    font-size: clamp(24px, 4vw, 42px);
+    margin-bottom: var(--space-md);
+    font-weight: 800;
+}
+
+.banner-content p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: var(--space-lg);
+}
+
+.banner-content .categories {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 8px 20px;
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: var(--space-md);
+}
+
+/* Swiper Pagination - Minimal Dots */
+.swiper-pagination-bullet {
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 1;
+    width: 8px;
+    height: 8px;
+    transition: all var(--transition-base);
+}
+
+.swiper-pagination-bullet-active {
+    background: white;
+    width: 24px;
+    border-radius: var(--radius-sm);
+}
+
+/* ============ BUTTONS - MATERIAL STYLE ============ */
+.btn {
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px 28px;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-base);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.btn-dark,
+.btn-primary {
+    background: linear-gradient(180deg, #1A237E 0%, #0D47A1 100%);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-dark:hover,
+.btn-primary:hover {
+    background: linear-gradient(180deg, #1A237E 0%, #0D47A1 100%);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    color: white;
+}
+
+.btn-outline-dark {
+    background: transparent;
+    border: 2px solid var(--ocean-primary);
+    color: var(--ocean-primary);
+}
+
+.btn-outline-dark:hover {
+    background: var(--ocean-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-lg {
+    padding: 14px 32px;
+    font-size: 16px;
+}
+
+.btn-yellow,
+.btn-warning {
+    background: #FFB300;
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-yellow:hover,
+.btn-warning:hover {
+    background: #FFA000;
+    box-shadow: var(--shadow-md);
+    transform: scale(1.02);
+}
+
+/* ============ SECTION HEADERS - MINIMAL ============ */
+.section-header {
+    margin-bottom: var(--space-2xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title {
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 800;
+    color: var(--text-primary);
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--ocean-primary);
+    border-radius: var(--radius-sm);
+}
+
+/* ============ CATEGORY CARDS - CLEAN CIRCLES ============ */
+.category-item {
+    background: var(--ocean-foam);
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: all var(--transition-spring);
+    border: 1px solid rgba(30, 136, 229, 0.08);
+    box-shadow: var(--shadow-sm);
+}
+
+.category-item:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    {% comment %} border-color: var(--ocean-primary); {% endcomment %}
+    background: var(--ocean-ultra-light);
+}
+
+.category-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: var(--space-md);
+    transition: transform var(--transition-spring);
+}
+
+.category-item:hover img {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.category-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* ============ PRODUCT CARDS - ELEVATED CARDS ============ */
+.product-item {
+    background: var(--ocean-foam);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    transition: all var(--transition-base);
+    border: 1px solid rgba(30, 136, 229, 0.08);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-item:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    {% comment %} border-color: var(--ocean-primary); {% endcomment %}
+}
+
+.product-item figure {
+    background: var(--ocean-ultra-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin: 0 0 var(--space-md) 0;
+    overflow: hidden;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.product-item:hover img {
+    transform: scale(1.08);
+}
+
+.product-item h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+    line-height: 1.4;
+}
+
+.product-item .qty {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-right: var(--space-sm);
+}
+
+.product-item .rating {
+    font-size: 14px;
+    color: #FFB300;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.product-item .price {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--ocean-primary);
+    margin: var(--space-md) 0;
+}
+
+/* Badge - Minimal Pill */
+.product-item .badge {
+    position: absolute;
+    top: var(--space-md);
+    left: var(--space-md);
+    background: var(--coral-accent) !important;
+    color: white;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Wishlist Button - Minimal Circle */
+.btn-wishlist {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    background: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(30, 136, 229, 0.12);
+    transition: all var(--transition-base);
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-wishlist:hover {
+    background: var(--coral-accent);
+    border-color: var(--coral-accent);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-wishlist svg {
+    color: var(--text-light);
+    transition: color var(--transition-base);
+}
+
+.btn-wishlist:hover svg {
+    color: white !important;
+}
+
+/* Product Quantity - Minimal Pills */
+.product-qty {
+    background: var(--ocean-ultra-light);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid rgba(30, 136, 229, 0.12);
+    display: flex;
+    align-items: center;
+}
+
+.product-qty .btn {
+    background: transparent;
+    border: none;
+    padding: 5px 5px;
+    transition: background var(--transition-fast);
+    border-radius: 0;
+}
+
+.product-qty .btn-danger {
+    color: var(--coral-accent);
+}
+
+.product-qty .btn-success {
+    color: var(--mint-accent);
+}
+
+.product-qty .btn:hover {
+    background: var(--ocean-light);
+}
+
+.product-qty input {
+    background: transparent;
+    border: none;
+    text-align: center;
+    width: 50px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ============ BRAND CARDS - MINIMAL HORIZONTAL ============ */
+.card {
+    background: var(--ocean-foam) !important;
+    border: 1px solid rgba(30, 136, 229, 0.08) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all var(--transition-base);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md) !important;
+    {% comment %} border-color: var(--ocean-primary) !important; {% endcomment %}
+}
+
+.card img {
+    border-radius: var(--radius-md);
+    transition: transform var(--transition-base);
+}
+
+.card:hover img {
+    transform: scale(1.05);
+}
+
+.card-body {
+    padding: var(--space-md);
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.text-body-secondary {
+    color: var(--text-light) !important;
+    font-size: 14px;
+}
+
+/* ============ TABS - MINIMAL UNDERLINE ============ */
+.bootstrap-tabs .nav-tabs {
+    border: none !important;
+    border-bottom: 1px solid rgba(30, 136, 229, 0.12) !important;
+    margin-bottom: var(--space-xl);
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 15px;
+    padding: var(--space-md) var(--space-lg);
+    background: transparent;
+    position: relative;
+    transition: all var(--transition-base);
+}
+
+.nav-tabs .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--ocean-primary);
+    transform: scaleX(0);
+    transition: transform var(--transition-base);
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--ocean-primary);
+    background: var(--ocean-ultra-light);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--ocean-primary);
+    background: transparent;
+}
+
+.nav-tabs .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* ============ BLOG CARDS - CLEAN VERTICAL ============ */
+.post-item {
+    background: var(--ocean-foam);
+    border: 1px solid rgba(30, 136, 229, 0.08) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.post-item:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg) !important;
+    border-color: var(--ocean-primary) !important;
+}
+
+.image-holder {
+    overflow: hidden;
+    border-radius: 0;
+    aspect-ratio: 16/10;
+}
+
+.zoom-effect img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.zoom-effect:hover img {
+    transform: scale(1.06);
+}
+
+.post-meta {
+    display: flex;
+    gap: var(--space-md);
+    color: var(--text-light);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.post-meta svg {
+    color: var(--ocean-primary);
+}
+
+.post-title {
+    margin: var(--space-md) 0;
+}
+
+.post-title a {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+    transition: color var(--transition-base);
+}
+
+.post-title a:hover {
+    color: var(--ocean-primary);
+}
+
+.card-body p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ============ FORMS - MINIMAL INPUT ============ */
+.form-control,
+.form-select {
+    border: 1px solid rgba(30, 136, 229, 0.12);
+    border-radius: var(--radius-md);
+    padding: 12px var(--space-md);
+    font-size: 15px;
+    transition: all var(--transition-base);
+    background: var(--ocean-ultra-light);
+    color: var(--text-primary);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--ocean-primary);
+    box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.08);
+    background: var(--ocean-foam);
+    outline: none;
+}
+
+.form-control-lg {
+    padding: 14px var(--space-lg);
+    font-size: 16px;
+}
+
+.form-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: var(--space-sm);
+}
+
+.form-check-input {
+    border-color: rgba(30, 136, 229, 0.24);
+    transition: all var(--transition-fast);
+}
+
+.form-check-input:checked {
+    background-color: var(--ocean-primary);
+    border-color: var(--ocean-primary);
+}
+
+/* ============ FOOTER - MINIMAL DARK ============ */
+footer {
+    background: linear-gradient(180deg, #1A237E 0%, #0D47A1 100%);
+    color: rgba(255, 255, 255, 0.8);
+    padding-top: var(--space-3xl);
+    {% comment %} margin-top: var(--space-3xl); {% endcomment %}
+}
+
+footer .widget-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+}
+
+footer .menu-list {
+    list-style: none;
+    padding: 0;
+}
+
+footer .menu-list .nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    padding: var(--space-sm) 0;
+    font-size: 15px;
+    transition: all var(--transition-base);
+}
+
+footer .menu-list .nav-link:hover {
+    color: white;
+    padding-left: var(--space-sm);
+}
+
+/* Social Links - Minimal Circles */
+.social-links .btn-outline-light {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all var(--transition-base);
+}
+
+.social-links .btn-outline-light:hover {
+    background: white;
+    color: var(--ocean-primary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Newsletter Form */
+footer form {
+    display: flex;
+    gap: 0;
+}
+
+footer form input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    flex: 1;
+}
+
+footer form input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+footer form input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+footer form .btn-dark {
+    background: white;
+    color: var(--ocean-primary);
+    border: none;
+}
+
+footer form .btn-dark:hover {
+    background: var(--ocean-light);
+    color: var(--ocean-primary);
+}
+
+#footer-bottom {
+    background: rgb(4 25 65);
+    padding: var(--space-lg) 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#footer-bottom p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+#footer-bottom a {
+    color: white;
+    transition: color var(--transition-base);
+}
+
+#footer-bottom a:hover {
+    color: var(--ocean-light);
+}
+
+/* ============ OFFCANVAS - CLEAN SLIDE ============ */
+.offcanvas {
+    background: var(--ocean-foam);
+    border: none;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid rgba(30, 136, 229, 0.12);
+    padding: var(--space-lg);
+}
+
+.offcanvas-title {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.btn-close {
+    transition: transform var(--transition-base);
+}
+
+.btn-close:hover {
+    transform: scale(1.1);
+}
+
+.list-group-item {
+    background: var(--ocean-ultra-light) !important;
+    border: 1px solid rgba(30, 136, 229, 0.12) !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: var(--space-sm);
+    transition: all var(--transition-base);
+}
+
+.list-group-item:hover {
+    background: var(--ocean-light) !important;
+    transform: translateX(4px);
+}
+
+/* ============ SWIPER BUTTONS - MINIMAL CIRCLES ============ */
+.swiper-button-next,
+.swiper-button-prev {
+    background: white !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+    border: 1px solid rgba(30, 136, 229, 0.12);
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+    background: var(--ocean-primary) !important;
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 18px !important;
+    color: var(--ocean-primary);
+    font-weight: 700;
+}
+
+.swiper-button-next:hover::after,
+.swiper-button-prev:hover::after {
+    color: white;
+}
+
+/* ============ UTILITY CLASSES ============ */
+.text-primary {
+    color: var(--ocean-primary) !important;
+}
+
+.bg-primary {
+    background: var(--ocean-primary) !important;
+}
+
+.bg-light {
+    background: var(--ocean-ultra-light) !important;
+}
+
+.bg-success-subtle {
+    background: var(--ocean-light) !important;
+}
+
+.shadow {
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* ============ ANIMATIONS - SMOOTH & MINIMAL ============ */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fade-in 0.6s ease-out;
+}
+
+/* ============ SCROLLBAR - MINIMAL ============ */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--ocean-ultra-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--ocean-primary);
+    border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ocean-accent);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1200px) {
+    .banner-blocks {
+        grid-template-columns: 1fr;
+    }
+    
+    .banner-ad.large,
+    .banner-ad.block-2,
+    .banner-ad.block-3 {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --space-2xl: 32px;
+        --space-3xl: 48px;
+    }
+    
+    .section-title {
+        font-size: 24px;
+    }
+    
+    .banner-ad.large {
+        padding: var(--space-xl);
+        min-height: 360px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-md);
+    }
+}
+
+/* ============ ACCESSIBILITY ============ */
+*:focus-visible {
+    outline: 2px solid var(--ocean-primary);
+    outline-offset: 2px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ============ PRINT STYLES ============ */
+@media print {
+    header,
+    footer,
+    .btn,
+    .swiper-button-next,
+    .swiper-button-prev,
+    .btn-wishlist {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+    }
+}
+
+@keyframes floatFish {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(5deg); }
+}
+
+.brand-icon-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-icon-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.brand-icon-wrapper:hover::after {
+    opacity: 1;
+}
+
+.btn-social {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-social::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-social:hover::before {
+    left: 100%;
+}
+
+@media (max-width: 768px) {
+    .btn-social {
+        padding: 10px 18px !important;
+        font-size: 14px;
+    }
+    
+    .brand-icon-wrapper {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .network-brand-showcase {
+        text-align: center;
+    }
+    
+    .d-flex.align-items-center {
+        justify-content: center;
+    }
+}
+</style>
+    <!-- Toast Container (Top Right) -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="toast align-items-center text-white border-0 shadow-lg 
+            {% if message.tags == 'error' %}bg-danger{% elif message.tags == 'success' %}bg-success{% else %}bg-primary{% endif %}" 
+            role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+            <div class="toast-body fw-medium">
+                {{ message }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+    </div>
+
+    <!-- Script to Auto-Show Toasts -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+        var toastList = toastElList.map(function(toastEl) {
+        return new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 }).show()
+        })
+    });
+    </script>
+
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <defs>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="link" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M12 19a1 1 0 1 0-1-1a1 1 0 0 0 1 1Zm5 0a1 1 0 1 0-1-1a1 1 0 0 0 1 1Zm0-4a1 1 0 1 0-1-1a1 1 0 0 0 1 1Zm-5 0a1 1 0 1 0-1-1a1 1 0 0 0 1 1Zm7-12h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3Zm1 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9h16Zm0-11H4V6a1 1 0 0 1 1-1h1v1a1 1 0 0 0 2 0V5h8v1a1 1 0 0 0 2 0V5h1a1 1 0 0 1 1 1ZM7 15a1 1 0 1 0-1-1a1 1 0 0 0 1 1Zm0 4a1 1 0 1 0-1-1a1 1 0 0 0 1 1Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="arrow-right" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M17.92 11.62a1 1 0 0 0-.21-.33l-5-5a1 1 0 0 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1 1 0 0 0 0 1.42a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .21-.33a1 1 0 0 0 0-.76Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="category" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M19 5.5h-6.28l-.32-1a3 3 0 0 0-2.84-2H5a3 3 0 0 0-3 3v13a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-10a3 3 0 0 0-3-3Zm1 13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1h4.56a1 1 0 0 1 .95.68l.54 1.64a1 1 0 0 0 .95.68h7a1 1 0 0 1 1 1Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="calendar" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M19 4h-2V3a1 1 0 0 0-2 0v1H9V3a1 1 0 0 0-2 0v1H5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3Zm1 15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7h16Zm0-9H4V7a1 1 0 0 1 1-1h2v1a1 1 0 0 0 2 0V6h6v1a1 1 0 0 0 2 0V6h2a1 1 0 0 1 1 1Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="heart" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M20.16 4.61A6.27 6.27 0 0 0 12 4a6.27 6.27 0 0 0-8.16 9.48l7.45 7.45a1 1 0 0 0 1.42 0l7.45-7.45a6.27 6.27 0 0 0 0-8.87Zm-1.41 7.46L12 18.81l-6.75-6.74a4.28 4.28 0 0 1 3-7.3a4.25 4.25 0 0 1 3 1.25a1 1 0 0 0 1.42 0a4.27 4.27 0 0 1 6 6.05Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="plus" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M19 11h-6V5a1 1 0 0 0-2 0v6H5a1 1 0 0 0 0 2h6v6a1 1 0 0 0 2 0v-6h6a1 1 0 0 0 0-2Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="minus" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M19 11H5a1 1 0 0 0 0 2h14a1 1 0 0 0 0-2Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="cart" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M8.5 19a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 8.5 19ZM19 16H7a1 1 0 0 1 0-2h8.491a3.013 3.013 0 0 0 2.885-2.176l1.585-5.55A1 1 0 0 0 19 5H6.74a3.007 3.007 0 0 0-2.82-2H3a1 1 0 0 0 0 2h.921a1.005 1.005 0 0 1 .962.725l.155.545v.005l1.641 5.742A3 3 0 0 0 7 18h12a1 1 0 0 0 0-2Zm-1.326-9l-1.22 4.274a1.005 1.005 0 0 1-.963.726H8.754l-.255-.892L7.326 7ZM16.5 19a1.5 1.5 0 1 0 1.5 1.5a1.5 1.5 0 0 0-1.5-1.5Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="check" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M18.71 7.21a1 1 0 0 0-1.42 0l-7.45 7.46l-3.13-3.14A1 1 0 1 0 5.29 13l3.84 3.84a1 1 0 0 0 1.42 0l8.16-8.16a1 1 0 0 0 0-1.47Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="trash" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M10 18a1 1 0 0 0 1-1v-6a1 1 0 0 0-2 0v6a1 1 0 0 0 1 1ZM20 6h-4V5a3 3 0 0 0-3-3h-2a3 3 0 0 0-3 3v1H4a1 1 0 0 0 0 2h1v11a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8h1a1 1 0 0 0 0-2ZM10 5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1h-4Zm7 14a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8h10Zm-3-1a1 1 0 0 0 1-1v-6a1 1 0 0 0-2 0v6a1 1 0 0 0 1 1Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="star-outline" viewBox="0 0 15 15">
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                    d="M7.5 9.804L5.337 11l.413-2.533L4 6.674l2.418-.37L7.5 4l1.082 2.304l2.418.37l-1.75 1.793L9.663 11L7.5 9.804Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="star-solid" viewBox="0 0 15 15">
+                <path fill="currentColor"
+                    d="M7.953 3.788a.5.5 0 0 0-.906 0L6.08 5.85l-2.154.33a.5.5 0 0 0-.283.843l1.574 1.613l-.373 2.284a.5.5 0 0 0 .736.518l1.92-1.063l1.921 1.063a.5.5 0 0 0 .736-.519l-.373-2.283l1.574-1.613a.5.5 0 0 0-.283-.844L8.921 5.85l-.968-2.062Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="search" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="user" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M15.71 12.71a6 6 0 1 0-7.42 0a10 10 0 0 0-6.22 8.18a1 1 0 0 0 2 .22a8 8 0 0 1 15.9 0a1 1 0 0 0 1 .89h.11a1 1 0 0 0 .88-1.1a10 10 0 0 0-6.25-8.19ZM12 12a4 4 0 1 1 4-4a4 4 0 0 1-4 4Z" />
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" id="close" viewBox="0 0 15 15">
+                <path fill="currentColor"
+                    d="M7.953 3.788a.5.5 0 0 0-.906 0L6.08 5.85l-2.154.33a.5.5 0 0 0-.283.843l1.574 1.613l-.373 2.284a.5.5 0 0 0 .736.518l1.92-1.063l1.921 1.063a.5.5 0 0 0 .736-.519l-.373-2.283l1.574-1.613a.5.5 0 0 0-.283-.844L8.921 5.85l-.968-2.062Z" />
+            </symbol>
+        </defs>
+    </svg>
+
+    <div class="preloader-wrapper">
+        <div class="preloader">
+        </div>
+    </div>
+
+    <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasSearch"
+        aria-labelledby="Search">
+        <div class="offcanvas-header justify-content-center">
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="order-md-last">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-primary">Search</span>
+                </h4>
+                <form role="search" action="index.html" method="get" class="d-flex mt-3 gap-0">
+                    <input class="form-control rounded-start rounded-0 bg-light" type="email"
+                        placeholder="What are you looking for?" aria-label="What are you looking for?">
+                    <button class="btn btn-dark rounded-end rounded-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="container-fluid">
+            <div class="row py-3 border-bottom">
+
+                <div class="col-sm-4 col-lg-3 text-center text-sm-start">
+                    <div class="main-logo">
+                        <a href="{% url 'home' %}">
+                            <img src="{% static 'mob/images/logo.png' %}" alt="logo" class="img-fluid">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
+                    <div class="d-flex align-items-center">
+                        
+                        <!-- 1. The Search Field (Reduced height to match button) -->
+                        <div class="search-bar bg-light rounded-pill flex-grow-1 overflow-hidden" style="height: 44px;">
+                            <form id="search-form" class="h-100" action="index.html" method="post">
+                                <!-- Added h-100 and py-0 to keep text centered in the smaller bar -->
+                                <input type="text" class="form-control border-0 bg-transparent px-3 h-100 py-0"
+                                    placeholder="Search for more than 20,000 products" />
+                            </form>
+                        </div>
+
+                        <!-- 2. The Search Button (Outside, 44px height) -->
+                        <button type="submit" form="search-form" class="rounded-circle bg-light p-0 ms-3 border-0 d-flex align-items-center justify-content-center" 
+                                style="width: 44px; height: 44px; min-width: 44px;" aria-label="Search">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <use xlink:href="#search"></use>
+                            </svg>
+                        </button>
+                        
+                    </div>
+                </div>
+
+
+                <div
+                    class="col-sm-8 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
+                    <ul class="d-flex justify-content-end list-unstyled m-0">
+                        <li>
+                            <a href="{% url 'login' %}" class="rounded-circle bg-light p-2 mx-1" aria-label="Login">
+                                <svg width="24" height="24" viewBox="0 0 24 24">
+                                    <use xlink:href="#user"></use>
+                                </svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                                <svg width="24" height="24" viewBox="0 0 24 24">
+                                    <use xlink:href="#heart"></use>
+                                </svg>
+                            </a>
+                        </li>
+                        <li class="d-lg-none">
+                            <a href="#" class="rounded-circle bg-light p-2 mx-1" data-bs-toggle="offcanvas"
+                                data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
+                                <svg width="24" height="24" viewBox="0 0 24 24">
+                                    <use xlink:href="#cart"></use>
+                                </svg>
+                            </a>
+                        </li>
+                        <li class="d-lg-none">
+                            <a href="#" class="rounded-circle bg-light p-2 mx-1" data-bs-toggle="offcanvas"
+                                data-bs-target="#offcanvasSearch" aria-controls="offcanvasSearch">
+                                <svg width="24" height="24" viewBox="0 0 24 24">
+                                    <use xlink:href="#search"></use>
+                                </svg>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="cart text-end d-none d-lg-block dropdown">
+                        <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
+                            <span class="fs-6 text-bold dropdown-toggle">Your Cart</span>
+                            <span class="cart-total fs-5 fw-bold">$1290.00</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row py-3">
+                <div class="d-flex  justify-content-center justify-content-sm-between align-items-center">
+                    <nav class="main-menu d-flex navbar navbar-expand-lg">
+
+                        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
+                            aria-labelledby="offcanvasNavbarLabel">
+
+                            <div class="offcanvas-header justify-content-center">
+                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                    aria-label="Close"></button>
+                            </div>
+
+                            <div class="offcanvas-body">
+
+                                <select class="filter-categories border-0 mb-0 me-5">
+                                    <option>Shop by Departments</option>
+                                    <option>Groceries</option>
+                                    <option>Drinks</option>
+                                    <option>Chocolates</option>
+                                </select>
+
+                                <ul class="navbar-nav justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
+                                    <li class="nav-item active">
+                                        <a href="#women" class="nav-link">Women</a>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a href="#men" class="nav-link">Men</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#kids" class="nav-link">Kids</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#accessories" class="nav-link">Accessories</a>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" role="button" id="pages"
+                                            data-bs-toggle="dropdown" aria-expanded="false">Pages</a>
+                                        <ul class="dropdown-menu" aria-labelledby="pages">
+                                            <li><a href="index.html" class="dropdown-item">About Us </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Shop </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Single Product </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Cart </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Checkout </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Blog </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Single Post </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Styles </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Contact </a></li>
+                                            <li><a href="index.html" class="dropdown-item">Thank You </a></li>
+                                            <li><a href="index.html" class="dropdown-item">My Account </a></li>
+                                            <li><a href="index.html" class="dropdown-item">404 Error </a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#brand" class="nav-link">Brand</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#sale" class="nav-link">Sale</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#blog" class="nav-link">Blog</a>
+                                    </li>
+                                </ul>
+
+                            </div>
+
+                        </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    {% block content %}
+
+    <section class="py-3">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="banner-blocks">
+
+                        <div class="banner-ad large bg-info block-1">
+
+                            <div class="swiper main-swiper">
+                                <div class="swiper-wrapper">
+
+                                    <div class="swiper-slide">
+                                        <div class="row banner-content p-3">
+                                            <div class="content-wrapper col-md-7">
+                                                <div class="categories my-3">100% natural</div>
+                                                <h3 class="display-4">Fresh Smoothie & Summer Juice</h3>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dignissim
+                                                    massa diam elementum.</p>
+                                                <a href="#"
+                                                    class="btn btn-light btn-lg text-uppercase fs-6 rounded-1 px-4 py-3 mt-3">Shop
+                                                    Now</a>
+                                            </div>
+                                            <div class="img-wrapper col-md-5">
+                                                <img src="{% static 'mob/images/product-thumb-1.png' %}"
+                                                    class="img-fluid">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="swiper-slide">
+                                        <div class="row banner-content p-3">
+                                            <div class="content-wrapper col-md-7">
+                                                <div class="categories mb-3 pb-3">100% natural</div>
+                                                <h3 class="banner-title">Fresh Smoothie & Summer Juice</h3>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dignissim
+                                                    massa diam elementum.</p>
+                                                <a href="#"
+                                                    class="btn btn-light btn-lg text-uppercase fs-6 rounded-1">Shop
+                                                    Collection</a>
+                                            </div>
+                                            <div class="img-wrapper col-md-5">
+                                                <img src="{% static 'mob/images/product-thumb-1.png' %}"
+                                                    class="img-fluid">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="swiper-slide">
+                                        <div class="row banner-content p-3">
+                                            <div class="content-wrapper col-md-7">
+                                                <div class="categories mb-3 pb-3">100% natural</div>
+                                                <h3 class="banner-title">Heinz Tomato Ketchup</h3>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dignissim
+                                                    massa diam elementum.</p>
+                                                <a href="#"
+                                                    class="btn btn-light btn-lg text-uppercase fs-6 rounded-1">Shop
+                                                    Collection</a>
+                                            </div>
+                                            <div class="img-wrapper col-md-5">
+                                                <img src="{% static 'mob/images/product-thumb-2.png' %}"
+                                                    class="img-fluid">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="swiper-pagination"></div>
+
+                            </div>
+                        </div>
+
+                        <div class="banner-ad bg-success-subtle block-2"
+                            style="background:url('{% static 'mob/images/ad-image-1.png' %}') no-repeat;background-position: right bottom">
+                            <div class="row banner-content p-3">
+
+                                <div class="content-wrapper col-md-7">
+                                    <div class="categories sale mb-3 pb-3">20% off</div>
+                                    <h3 class="banner-title">Fruits & Vegetables</h3>
+                                    <a href="#" class="d-flex align-items-center nav-link">Shop Collection <svg
+                                            width="24" height="24">
+                                            <use xlink:href="#arrow-right"></use>
+                                        </svg></a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="banner-ad bg-danger block-3"
+                            style="background:url('{% static 'mob/images/ad-image-2.png' %}') no-repeat;background-position: right bottom">
+                            <div class="row banner-content p-3">
+
+                                <div class="content-wrapper col-md-7">
+                                    <div class="categories sale mb-3 pb-3">15% off</div>
+                                    <h3 class="item-title">Baked Products</h3>
+                                    <a href="#" class="d-flex align-items-center nav-link">Shop Collection <svg
+                                            width="24" height="24">
+                                            <use xlink:href="#arrow-right"></use>
+                                        </svg></a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- / Banner Blocks -->
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 overflow-hidden">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="section-header d-flex flex-wrap justify-content-between mb-5">
+                        <h2 class="section-title">Category</h2>
+
+                        <div class="d-flex align-items-center">
+                            <a href="#" class="btn-link text-decoration-none">View All Categories →</a>
+                            <div class="swiper-buttons">
+                                <button class="swiper-prev category-carousel-prev btn btn-primary">❮</button>
+                                <button class="swiper-next category-carousel-next btn btn-primary">❯</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="category-carousel swiper">
+                        <div class="swiper-wrapper">
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-vegetables-broccoli.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-bread-baguette.png' %}" alt="Category Thumbnail">
+                                <h3 class="category-title">Breads & Sweets</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-soft-drinks-bottle.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-wine-glass-bottle.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-animal-products-drumsticks.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-bread-herb-flour.png' %}" alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-vegetables-broccoli.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-vegetables-broccoli.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-vegetables-broccoli.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-vegetables-broccoli.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-vegetables-broccoli.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+                            <a href="index.html" class="nav-link category-item swiper-slide">
+                                <img src="{% static 'mob/images/icon-vegetables-broccoli.png' %}"
+                                    alt="Category Thumbnail">
+                                <h3 class="category-title">Fruits & Veges</h3>
+                            </a>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="py-5 overflow-hidden">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="section-header d-flex flex-wrap flex-wrap justify-content-between mb-5">
+
+                        <h2 class="section-title">Newly Arrived Brands</h2>
+
+                        <div class="d-flex align-items-center">
+                            <a href="#" class="btn-link text-decoration-none">View All Categories →</a>
+                            <div class="swiper-buttons">
+                                <button class="swiper-prev brand-carousel-prev btn btn-primary">❮</button>
+                                <button class="swiper-next brand-carousel-next btn btn-primary">❯</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="brand-carousel swiper">
+                        <div class="swiper-wrapper">
+
+                            <div class="swiper-slide">
+                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            <img src="{% static 'mob/images/product-thumb-11.jpg' %}"
+                                                class="img-fluid rounded" alt="Card title">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body py-0">
+                                                <p class="text-muted mb-0">Amber Jar</p>
+                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            <img src="{% static 'mob/images/product-thumb-12.jpg' %}"
+                                                class="img-fluid rounded" alt="Card title">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body py-0">
+                                                <p class="text-muted mb-0">Amber Jar</p>
+                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            <img src="{% static 'mob/images/product-thumb-13.jpg' %}"
+                                                class="img-fluid rounded" alt="Card title">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body py-0">
+                                                <p class="text-muted mb-0">Amber Jar</p>
+                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            <img src="{% static 'mob/images/product-thumb-14.jpg' %}"
+                                                class="img-fluid rounded" alt="Card title">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body py-0">
+                                                <p class="text-muted mb-0">Amber Jar</p>
+                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            <img src="{% static 'mob/images/product-thumb-11.jpg' %}"
+                                                class="img-fluid rounded" alt="Card title">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body py-0">
+                                                <p class="text-muted mb-0">Amber Jar</p>
+                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            <img src="{% static 'mob/images/product-thumb-12.jpg' %}"
+                                                class="img-fluid rounded" alt="Card title">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body py-0">
+                                                <p class="text-muted mb-0">Amber Jar</p>
+                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="py-5">
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="bootstrap-tabs product-tabs">
+                        <div class="tabs-header d-flex justify-content-between border-bottom my-3">
+                            <h3>Trending Products</h3>
+                            <nav>
+                                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                    <a href="#" class="nav-link text-uppercase fs-6 active" id="nav-all-tab"
+                                        data-bs-toggle="tab" data-bs-target="#nav-all">All</a>
+                                    <a href="#" class="nav-link text-uppercase fs-6" id="nav-fruits-tab"
+                                        data-bs-toggle="tab" data-bs-target="#nav-fruits">Fruits & Veges</a>
+                                    <a href="#" class="nav-link text-uppercase fs-6" id="nav-juices-tab"
+                                        data-bs-toggle="tab" data-bs-target="#nav-juices">Juices</a>
+                                </div>
+                            </nav>
+                        </div>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-all" role="tabpanel"
+                                aria-labelledby="nav-all-tab">
+
+                                <div
+                                    class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <span class="badge bg-success position-absolute m-3">-30%</span>
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-bananas.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <span class="badge bg-success position-absolute m-3">-30%</span>
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-biscuits.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-cucumber.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-milk.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-bananas.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-biscuits.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-cucumber.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-milk.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-bananas.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-biscuits.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- / product-grid -->
+
+                            </div>
+
+                            <div class="tab-pane fade" id="nav-fruits" role="tabpanel" aria-labelledby="nav-fruits-tab">
+
+                                <div
+                                    class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <span class="badge bg-success position-absolute m-3">-30%</span>
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-cucumber.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <span class="badge bg-success position-absolute m-3">-30%</span>
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-milk.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <span class="badge bg-success position-absolute m-3">-30%</span>
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-orange-juice.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-raspberries.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-bananas.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-bananas.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- / product-grid -->
+
+                            </div>
+                            <div class="tab-pane fade" id="nav-juices" role="tabpanel" aria-labelledby="nav-juices-tab">
+
+                                <div
+                                    class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-cucumber.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-milk.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-tomatoes.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-tomatoketchup.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-bananas.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col mt-5">
+                                        <div class="product-item">
+                                            <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                                    <use xlink:href="#heart"></use>
+                                                </svg></a>
+                                            <figure>
+                                                <a href="index.html" title="Product Title">
+                                                    <img src="{% static 'mob/images/thumb-bananas.png' %}"
+                                                        class="tab-image">
+                                                </a>
+                                            </figure>
+                                            <h3>Sunstar Fresh Melon Juice</h3>
+                                            <span class="qty">1 Unit</span><span class="rating"><svg width="24"
+                                                    height="24" class="text-primary">
+                                                    <use xlink:href="#star-solid"></use>
+                                                </svg> 4.5</span>
+                                            <span class="price">$18.00</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- / product-grid -->
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container-fluid">
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="banner-ad bg-danger mb-3"
+                        style="background: url('{% static 'mob/images/ad-image-3.png' %}');background-repeat: no-repeat;background-position: right bottom;">
+                        <div class="banner-content p-5">
+
+                            <div class="categories text-primary fs-3 fw-bold">Upto 25% Off</div>
+                            <h3 class="banner-title">Luxa Dark Chocolate</h3>
+                            <p>Very tasty & creamy vanilla flavour creamy muffins.</p>
+                            <a href="#" class="btn btn-dark text-uppercase">Show Now</a>
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="banner-ad bg-info"
+                        style="background: url('{% static 'mob/images/ad-image-4.png' %}');background-repeat: no-repeat;background-position: right bottom;">
+                        <div class="banner-content p-5">
+
+                            <div class="categories text-primary fs-3 fw-bold">Upto 25% Off</div>
+                            <h3 class="banner-title">Creamy Muffins</h3>
+                            <p>Very tasty & creamy vanilla flavour creamy muffins.</p>
+                            <a href="#" class="btn btn-dark text-uppercase">Show Now</a>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 overflow-hidden">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="section-header d-flex flex-wrap justify-content-between my-5">
+
+                        <h2 class="section-title">Best selling products</h2>
+
+                        <div class="d-flex align-items-center">
+                            <a href="#" class="btn-link text-decoration-none">View All Categories →</a>
+                            <div class="swiper-buttons">
+                                <button class="swiper-prev products-carousel-prev btn btn-primary">❮</button>
+                                <button class="swiper-next products-carousel-next btn btn-primary">❯</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="products-carousel swiper">
+                        <div class="swiper-wrapper">
+
+                            <div class="product-item swiper-slide">
+                                <span class="badge bg-success position-absolute m-3">-15%</span>
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-tomatoes.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <span class="badge bg-success position-absolute m-3">-15%</span>
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-tomatoketchup.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <span class="badge bg-success position-absolute m-3">-15%</span>
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-bananas.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <span class="badge bg-success position-absolute m-3">-15%</span>
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-bananas.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-tomatoes.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-tomatoketchup.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-bananas.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-bananas.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- / products-carousel -->
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container-fluid">
+
+            <div class="bg-secondary py-5 my-5 rounded-5"
+                style="background: url('{% static 'mob/images/bg-leaves-img-pattern.png' %}') no-repeat;">
+                <div class="container my-5">
+                    <div class="row">
+                        <div class="col-md-6 p-5">
+                            <div class="section-header">
+                                <h2 class="section-title display-4">Get <span class="text-primary">25% Discount</span>
+                                    on your first purchase</h2>
+                            </div>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dictumst amet, metus, sit massa
+                                posuere maecenas. At tellus ut nunc amet vel egestas.</p>
+                        </div>
+                        <div class="col-md-6 p-5">
+                            <form>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" class="form-control form-control-lg" name="name" id="name"
+                                        placeholder="Name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="" class="form-label">Email</label>
+                                    <input type="email" class="form-control form-control-lg" name="email" id="email"
+                                        placeholder="abc@mail.com">
+                                </div>
+                                <div class="form-check form-check-inline mb-3">
+                                    <label class="form-check-label" for="subscribe">
+                                        <input class="form-check-input" type="checkbox" id="subscribe"
+                                            value="subscribe">
+                                        Subscribe to the newsletter</label>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-dark btn-lg">Submit</button>
+                                </div>
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    
+
+    <section class="py-5 overflow-hidden">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="section-header d-flex justify-content-between">
+
+                        <h2 class="section-title">Just arrived</h2>
+
+                        <div class="d-flex align-items-center">
+                            <a href="#" class="btn-link text-decoration-none">View All Categories →</a>
+                            <div class="swiper-buttons">
+                                <button class="swiper-prev products-carousel-prev btn btn-primary">❮</button>
+                                <button class="swiper-next products-carousel-next btn btn-primary">❯</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="products-carousel swiper">
+                        <div class="swiper-wrapper">
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-tomatoes.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-tomatoketchup.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-bananas.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-bananas.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-tomatoes.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-tomatoketchup.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-bananas.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                            <div class="product-item swiper-slide">
+                                <a href="#" class="btn-wishlist"><svg width="24" height="24">
+                                        <use xlink:href="#heart"></use>
+                                    </svg></a>
+                                <figure>
+                                    <a href="index.html" title="Product Title">
+                                        <img src="{% static 'mob/images/thumb-bananas.png' %}" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>Sunstar Fresh Melon Juice</h3>
+                                <span class="qty">1 Unit</span><span class="rating"><svg width="24" height="24"
+                                        class="text-primary">
+                                        <use xlink:href="#star-solid"></use>
+                                    </svg> 4.5</span>
+                                <span class="price">$18.00</span>
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2">Add to Cart <iconify-icon icon="uil:shopping-cart" width="18"></iconify-icon></a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- / products-carousel -->
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% comment %} <section id="latest-blog" class="py-5">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="section-header d-flex align-items-center justify-content-between my-5">
+                    <h2 class="section-title">Our Recent Blog</h2>
+                    <div class="btn-wrap align-right">
+                        <a href="#" class="d-flex align-items-center nav-link">Read All Articles <svg width="24"
+                                height="24">
+                                <use xlink:href="#arrow-right"></use>
+                            </svg></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <article class="post-item card border-0 shadow-sm p-3">
+                        <div class="image-holder zoom-effect">
+                            <a href="#">
+                                <img src="{% static 'mob/images/post-thumb-1.jpg' %}" alt="post" class="card-img-top">
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="post-meta d-flex text-uppercase gap-3 my-2 align-items-center">
+                                <div class="meta-date"><svg width="32" height="32">
+                                        <use xlink:href="#calendar"></use>
+                                    </svg>22 Aug 2021</div>
+                                <div class="meta-categories"><svg width="32" height="32">
+                                        <use xlink:href="#category"></use>
+                                    </svg>tips & tricks</div>
+                            </div>
+                            <div class="post-header">
+                                <h3 class="post-title">
+                                    <a href="#" class="text-decoration-none">Top 10 casual look ideas to dress up your
+                                        kids</a>
+                                </h3>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipi elit. Aliquet eleifend viverra enim
+                                    tincidunt donec quam. A in arcu, hendrerit neque dolor morbi...</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="post-item card border-0 shadow-sm p-3">
+                        <div class="image-holder zoom-effect">
+                            <a href="#">
+                                <img src="{% static 'mob/images/post-thumb-2.jpg' %}" alt="post" class="card-img-top">
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="post-meta d-flex text-uppercase gap-3 my-2 align-items-center">
+                                <div class="meta-date"><svg width="32" height="32">
+                                        <use xlink:href="#calendar"></use>
+                                    </svg>25 Aug 2021</div>
+                                <div class="meta-categories"><svg width="32" height="32">
+                                        <use xlink:href="#category"></use>
+                                    </svg>trending</div>
+                            </div>
+                            <div class="post-header">
+                                <h3 class="post-title">
+                                    <a href="#" class="text-decoration-none">Latest trends of wearing street wears
+                                        supremely</a>
+                                </h3>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipi elit. Aliquet eleifend viverra enim
+                                    tincidunt donec quam. A in arcu, hendrerit neque dolor morbi...</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="post-item card border-0 shadow-sm p-3">
+                        <div class="image-holder zoom-effect">
+                            <a href="#">
+                                <img src="{% static 'mob/images/post-thumb-3.jpg' %}" alt="post" class="card-img-top">
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="post-meta d-flex text-uppercase gap-3 my-2 align-items-center">
+                                <div class="meta-date"><svg width="32" height="32">
+                                        <use xlink:href="#calendar"></use>
+                                    </svg>28 Aug 2021</div>
+                                <div class="meta-categories"><svg width="32" height="32">
+                                        <use xlink:href="#category"></use>
+                                    </svg>inspiration</div>
+                            </div>
+                            <div class="post-header">
+                                <h3 class="post-title">
+                                    <a href="#" class="text-decoration-none">10 Different Types of comfortable clothes
+                                        ideas for women</a>
+                                </h3>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipi elit. Aliquet eleifend viverra enim
+                                    tincidunt donec quam. A in arcu, hendrerit neque dolor morbi...</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section> {% endcomment %}
+
+    <section class="py-5 my-5">
+        <div class="container-fluid">
+
+            <div class="bg-warning py-5 rounded-5"
+                style="background-image: url('{% static 'mob/images/bg-pattern-2.png' %}') no-repeat;">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img src="{% static 'mob/images/phone.png' %}" alt="phone" class="image-float img-fluid">
+                        </div>
+                        <div class="col-md-8">
+                            <h2 class="my-5">Shop faster with MyOceanBasket App</h2>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sagittis sed ptibus liberolectus
+                                nonet psryroin. Amet sed lorem posuere sit iaculis amet, ac urna. Adipiscing fames
+                                semper erat ac in suspendisse iaculis. Amet blandit tortor praesent ante vitae. A, enim
+                                pretiummi senectus magna. Sagittis sed ptibus liberolectus non et psryroin.</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <img src="{% static 'mob/images/app-store.jpg' %}" alt="app-store">
+                                <img src="{% static 'mob/images/google-play.jpg' %}" alt="google-play">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section> 
+
+
+        <section class="py-5 ">
+        <div class="container-fluid">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4 g-lg-3 justify-content-center">
+            
+            <!-- Free Delivery -->
+            <div class="col mt-5">
+                <div class="card h-100 border-0 shadow-sm rounded-4 text-center feature-card">
+                <div class="card-body p-4 p-md-3 bg-light">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="text-primary" viewBox="0 0 24 24">
+                        <path d="M21.5 15a3 3 0 0 0-1.9-2.78l1.87-7a1 1 0 0 0-.18-.87A1 1 0 0 0 20.5 4H6.8l-.33-1.26A1 1 0 0 0 5.5 2h-2v2h1.23l2.48 9.26a1 1 0 0 0 1 .74H18.5a1 1 0 0 1 0 2h-13a1 1 0 0 0 0 2h1.18a3 3 0 1 0 5.64 0h2.36a3 3 0 1 0 5.82 1a2.94 2.94 0 0 0-.4-1.47A3 3 0 0 0 21.5 15Zm-3.91-3H9L7.34 6H19.2ZM9.5 20a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm8 0a1 1 0 1 1 1-1a1 1 0 0 1-1 1Z"/>
+                    </svg>
+                    </div>
+                    <h6 class="fw-semibold mb-1">Free Delivery</h6>
+                    <p class="text-muted small mb-0">On orders above ₹499 – fast & reliable</p>
+                </div>
+                </div>
+            </div>
+
+            <!-- Secure Payment -->
+            <div class="col mt-5">
+                <div class="card h-100 border-0 shadow-sm rounded-4 text-center feature-card">
+                <div class="card-body p-4 p-md-3 bg-light">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="text-primary" viewBox="0 0 24 24">
+                        <path d="M19.63 3.65a1 1 0 0 0-.84-.2a8 8 0 0 1-6.22-1.27a1 1 0 0 0-1.14 0a8 8 0 0 1-6.22 1.27a1 1 0 0 0-.84.2a1 1 0 0 0-.37.78v7.45a9 9 0 0 0 3.77 7.33l3.65 2.6a1 1 0 0 0 1.16 0l3.65-2.6A9 9 0 0 0 20 11.88V4.43a1 1 0 0 0-.37-.78ZM18 11.88a7 7 0 0 1-2.93 5.7L12 19.77l-3.07-2.19A7 7 0 0 1 6 11.88v-6.3a10 10 0 0 0 6-1.39a10 10 0 0 0 6 1.39Zm-4.46-2.29l-2.69 2.7l-.89-.9a1 1 0 0 0-1.42 1.42l1.6 1.6a1 1 0 0 0 1.42 0L15 11a1 1 0 0 0-1.42-1.42Z"/>
+                    </svg>
+                    </div>
+                    <h6 class="fw-semibold mb-1">100% Secure Payment</h6>
+                    <p class="text-muted small mb-0">Protected checkout with top security</p>
+                </div>
+                </div>
+            </div>
+
+            <!-- Quality Guarantee -->
+            <div class="col mt-5">
+                <div class="card h-100 border-0 shadow-sm rounded-4 text-center feature-card">
+                <div class="card-body p-4 p-md-3 bg-light">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="text-primary" viewBox="0 0 24 24">
+                        <path d="M22 5H2a1 1 0 0 0-1 1v4a3 3 0 0 0 2 2.82V22a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-9.18A3 3 0 0 0 23 10V6a1 1 0 0 0-1-1Zm-7 2h2v3a1 1 0 0 1-2 0Zm-4 0h2v3a1 1 0 0 1-2 0ZM7 7h2v3a1 1 0 0 1-2 0Zm-3 4a1 1 0 0 1-1-1V7h2v3a1 1 0 0 1-1 1Zm10 10h-4v-2a2 2 0 0 1 4 0Zm5 0h-3v-2a4 4 0 0 0-8 0v2H5v-8.18a3.17 3.17 0 0 0 1-.6a3 3 0 0 0 4 0a3 3 0 0 0 4 0a3 3 0 0 0 4 0a3.17 3.17 0 0 0 1 .6Zm2-11a1 1 0 0 1-2 0V7h2ZM4.3 3H20a1 1 0 0 0 0-2H4.3a1 1 0 0 0 0 2Z"/>
+                    </svg>
+                    </div>
+                    <h6 class="fw-semibold mb-1">Quality Guarantee</h6>
+                    <p class="text-muted small mb-0">Fresh & premium seafood every time</p>
+                </div>
+                </div>
+            </div>
+
+            <!-- Guaranteed Savings -->
+            <div class="col mt-5">
+                <div class="card h-100 border-0 shadow-sm rounded-4 text-center feature-card">
+                <div class="card-body p-4 p-md-3 bg-light">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="text-primary" viewBox="0 0 24 24">
+                        <path d="M12 8.35a3.07 3.07 0 0 0-3.54.53a3 3 0 0 0 0 4.24L11.29 16a1 1 0 0 0 1.42 0l2.83-2.83a3 3 0 0 0 0-4.24A3.07 3.07 0 0 0 12 8.35Zm2.12 3.36L12 13.83l-2.12-2.12a1 1 0 0 1 0-1.42a1 1 0 0 1 1.41 0a1 1 0 0 0 1.42 0a1 1 0 0 1 1.41 0a1 1 0 0 1 0 1.42ZM12 2A10 10 0 0 0 2 12a9.89 9.89 0 0 0 2.26 6.33l-2 2a1 1 0 0 0-.21 1.09A1 1 0 0 0 3 22h9a10 10 0 0 0 0-20Zm0 18H5.41l.93-.93a1 1 0 0 0 0-1.41A8 8 0 1 1 12 20Z"/>
+                    </svg>
+                    </div>
+                    <h6 class="fw-semibold mb-1">Guaranteed Savings</h6>
+                    <p class="text-muted small mb-0">Best prices direct from fishermen</p>
+                </div>
+                </div>
+            </div>
+
+            <!-- Daily Offers -->
+            <div class="col mt-5">
+                <div class="card h-100 border-0 shadow-sm rounded-4 text-center feature-card">
+                <div class="card-body p-4 p-md-3 bg-light">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="text-primary" viewBox="0 0 24 24">
+                        <path d="M18 7h-.35A3.45 3.45 0 0 0 18 5.5a3.49 3.49 0 0 0-6-2.44A3.49 3.49 0 0 0 6 5.5A3.45 3.45 0 0 0 6.35 7H6a3 3 0 0 0-3 3v2a1 1 0 0 0 1 1h1v6a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-6h1a1 1 0 0 0 1-1v-2a3 3 0 0 0-3-3Zm-7 13H8a1 1 0 0 1-1-1v-6h4Zm0-9H5v-1a1 1 0 0 1 1-1h5Zm0-4H9.5A1.5 1.5 0 1 1 11 5.5Zm2-1.5A1.5 1.5 0 1 1 14.5 7H13ZM17 19a1 1 0 0 1-1 1h-3v-7h4Zm2-8h-6V9h5a1 1 0 0 1 1 1Z"/>
+                    </svg>
+                    </div>
+                    <h6 class="fw-semibold mb-1">Daily Offers</h6>
+                    <p class="text-muted small mb-0">Fresh deals every day on seafood</p>
+                </div>
+                </div>
+            </div>
+
+            </div>
+        </div>
+
+        <!-- Optional CSS enhancements (add to your stylesheet or <style> tag) -->
+        <style>
+            .feature-card {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            background: white;
+            }
+            .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.08) !important;
+            }
+            .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background: rgba(13, 110, 253, 0.08);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            }
+            @media (max-width: 576px) {
+            .feature-card .card-body { padding: 1.5rem 1rem; }
+            .icon-wrapper { width: 52px; height: 52px; }
+            .icon-wrapper svg { width: 32px; height: 32px; }
+            }
+        </style>
+        </section>
+
+    {% endblock %}
+
+    <footer class="">
+        <div class="container-fluid">
+            <div class="row">
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="footer-menu">
+                        <img src="{% static 'mob/images/logo.png' %}" alt="logo">
+
+                        <div class="social-links mt-5">
+                            <h5 class="text-ocean mb-4" style="font-family: 'Nunito', sans-serif; font-weight: 700; position: relative; display: inline-block; padding-bottom: 10px;">
+                                <span style="background: linear-gradient(135deg, var(--coral), var(--coral-light)); padding: 8px 20px; border-radius: 50px; color: white; box-shadow: 0 4px 15px rgba(255,123,92,0.3);">
+                                    🌊 Catch Us Online
+                                </span>
+                            </h5>
+                            
+                            <div class="row align-items-center">
+                                <div class="col-12" style="padding-left: 12px; padding-right: 12px;">
+                                    <!-- Brand Icons - cleaner horizontal layout with uniform gap -->
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap gap-3" style="margin: 20px 0 16px 0;">
+                                        <div class="brand-icon-wrapper" style="width: 40px; height: 40px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.06); border: 1px solid transparent; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--coral)'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)';">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/600px-Facebook_Logo_%282019%29.png" 
+                                                alt="Facebook" 
+                                                style="width: 24px; height: 24px; object-fit: contain;">
+                                        </div>
+                                        
+                                        <div class="brand-icon-wrapper" style="width: 40px; height: 40px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.06); border: 1px solid transparent; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--coral)'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)';">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/512px-Logo_of_Twitter.svg.png" 
+                                                alt="Twitter/X" 
+                                                style="width: 24px; height: 24px; object-fit: contain;">
+                                        </div>
+                                        
+                                        <div class="brand-icon-wrapper" style="width: 40px; height: 40px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.06); border: 1px solid transparent; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--coral)'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)';">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/600px-Instagram_logo_2016.svg.png" 
+                                                alt="Instagram" 
+                                                style="width: 24px; height: 24px; object-fit: contain;">
+                                        </div>
+                                        
+                                        <div class="brand-icon-wrapper" style="width: 40px; height: 40px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.06); border: 1px solid transparent; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--coral)'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)';">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/600px-LinkedIn_logo_initials.png" 
+                                                alt="LinkedIn" 
+                                                style="width: 24px; height: 24px; object-fit: contain;">
+                                        </div>
+                                        
+                                        <div class="brand-icon-wrapper" style="width: 40px; height: 40px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.06); border: 1px solid transparent; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--coral)'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)';">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/640px-YouTube_full-color_icon_%282017%29.svg.png" 
+                                                alt="YouTube" 
+                                                style="width: 26px; height: 24px; object-fit: contain;">
+                                        </div>
+                                    </div>
+
+                                    <!-- Join Text -->
+                                    <p class="text-ocean mb-0" style="font-size: 0.85rem; opacity: 0.8; display: flex; align-items: center; gap: 6px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" style="fill: var(--coral);">
+                                            <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm4-8a4 4 0 1 1-4-4a4 4 0 0 1 4 4Z"/>
+                                        </svg>
+                                        <span>Join 50K+ seafood lovers</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-5 col-sm-6">
+                    {% comment %} <div class="footer-menu">
+                        <h5 class="widget-title">Ultras</h5>
+                        <ul class="menu-list list-unstyled">
+                            <li class="menu-item"><a href="#" class="nav-link">About us</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Conditions </a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Our Journals</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Careers</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Affiliate Programme</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Ultras Press</a></li>
+                        </ul>
+                    </div> {% endcomment %}
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                    <div class="footer-menu">
+                        <h5 class="widget-title">Customer Service</h5>
+                        <ul class="menu-list list-unstyled">
+                            <li class="menu-item"><a href="#" class="nav-link">FAQ</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Contact</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Privacy Policy</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Returns & Refunds</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Cookie Guidelines</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Delivery Information</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                    <div class="footer-menu">
+                        <h5 class="widget-title">Customer Service</h5>
+                        <ul class="menu-list list-unstyled">
+                            <li class="menu-item"><a href="#" class="nav-link">FAQ</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Contact</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Privacy Policy</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Returns & Refunds</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Cookie Guidelines</a></li>
+                            <li class="menu-item"><a href="#" class="nav-link">Delivery Information</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </footer>
+    <div id="footer-bottom">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12 credit-link text-start text-md-center">
+                    <p>© 2026 MyOceanBasket. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> <!-- 1. jQuery FIRST -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 2. Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script> <!-- 3. Swiper -->
+    <script src="https://cdn.jsdelivr.net/npm/jarallax@2.1.1/dist/jarallax.min.js"></script> <!-- 4. Jarallax -->
+    <script src="https://cdn.jsdelivr.net/npm/jarallax@2.1.1/dist/jarallax-element.min.js"></script>
+    <!-- 5. Jarallax-element -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chocolat/0.4.12/jquery.chocolat.min.js"></script>
+    <!-- 6. Chocolat LAST -->
+    <script src="{% static 'mob/js/script.js' %}"></script> <!-- 7. Your script -->
+
+</body>
+
+</html>

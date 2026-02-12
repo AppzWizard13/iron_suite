@@ -676,7 +676,7 @@ class SubscriptionOrderListView(LoginRequiredMixin, ListView):
         Accepts 'q' (search), 'status', 'date', and 'sort' from GET params.
         """
         user = self.request.user
-        queryset = super().get_queryset().filter(Vendor=user.Vendor)  # Filter by tenant
+        queryset = super().get_queryset().filter(Vendor=user.vendor)  # Filter by tenant
 
         # Filters
         q = self.request.GET.get('q', '').strip()

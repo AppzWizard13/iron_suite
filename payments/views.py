@@ -45,7 +45,7 @@ def initiate_cashfree_payment(request, obj):
     payment, created = Payment.objects.get_or_create(
         content_type=ContentType.objects.get_for_model(obj),
         object_id=obj.id,
-        Vendor=request.user.Vendor,
+        Vendor=request.user.vendor,
         defaults={
             'payment_method': 'cashfree',
             'amount': amount,
@@ -72,7 +72,7 @@ def initiate_cashfree_payment(request, obj):
         transaction, trans_created = Transaction.objects.get_or_create(
             content_type=ContentType.objects.get_for_model(obj),
             object_id=obj.id,
-            Vendor=request.user.Vendor,
+            Vendor=request.user.vendor,
             defaults={
                 'transaction_type': Transaction.Type.INCOME,  # Assuming payment is income
                 'category': Transaction.Category.SALES if isinstance(obj, SubscriptionOrder) else Transaction.Category.OTHER,
@@ -129,7 +129,7 @@ def initiate_cashfree_payment(request, obj):
         "link_purpose": f"Payment for {obj.__class__.__name__} #{obj.order_number}",
         "link_tags": {
             "transaction_id": transaction.id if 'transaction' in locals() else None,
-            "vendor_id": request.user.Vendor.id,
+            "vendor_id": request.user.vendor.id,
             "customer_id": customer.member_id,
         }
     }
@@ -162,7 +162,7 @@ def initiate_cashfree_payment(request, obj):
             response_status=response.status_code,
             response_body=json.dumps(res_data),
             link_id=res_data.get("link_id"),
-            Vendor=request.user.Vendor,
+            Vendor=request.user.vendor,
         )
         
     except Exception as e:
@@ -179,7 +179,7 @@ def initiate_cashfree_payment(request, obj):
             request_url="https://sandbox.cashfree.com/pg/links",
             request_payload=json.dumps(payload),
             error_message=str(e),
-            Vendor=request.user.Vendor,
+            Vendor=request.user.vendor,
         )
         return redirect('payment_failed')
 
@@ -283,7 +283,7 @@ def initiate_subscription_payment(request):
         payment_status=SubscriptionOrder.PaymentStatus.PENDING,
         start_date=timezone.now().date(),
         end_date=timezone.now().date() + timedelta(days=package.duration_days),
-        Vendor=request.user.Vendor  
+        Vendor=request.user.vendor  
     )
 
     del request.session['pending_member_member_id']
@@ -332,7 +332,7 @@ def buy_subscription_package(request):
         payment_status=SubscriptionOrder.PaymentStatus.PENDING,
         start_date=today,
         end_date=new_expiry,
-        Vendor=request.user.Vendor
+        Vendor=request.user.vendor
     )
 
     # Set these right-away for pending payment - will confirm on webhook success
@@ -577,7 +577,7 @@ class PaymentListView(LoginRequiredMixin, ListView):
         """
         Filter payments by user and date, and apply sorting from GET parameters.
         """
-        user_vendor = self.request.user.Vendor
+        user_vendor = self.request.user.vendor
         queryset = Payment.objects.select_related('customer').filter(customer__vendor=user_vendor)
 
         user_id = self.request.GET.get('user_id')
@@ -617,7 +617,7 @@ def choose_package(request, member_id):
     """
     Render available subscription packages for a user to choose from.
     """
-    user_vendor = request.user.Vendor
+    user_vendor = request.user.vendor
     packages = Package.objects.filter(Vendor=user_vendor)
     return render(request, 'advadmin/choose_package.html', {
         'packages': packages,

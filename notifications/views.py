@@ -27,7 +27,7 @@ class NotificationConfigEditView(LoginRequiredMixin,UpdateView):
     success_url = reverse_lazy('notification_log_list')
 
     def get_object(self):
-        Vendor = self.request.user.Vendor
+        Vendor = self.request.user.vendor
         obj, created = NotificationConfig.objects.get_or_create(Vendor=Vendor)
         return obj
 
